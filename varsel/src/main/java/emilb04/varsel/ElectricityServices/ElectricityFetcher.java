@@ -2,6 +2,7 @@ package emilb04.varsel.ElectricityServices;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,7 +23,7 @@ public class ElectricityFetcher {
             "https://www.hvakosterstrommen.no/api/v1/prices/%d/%02d-%02d_%s.json",
             date.getYear(), date.getMonthValue(), date.getDayOfMonth(), region.getRegionNumber()
         );
-        URL url = java.net.URI.create(urlString).toURL();
+        URL url = URI.create(urlString).toURL();
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
         conn.connect();
