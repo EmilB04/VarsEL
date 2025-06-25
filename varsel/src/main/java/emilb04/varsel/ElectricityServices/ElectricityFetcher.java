@@ -62,12 +62,6 @@ public class ElectricityFetcher {
         return new JsonFormatter().format(region, content);
     }
 
-
-
-
-
-
-
     public static String fetchPricesFromDay(ElectricityRegion.Region region, String date) throws IOException {
         String urlString = constructUrl(region, date);
         String content = makeApiRequest(urlString);
@@ -90,7 +84,8 @@ public class ElectricityFetcher {
             throw new IllegalArgumentException("Timer må være mellom 0 og 23: " + startHour + " til " + endHour);
         }
         if (startHour > endHour) {
-            throw new IllegalArgumentException("Starttime må være mindre enn sluttid: " + startHour + " til " + endHour);
+            throw new IllegalArgumentException(
+                    "Starttime må være mindre enn sluttid: " + startHour + " til " + endHour);
         }
 
         // Hent rå API-data som er i riktig ISO 8601-format

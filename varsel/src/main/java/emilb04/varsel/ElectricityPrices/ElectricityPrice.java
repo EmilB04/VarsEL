@@ -14,6 +14,7 @@ public class ElectricityPrice {
     public String getTimeStart() {
         return timeStart;
     }
+
     public String getTimeEnd() {
         return timeEnd;
     }
