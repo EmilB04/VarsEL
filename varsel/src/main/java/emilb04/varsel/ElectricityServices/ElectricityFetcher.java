@@ -62,12 +62,31 @@ public class ElectricityFetcher {
         return new JsonFormatter().format(region, content);
     }
 
+    /**
+     * Henter strømpriser for en hel dag i valgt region.
+     * 
+     * @param region Strømregion (NO1-NO5)
+     * @param date   Dato (yyyy-MM-dd)
+     * @return JSON-respons med priser
+     * @throws IOException ved nettverksfeil
+     */
     public static String fetchPricesFromDay(ElectricityRegion.Region region, String date) throws IOException {
         String urlString = constructUrl(region, date);
         String content = makeApiRequest(urlString);
         return formatApiResponse(region, content);
     }
 
+    /**
+     * Henter strømpriser for en spesifikk tidsperiode i valgt region.
+     * 
+     * @param region      Strømregion (NO1-NO5)
+     * @param date        Dato (yyyy-MM-dd)
+     * @param startHour   Starttime (0-23), null for hele dagen
+     * @param endHour     Sluttid (0-23), null for hele dagen
+     * @return JSON-respons med priser for den spesifikke perioden
+     * @throws IOException ved nettverksfeil
+     * @throws IllegalArgumentException ved ugyldige timer
+     */
     public static String fetchPricesBetweenHours(ElectricityRegion.Region region, String date, Integer startHour,
             Integer endHour) throws IOException {
         // Hvis startHour eller endHour er null, returner hele dagen
