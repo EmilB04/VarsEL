@@ -1,36 +1,21 @@
 package emilb04.varsel.ElectricityServices;
 
-import java.time.LocalDate;
-
-import org.json.JSONObject;
-
+import emilb04.varsel.Components.DTFormatter;
 import emilb04.varsel.ElectricityRegions.ElectricityRegion;
+
+import java.io.IOException;
 
 public class ElectricityFetcherTest {
     public static void main(String[] args) {
-        try {
-            ElectricityRegion.Region region = ElectricityRegion.Region.MOSS;
-            String prices = ElectricityFetcher.fetchPrices(region, LocalDate.now());
+        // Choose region:
+        ElectricityRegion.Region region = ElectricityRegion.Region.MOSS;
 
-            // Validerer JSON-strukturen før trimming
-            if (isValidJson(prices)) {
-                String output = ContentTrimmer.trimContent(prices);
-                System.out.println(output);
-            } else {
-                String output = JsonFormatter.formatAsJson(region, prices);
-                System.err.println("Ugyldig JSON-struktur mottatt: " + output);
-            }
-        } catch (IllegalArgumentException | java.io.IOException e) {
-            System.err.println(e.getMessage());
-        }
-    }
-
-    private static boolean isValidJson(String json) {
+        // Try getting prices for the specified period and region
         try {
-            new JSONObject(json);
-            return true;
-        } catch (Exception e) {
-            return false;
+            String prices = ElectricityFetcher.fetchPricesFromDay(region, DTFormatter.getDate());
+            System.out.println(prices);
+        } catch (IOException e) {
+            System.err.println("Error fetching prices: " + e.getMessage());
         }
     }
 }
