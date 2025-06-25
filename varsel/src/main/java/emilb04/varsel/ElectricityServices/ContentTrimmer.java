@@ -10,14 +10,22 @@ public class ContentTrimmer {
      * @return Trimmet og formatert JSON-struktur som String
      */
     public static String trimContent(String jsonContent) {
-        JSONObject json = new JSONObject(jsonContent);
-        JSONObject trimmedJson = new JSONObject();
+        String rawJson = jsonContent;
 
-        // Beholder kun relevante felt
-        trimmedJson.put("NOK_per_kWh", json.getDouble("NOK_per_kWh"));
-        trimmedJson.put("time_start", json.getString("time_start"));
-        trimmedJson.put("time_end", json.getString("time_end"));
+        // Parse JSON-strukturen
+        JSONObject jsonObject = new JSONObject(rawJson);
+        // Fjern unødvendige felt
+        jsonObject.remove("EUR");
+        // Fjern unødvendige felt i "prices" arrayet
+        if (jsonObject.has("prices")) {
+            jsonObject.getJSONArray("prices").forEach(item -> {
+                JSONObject priceItem = (JSONObject) item;
+                priceItem.remove("EUR");
+            });
+        }
 
-        return trimmedJson.toString(4); // Pretty print med 4 mellomrom
+
+        // Returner den trimmede JSON-strukturen som String
+        return jsonObject.toString(4); // 4 er antall mellomrom for innrykk
     }
 }
