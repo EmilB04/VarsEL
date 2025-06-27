@@ -1,31 +1,12 @@
 <template>
   <q-page class="q-pa-md">
+    <header>
+      <HeaderSection />
+    </header>
     <q-form @submit="fetchPrices">
-      <q-select
-        v-model="region"
-        :options="[
-          { value: 'NO1', label: 'Oslo (Øst-Norge)' },
-          { value: 'NO2', label: 'Kristiansand (Sør-Norge)' },
-          { value: 'NO3', label: 'Trondheim (Midt-Norge)' },
-          { value: 'NO4', label: 'Tromsø (Nord-Norge)' },
-          { value: 'NO5', label: 'Bergen (Vest-Norge)' },
-          { value: 'NO2', label: 'Arendal (Sør-Norge)' },
-          { value: 'NO4', label: 'Bodø (Nord-Norge)' },
-          { value: 'NO1', label: 'Drammen (Øst-Norge)' },
-          { value: 'NO1', label: 'Fredrikstad (Øst-Norge)' },
-          { value: 'NO2', label: 'Haugesund (Sør-Norge)' },
-          { value: 'NO1', label: 'Moss (Øst-Norge)' },
-          { value: 'NO2', label: 'Porsgrunn (Sør-Norge)' },
-          { value: 'NO2', label: 'Sandefjord (Sør-Norge)' },
-          { value: 'NO2', label: 'Stavanger (Sør-Norge)' },
-          { value: 'NO2', label: 'Tønsberg (Sør-Norge)' },
-          { value: 'NO3', label: 'Ålesund (Midt-Norge)' }
-        ]"
-        label="Region"
-        class="q-mb-sm"
-        emit-value
-        map-options
-      />
+      <q-select v-model="selectedArea" :options="areaOptions" label="Område" class="q-mb-sm" emit-value map-options />
+      <q-select v-model="selectedCity" :options="filteredCityOptions" label="By" class="q-mb-sm" emit-value map-options
+        :disable="!selectedArea" />
       <q-input v-model="date" label="Dato" type="date" class="q-mb-sm" />
       <q-input v-model="startHour" label="Starttime (valgfritt)" type="number" class="q-mb-sm" />
       <q-input v-model="endHour" label="Slutttime (valgfritt)" type="number" class="q-mb-sm" />
@@ -34,47 +15,117 @@
 
     <q-separator class="q-my-md" />
 
-    <q-table
-      v-if="prices.length"
-      :rows="prices"
-      :columns="columns"
-      row-key="time_start"
-      flat
-      bordered
-    />
+    <q-table v-if="prices.length" :rows="prices" :columns="columns" row-key="time_start" flat bordered />
   </q-page>
+  <footer class="text-center">
+    <FooterSection />
+  </footer>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { api } from 'boot/axios'
+import type { QTableColumn } from 'quasar'
+import FooterSection from 'src/components/FooterSection.vue'
+import HeaderSection from 'src/components/HeaderSection.vue'
+// import { start } from 'repl'
 
-const region = ref('NO1')
+// Define options for area and city selection
+const areaOptions = [
+  { value: 'NO1', label: 'Øst-Norge' },
+  { value: 'NO2', label: 'Sør-Norge' },
+  { value: 'NO3', label: 'Midt-Norge' },
+  { value: 'NO4', label: 'Nord-Norge' },
+  { value: 'NO5', label: 'Vest-Norge' }
+]
+
+// Define specific cities with their areas
+const cityOptions = [
+  { value: 'Moss', label: 'Moss', area: 'NO1' },
+  { value: 'Drammen', label: 'Drammen', area: 'NO1' },
+  { value: 'Fredrikstad', label: 'Fredrikstad', area: 'NO1' },
+  { value: 'Arendal', label: 'Arendal', area: 'NO2' },
+  { value: 'Bodo', label: 'Bodø', area: 'NO4' },
+  { value: 'Haugesund', label: 'Haugesund', area: 'NO2' },
+  { value: 'Porsgrunn', label: 'Porsgrunn', area: 'NO2' },
+  { value: 'Sandefjord', label: 'Sandefjord', area: 'NO2' },
+  { value: 'Stavanger', label: 'Stavanger', area: 'NO2' },
+  { value: 'Tonsberg', label: 'Tønsberg', area: 'NO2' },
+  { value: 'Alesund', label: 'Ålesund', area: 'NO3' }
+]
+
+// Base cities for each area, used for default selection
+const baseCities: Record<'NO1' | 'NO2' | 'NO3' | 'NO4' | 'NO5', string> = {
+  NO1: 'Oslo',
+  NO2: 'Kristiansand',
+  NO3: 'Trondheim',
+  NO4: 'Tromsø',
+  NO5: 'Bergen'
+};
+
+// Reactive state variables
+const selectedArea = ref('NO1')
+const selectedCity = ref(null)
 const date = ref(new Date().toISOString().slice(0, 10))
 const startHour = ref<number | null>(null)
 const endHour = ref<number | null>(null)
 const prices = ref([])
 
-import type { QTableColumn } from 'quasar'
+const filteredCityOptions = computed(() =>
+  cityOptions.filter(city => city.area === selectedArea.value)
+)
 
+// Define the columns for the QTable
 const columns: QTableColumn[] = [
-  { name: 'time_start', label: 'Start', field: 'time_start', align: 'left' as const },
-  { name: 'time_end', label: 'Slutt', field: 'time_end', align: 'left' as const },
+  { name: 'area', label: 'Område', field: 'area', align: 'left' as const },
+  { name: 'city', label: 'By', field: 'city', align: 'left' as const },
+  { name: 'date', label: 'Dato', field: row => {
+      const [year, month, day] = row.date.split('-');
+      return `${day}-${month}-${year}`;
+    }, align: 'left' as const },
+  { name: 'time_start', label: 'Start', field: row => row.time_start.slice(11, 16), align: 'left' as const }, // henter bare tid
+  { name: 'time_end', label: 'Slutt', field: row => row.time_end.slice(11, 16), align: 'left' as const }, // Henter bare tid
   { name: 'NOK_per_kWh', label: 'Pris (kr/kWh)', field: 'NOK_per_kWh', align: 'right' as const, format: (val: number) => `${val.toFixed(2)} kr` }
 ]
 
 async function fetchPrices() {
   try {
-    let url = `/prices/${region.value}/${date.value}`
-    if (startHour.value !== null && endHour.value !== null) {
-      url += `?startHour=${startHour.value}&endHour=${endHour.value}`
+    // Bruk by hvis valgt, ellers område
+    const regionParam = selectedCity.value || selectedArea.value
+    const url = `/prices/${regionParam}/${date.value}`
+
+    // Bygg query params dynamisk med standardverdier
+    const params: Record<string, number> = {
+      startHour: startHour.value ?? 0, // Standardverdi 0 hvis null
+      endHour: endHour.value ?? 24    // Standardverdi 24 hvis null
     }
 
-    const response = await api.get(url)
-    const json = typeof response.data === 'string' ? JSON.parse(response.data) : response.data
-    prices.value = json.prices
+    // Send GET-kall til backend
+    const response = await api.get(url, { params })
+
+    // Hvis response er string (fra Java), parse det
+    const json = typeof response.data === 'string'
+      ? JSON.parse(response.data)
+      : response.data
+
+    interface Price {
+      time_start: string;
+      time_end: string;
+      NOK_per_kWh: number;
+    }
+
+    // Berik hvert objekt med område, by og valgt dato
+    const enrichedPrices = json.prices.map((price: Price) => ({
+      ...price,
+      area: selectedArea.value,
+      city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
+      date: date.value
+    }))
+
+    prices.value = enrichedPrices
   } catch (err) {
     console.error('Klarte ikke hente priser:', err)
   }
 }
+
 </script>
