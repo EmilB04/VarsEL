@@ -20,7 +20,7 @@ public class ElectricityFetcherTest {
 
         // Try getting prices for a specific hour range
         try {
-            String prices = ElectricityFetcher.fetchPricesBetweenHours(region, DTFormatter.getDate(), 15, 18);
+            String prices = ElectricityFetcher.fetchPricesBetweenHours(region, DTFormatter.getDate(), 15, null);
             System.out.println(prices);
         } catch (IOException e) {
             System.err.println("Error fetching prices for specific hours: " + e.getMessage());
