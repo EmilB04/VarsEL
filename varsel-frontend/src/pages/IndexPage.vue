@@ -81,29 +81,29 @@ const columns: QTableColumn[] = [
   { name: 'city', label: 'By', field: 'city', align: 'left' as const },
   { name: 'date', label: 'Dato', field: row => {
       const [year, month, day] = row.date.split('-');
-      return `${day}-${month}-${year}`;
+      return `${day}.${month}.${year}`; // DD.MM.YYYY format
     }, align: 'left' as const },
-  { name: 'time_start', label: 'Start', field: row => row.time_start.slice(11, 16), align: 'left' as const }, // henter bare tid
-  { name: 'time_end', label: 'Slutt', field: row => row.time_end.slice(11, 16), align: 'left' as const }, // Henter bare tid
+  { name: 'time_start', label: 'Start', field: row => row.time_start.slice(11, 16), align: 'left' as const }, // Only retrieves hour and minute
+  { name: 'time_end', label: 'Slutt', field: row => row.time_end.slice(11, 16), align: 'left' as const }, // Only retrieves hour and minute
   { name: 'NOK_per_kWh', label: 'Pris (kr/kWh)', field: 'NOK_per_kWh', align: 'right' as const, format: (val: number) => `${val.toFixed(2)} kr` }
 ]
 
 async function fetchPrices() {
   try {
-    // Bruk by hvis valgt, ellers område
+    // Use city if chosen, else use area
     const regionParam = selectedCity.value || selectedArea.value
     const url = `/prices/${regionParam}/${date.value}`
 
-    // Bygg query params dynamisk med standardverdier
+    // Build query parames dynamically with standard values
     const params: Record<string, number> = {
-      startHour: startHour.value ?? 0, // Standardverdi 0 hvis null
-      endHour: endHour.value ?? 24    // Standardverdi 24 hvis null
+      startHour: startHour.value ?? 0, // Standard 0 if null
+      endHour: endHour.value ?? 24    // Standard 24 if null
     }
 
-    // Send GET-kall til backend
+    // Send GET-call to backend
     const response = await api.get(url, { params })
 
-    // Hvis response er string (fra Java), parse det
+    // If reponse is string (from Java), parse it
     const json = typeof response.data === 'string'
       ? JSON.parse(response.data)
       : response.data

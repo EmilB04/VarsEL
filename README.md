@@ -1,6 +1,6 @@
-# varsEL
+# VarsEL
 
-varsEL is a private project designed to fetch and display electricity prices from an API. It consists of a backend service built with Spring Boot and a frontend application developed using Quasar Framework.
+VarsEL is a private project designed to fetch and display electricity prices from an API. It consists of a backend service built with Spring Boot and a frontend application developed using Quasar Framework.
 
 ## Features
 - Fetch electricity prices for different regions and cities.
