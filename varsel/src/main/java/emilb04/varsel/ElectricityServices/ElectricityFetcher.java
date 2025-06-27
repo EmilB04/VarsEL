@@ -25,14 +25,13 @@ public class ElectricityFetcher {
      * @throws IOException ved nettverksfeil
      */
     private static String constructUrl(ElectricityRegion.Region region, String date) {
-    return String.format(
-        "https://www.hvakosterstrommen.no/api/v1/prices/%d/%02d-%02d_%s.json",
-        DTFormatter.getYear(date),
-        DTFormatter.getMonthValue(date),
-        DTFormatter.getDayOfMonth(date),
-        region.getRegionNumber()
-    );
-}
+        return String.format(
+                "https://www.hvakosterstrommen.no/api/v1/prices/%d/%02d-%02d_%s.json",
+                DTFormatter.getYear(date),
+                DTFormatter.getMonthValue(date),
+                DTFormatter.getDayOfMonth(date),
+                region.getRegionNumber());
+    }
 
     private static String makeApiRequest(String urlString) throws IOException {
         URL url = URI.create(urlString).toURL();
@@ -57,7 +56,6 @@ public class ElectricityFetcher {
         } else if (content.toString().contains("error")) {
             throw new IOException("Error in API response: " + content);
         }
-        System.out.println("Strømpriser levert av https://www.hvakosterstrommen.no");
         return content.toString();
     }
 
@@ -92,32 +90,28 @@ public class ElectricityFetcher {
      */
     public static String fetchPricesBetweenHours(ElectricityRegion.Region region, String date, Integer startHour,
             Integer endHour) throws IOException {
-        // Hvis startHour eller endHour er null, returner hele dagen
-        if (startHour == null || endHour == null) {
+        // Sett standardverdier hvis mangler
+        if ((startHour == null) && (endHour == null)) {
             return fetchPricesFromDay(region, date);
         }
-        if (startHour < 0 || startHour > 23 || endHour < 0 || endHour > 23 || startHour >= endHour) {
+        if (startHour == null && endHour != null) {
+            startHour = 01;
+        }
+        if (endHour == null && startHour != null) {
+            endHour = 24;
+        }
+
+        // Valider at tallene er fornuftige
+        if (startHour < 0 || startHour > 23 || endHour < 1 || endHour > 24 || startHour >= endHour) {
             throw new IllegalArgumentException("Ugyldige timer: " + startHour + " til " + endHour);
         }
-        if (startHour == endHour) {
-            throw new IllegalArgumentException("Start- og sluttimer kan ikke være like: " + startHour);
-        }
-        if (startHour < 0 || endHour > 23) {
-            throw new IllegalArgumentException("Timer må være mellom 0 og 23: " + startHour + " til " + endHour);
-        }
-        if (startHour > endHour) {
-            throw new IllegalArgumentException(
-                    "Starttime må være mindre enn sluttid: " + startHour + " til " + endHour);
-        }
 
-        // Hent rå API-data som er i riktig ISO 8601-format
+        // Hent rådata
         String urlString = constructUrl(region, date);
         String rawContent = makeApiRequest(urlString);
-
-        // Parse JSON-arrayen direkte
         JSONArray rawPrices = new JSONArray(rawContent);
 
-        // Filtrer på time_start
+        // Filtrer mellom start og end
         JSONArray filtered = new JSONArray();
         for (int i = 0; i < rawPrices.length(); i++) {
             JSONObject entry = rawPrices.getJSONObject(i);
@@ -128,7 +122,6 @@ public class ElectricityFetcher {
             }
         }
 
-        // Lag ny JSON-struktur og send til JsonFormatter
         return new JsonFormatter().format(region, filtered.toString());
     }
 }
