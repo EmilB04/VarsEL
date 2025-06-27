@@ -17,5 +17,13 @@ public class ElectricityFetcherTest {
         } catch (IOException e) {
             System.err.println("Error fetching prices: " + e.getMessage());
         }
+
+        // Try getting prices for a specific hour range
+        try {
+            String prices = ElectricityFetcher.fetchPricesBetweenHours(region, DTFormatter.getDate(), 15, 18);
+            System.out.println(prices);
+        } catch (IOException e) {
+            System.err.println("Error fetching prices for specific hours: " + e.getMessage());
+        }
     }
 }

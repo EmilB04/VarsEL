@@ -25,11 +25,14 @@ public class ElectricityFetcher {
      * @throws IOException ved nettverksfeil
      */
     private static String constructUrl(ElectricityRegion.Region region, String date) {
-        return String.format(
-                "https://www.hvakosterstrommen.no/api/v1/prices/%d/%02d-%02d_%s.json",
-                DTFormatter.getYear(), DTFormatter.getMonthValue(), DTFormatter.getDayOfMonth(),
-                region.getRegionNumber());
-    }
+    return String.format(
+        "https://www.hvakosterstrommen.no/api/v1/prices/%d/%02d-%02d_%s.json",
+        DTFormatter.getYear(date),
+        DTFormatter.getMonthValue(date),
+        DTFormatter.getDayOfMonth(date),
+        region.getRegionNumber()
+    );
+}
 
     private static String makeApiRequest(String urlString) throws IOException {
         URL url = URI.create(urlString).toURL();
@@ -54,7 +57,7 @@ public class ElectricityFetcher {
         } else if (content.toString().contains("error")) {
             throw new IOException("Error in API response: " + content);
         }
-
+        System.out.println("Strømpriser levert av https://www.hvakosterstrommen.no");
         return content.toString();
     }
 
@@ -79,12 +82,12 @@ public class ElectricityFetcher {
     /**
      * Henter strømpriser for en spesifikk tidsperiode i valgt region.
      * 
-     * @param region      Strømregion (NO1-NO5)
-     * @param date        Dato (yyyy-MM-dd)
-     * @param startHour   Starttime (0-23), null for hele dagen
-     * @param endHour     Sluttid (0-23), null for hele dagen
+     * @param region    Strømregion (NO1-NO5)
+     * @param date      Dato (yyyy-MM-dd)
+     * @param startHour Starttime (0-23), null for hele dagen
+     * @param endHour   Sluttid (0-23), null for hele dagen
      * @return JSON-respons med priser for den spesifikke perioden
-     * @throws IOException ved nettverksfeil
+     * @throws IOException              ved nettverksfeil
      * @throws IllegalArgumentException ved ugyldige timer
      */
     public static String fetchPricesBetweenHours(ElectricityRegion.Region region, String date, Integer startHour,
