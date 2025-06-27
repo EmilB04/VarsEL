@@ -54,7 +54,7 @@ public class ElectricityFetcher {
         } else if (content.toString().contains("error")) {
             throw new IOException("Error in API response: " + content);
         }
-
+        System.out.println("Strømpriser levert av https://www.hvakosterstrommen.no");
         return content.toString();
     }
 

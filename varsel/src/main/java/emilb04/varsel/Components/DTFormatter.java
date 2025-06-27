@@ -47,5 +47,14 @@ public class DTFormatter {
     public static int getDayOfMonth() {
         return LocalDate.now().getDayOfMonth();
     }
+    public static int getHour() {
+        return LocalTime.now().getHour();
+    }
+    public static int getMinute() {
+        return LocalTime.now().getMinute();
+    }
 
+    public static String getNextDay() {
+        return formatDate(LocalDate.now().plusDays(1));
+    }
 }
