@@ -1,0 +1,12 @@
+emilb04/varsel/ElectricityRegions/ElectricityRegion.class
+emilb04/varsel/ElectricityServices/ContentTrimmer.class
+emilb04/varsel/Components/JsonFormatter.class
+emilb04/varsel/ElectricityPrices/ElectricityPrice.class
+emilb04/varsel/Components/JsonExporter.class
+emilb04/varsel/Controller/PriceController.class
+emilb04/varsel/ElectricityServices/ElectricityFetcher.class
+emilb04/varsel/Controller/CorsConfig.class
+emilb04/varsel/VarselApplication.class
+emilb04/varsel/ElectricityRegions/ElectricityRegion$Region.class
+emilb04/varsel/Controller/CorsConfig$1.class
+emilb04/varsel/Components/DTFormatter.class
