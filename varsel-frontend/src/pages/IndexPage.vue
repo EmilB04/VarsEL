@@ -1,43 +1,47 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <example-component
-      title="Example component"
-      active
-      :todos="todos"
-      :meta="meta"
-    ></example-component>
+  <q-page class="q-pa-md">
+    <q-form @submit="fetchPrices">
+      <q-select
+        v-model="region"
+        :options="['NO1', 'NO2', 'NO3', 'NO4', 'NO5']"
+        label="Region"
+        emit-value
+        map-options
+      />
+      <q-input v-model="date" label="Dato" type="date" />
+      <q-btn label="Hent priser" type="submit" color="primary" />
+    </q-form>
+
+    <q-table
+      v-if="prices.length"
+      :rows="prices"
+      :columns="columns"
+      row-key="time_start"
+      class="q-mt-md"
+    />
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { Todo, Meta } from 'components/models';
-import ExampleComponent from 'components/ExampleComponent.vue';
+import { ref } from 'vue'
+import { api } from 'boot/axios'
 
-const todos = ref<Todo[]>([
-  {
-    id: 1,
-    content: 'ct1'
-  },
-  {
-    id: 2,
-    content: 'ct2'
-  },
-  {
-    id: 3,
-    content: 'ct3'
-  },
-  {
-    id: 4,
-    content: 'ct4'
-  },
-  {
-    id: 5,
-    content: 'ct5'
+const region = ref('NO1')
+const date = ref('2025-06-25')
+const prices = ref([])
+
+const columns = [
+  { name: 'time_start', label: 'Start', field: 'time_start' },
+  { name: 'time_end', label: 'Slutt', field: 'time_end' },
+  { name: 'NOK_per_kWh', label: 'Pris (NOK/kWh)', field: 'NOK_per_kWh' }
+]
+
+async function fetchPrices() {
+  try {
+    const res = await api.get(`/prices/${region.value}/${date.value}`)
+    prices.value = JSON.parse(res.data).prices
+  } catch (err) {
+    console.error(err)
   }
-]);
-
-const meta = ref<Meta>({
-  totalCount: 1200
-});
+}
 </script>
