@@ -77,7 +77,12 @@ const filteredCityOptions = computed(() =>
 
 // Define the columns for the QTable
 const columns: QTableColumn[] = [
-  { name: 'area', label: 'Område', field: 'area', align: 'left' as const },
+  {
+    name: 'area',
+    label: 'Område',
+    field: row => areaOptions.find(option => option.value === row.area)?.label || row.area,
+    align: 'left' as const
+  },
   { name: 'city', label: 'By', field: 'city', align: 'left' as const },
   { name: 'date', label: 'Dato', field: row => {
       const [year, month, day] = row.date.split('-');
