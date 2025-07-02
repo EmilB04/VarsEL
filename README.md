@@ -10,24 +10,37 @@ VarsEL is a private project designed to fetch and display electricity prices fro
 ## Prerequisites
 - Node.js and npm installed for the frontend.
 - Java and Maven installed for the backend.
+- Docker and Docker Compose installed (for Docker alternative).
 
-## Start Frontend
+## Start Application
+
+### Option 1: Normal Localhost Setup
+#### Start Frontend
 Navigate to the `varsel-frontend` directory and run the following command:
 
 ```bash
 quasar dev
 ```
 
-This will start the frontend development server.
+This will start the frontend development server at `http://localhost:9000`.
 
-## Start Backend
+#### Start Backend
 Navigate to the `varsel` directory and run the following command:
 
 ```bash
 mvn spring-boot:run
 ```
 
-This will start the backend server.
+This will start the backend server at `http://localhost:8080`.
+
+### Option 2: Using Docker
+Navigate to the project root directory and run the following command:
+
+```bash
+docker-compose up --build
+```
+
+This will build and start both the backend and frontend services. The backend will be accessible at `http://localhost:8080`, and the frontend will be accessible at `http://localhost:80`.
 
 ## API Endpoints
 - `/prices/{region}/{date}`: Fetch electricity prices for a specific region and date.
@@ -42,7 +55,7 @@ This will start the backend server.
 ## Technologies Used
 - **Backend**: Java, Spring Boot
 - **Frontend**: Vue.js, Quasar Framework
-- **Other**: Maven, Axios
+- **Other**: Docker, Maven, Axios
 
 ## License
 This is a private project and not licensed for public use.
