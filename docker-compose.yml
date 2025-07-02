@@ -1,19 +1,23 @@
+version: '3.8'
 services:
   backend:
     build:
       context: ./varsel
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     networks:
       - varsel-network
+
   frontend:
     build:
       context: ./varsel-frontend
+      dockerfile: Dockerfile
     ports:
       - "80:80"
     networks:
       - varsel-network
-    depends_on:
-      - backend
+
 networks:
   varsel-network:
+    driver: bridge
