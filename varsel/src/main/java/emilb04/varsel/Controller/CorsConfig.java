@@ -22,7 +22,7 @@ public class CorsConfig {
 }
 */
 
-
+/* For Docker usage */
 @Configuration
 public class CorsConfig {
     @Bean
