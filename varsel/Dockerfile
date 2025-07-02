@@ -5,8 +5,9 @@ COPY pom.xml .
 COPY src ./src
 RUN mvn package -DskipTests -Dfile.encoding=UTF-8
 
-FROM eclipse-temurin:21-jdk
+# Use Maven image in the final stage to ensure Maven is available
+FROM maven:3.9.4-eclipse-temurin-21 AS runtime
 WORKDIR /app
-COPY . .
+COPY --from=build /app .
 EXPOSE 8080
 CMD ["mvn", "spring-boot:run"]

@@ -6,6 +6,8 @@ COPY tsconfig.json .
 COPY quasar.config.ts .
 COPY src ./src
 COPY public ./public
+COPY /index.html ./index.html
+COPY eslint.config.js ./eslint.config.js
 RUN npm install && npm run build
 
 FROM nginx:alpine

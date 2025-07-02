@@ -7,6 +7,12 @@ import prettierSkipFormatting from '@vue/eslint-config-prettier/skip-formatting'
 
 export default defineConfigWithVueTs(
   {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
     /**
      * Ignore the following files.
      * Please note that pluginQuasar.configs.recommended() already ignores
