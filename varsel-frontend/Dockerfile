@@ -1,0 +1,14 @@
+# Frontend Dockerfile
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY package.json .
+COPY tsconfig.json .
+COPY quasar.config.ts .
+COPY src ./src
+COPY public ./public
+RUN npm install && npm run build
+
+FROM nginx:alpine
+COPY --from=build /app/dist/spa /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

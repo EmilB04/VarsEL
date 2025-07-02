@@ -1,0 +1,19 @@
+services:
+  backend:
+    build:
+      context: ./varsel
+    ports:
+      - "8080:8080"
+    networks:
+      - varsel-network
+  frontend:
+    build:
+      context: ./varsel-frontend
+    ports:
+      - "80:80"
+    networks:
+      - varsel-network
+    depends_on:
+      - backend
+networks:
+  varsel-network:
