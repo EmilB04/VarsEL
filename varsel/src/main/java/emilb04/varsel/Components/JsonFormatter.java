@@ -1,12 +1,10 @@
 package emilb04.varsel.Components;
 
-import org.json.JSONObject;
-
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import emilb04.varsel.ElectricityRegions.ElectricityRegion;
 
