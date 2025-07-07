@@ -30,7 +30,6 @@ import type { QTableColumn } from 'quasar'
 import FooterSection from 'src/components/FooterSection.vue'
 import HeaderSection from 'src/components/HeaderSection.vue'
 import NavSection from 'src/components/NavSection.vue'
-// import { start } from 'repl'
 
 // Define options for area and city selection
 const areaOptions = [
@@ -71,7 +70,8 @@ const selectedCity = ref(null)
 const date = ref(new Date().toISOString().slice(0, 10))
 const startHour = ref<number | null>(null)
 const endHour = ref<number | null>(null)
-const prices = ref([])
+const prices = ref<Price[]>([])
+const isTaxIncluded = ref(false)
 
 const filteredCityOptions = computed(() =>
   cityOptions.filter(city => city.area === selectedArea.value)
@@ -95,43 +95,59 @@ const columns: QTableColumn[] = [
   { name: 'NOK_per_kWh', label: 'Pris (kr/kWh)', field: 'NOK_per_kWh', align: 'right' as const, format: (val: number) => `${val.toFixed(2)} kr` }
 ]
 
+interface Price {
+  time_start: string;
+  time_end: string;
+  NOK_per_kWh: number;
+  area: string;
+  city: string;
+  date: string;
+}
+
 async function fetchPrices() {
+  const storedTaxPreference = localStorage.getItem('isTaxIncluded');
+  isTaxIncluded.value = storedTaxPreference === 'true';
+
   try {
     // Use city if chosen, else use area
-    const regionParam = selectedCity.value || selectedArea.value
-    const url = `/prices/${regionParam}/${date.value}`
+    const regionParam = selectedCity.value || selectedArea.value;
+    const url = `/prices/${regionParam}/${date.value}`;
 
     // Build query parames dynamically with standard values
     const params: Record<string, number> = {
       startHour: startHour.value ?? 0, // Standard 0 if null
       endHour: endHour.value ?? 24    // Standard 24 if null
-    }
+    };
 
     // Send GET-call to backend
-    const response = await api.get(url, { params })
+    const response = await api.get(url, { params });
 
     // If reponse is string (from Java), parse it
     const json = typeof response.data === 'string'
       ? JSON.parse(response.data)
-      : response.data
+      : response.data;
 
-    interface Price {
-      time_start: string;
-      time_end: string;
-      NOK_per_kWh: number;
-    }
+    // Enrich each object with area, city, and selected date
+    const enrichedPrices = json.prices.map((price: Price) => {
+      const adjustedPrice = isTaxIncluded.value
+        ? price.NOK_per_kWh * 1.25 // Apply tax if included
+        : price.NOK_per_kWh;
 
-    // Berik hvert objekt med område, by og valgt dato
-    const enrichedPrices = json.prices.map((price: Price) => ({
-      ...price,
-      area: selectedArea.value,
-      city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
-      date: date.value
-    }))
+      return {
+        ...price,
+        NOK_per_kWh: adjustedPrice,
+        area: selectedArea.value,
+        city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
+        date: date.value
+      };
+    });
 
-    prices.value = enrichedPrices
+    prices.value = enrichedPrices;
+
+    // Trigger hot reload by resetting the table data
+    prices.value = [...prices.value];
   } catch (err) {
-    console.error('Klarte ikke hente priser:', err)
+    console.error('Could not fetch prices', err);
   }
 }
 
