@@ -4,19 +4,18 @@
       <NavSection />
       <HeaderSection />
     </header>
-    <q-form @submit="fetchPrices">
-      <q-select v-model="selectedArea" :options="areaOptions" label="Område" class="q-mb-sm" emit-value map-options />
-      <q-select v-model="selectedCity" :options="filteredCityOptions" label="By" class="q-mb-sm" emit-value map-options
-        :disable="!selectedArea" />
-      <q-input v-model="date" label="Dato" type="date" class="q-mb-sm" />
-      <q-input v-model="startHour" label="Starttime (valgfritt)" type="number" class="q-mb-sm" />
-      <q-input v-model="endHour" label="Slutttime (valgfritt)" type="number" class="q-mb-sm" />
-      <q-btn label="Hent priser" type="submit" color="primary" />
-    </q-form>
-
-    <q-separator class="q-my-md" />
-
-    <q-table v-if="prices.length" :rows="prices" :columns="columns" row-key="time_start" flat bordered />
+    <main>
+      <q-form @submit="fetchPrices">
+        <q-select v-model="selectedArea" :options="areaOptions" label="Område" class="q-mb-sm" emit-value map-options />
+        <q-select v-model="selectedCity" :options="filteredCityOptions" label="By (valgfritt)" class="q-mb-sm" emit-value
+          map-options :disable="!selectedArea" />
+        <q-input v-model="date" label="Dato" type="date" class="q-mb-sm" />
+        <q-input v-model="startHour" label="Starttid (valgfritt)" type="number" class="q-mb-sm" />
+        <q-input v-model="endHour" label="Sluttid (valgfritt)" type="number" class="q-mb-sm" />
+        <q-btn label="Hent priser" type="submit" color="primary" />
+      </q-form>
+      <q-table class="q-mt-lg" v-if="prices.length" :rows="prices" :columns="columns" row-key="time_start" flat bordered />
+    </main>
   </q-page>
   <footer class="text-center">
     <FooterSection />
@@ -24,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { api } from 'boot/axios'
 import type { QTableColumn } from 'quasar'
 import FooterSection from 'src/components/FooterSection.vue'
@@ -86,10 +85,12 @@ const columns: QTableColumn[] = [
     align: 'left' as const
   },
   { name: 'city', label: 'By', field: 'city', align: 'left' as const },
-  { name: 'date', label: 'Dato', field: row => {
+  {
+    name: 'date', label: 'Dato', field: row => {
       const [year, month, day] = row.date.split('-');
       return `${day}.${month}.${year}`; // DD.MM.YYYY format
-    }, align: 'left' as const },
+    }, align: 'left' as const
+  },
   { name: 'time_start', label: 'Start', field: row => row.time_start.slice(11, 16), align: 'left' as const }, // Only retrieves hour and minute
   { name: 'time_end', label: 'Slutt', field: row => row.time_end.slice(11, 16), align: 'left' as const }, // Only retrieves hour and minute
   { name: 'NOK_per_kWh', label: 'Pris (kr/kWh)', field: 'NOK_per_kWh', align: 'right' as const, format: (val: number) => `${val.toFixed(2)} kr` }
@@ -150,5 +151,10 @@ async function fetchPrices() {
     console.error('Could not fetch prices', err);
   }
 }
+
+// Watch for changes in selectedArea to reset city selection
+watch(selectedArea, () => {
+  selectedCity.value = null;
+});
 
 </script>
