@@ -1,6 +1,7 @@
 <template>
   <q-page class="q-pa-md">
     <header>
+      <NavSection />
       <HeaderSection />
     </header>
     <q-form @submit="fetchPrices">
@@ -28,6 +29,7 @@ import { api } from 'boot/axios'
 import type { QTableColumn } from 'quasar'
 import FooterSection from 'src/components/FooterSection.vue'
 import HeaderSection from 'src/components/HeaderSection.vue'
+import NavSection from 'src/components/NavSection.vue'
 // import { start } from 'repl'
 
 // Define options for area and city selection
