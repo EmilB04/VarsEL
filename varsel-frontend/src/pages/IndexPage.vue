@@ -41,17 +41,26 @@ const areaOptions = [
 
 // Define specific cities with their areas
 const cityOptions = [
+  { value: '', label: 'Oslo', area: 'NO1' },
   { value: 'Moss', label: 'Moss', area: 'NO1' },
   { value: 'Drammen', label: 'Drammen', area: 'NO1' },
   { value: 'Fredrikstad', label: 'Fredrikstad', area: 'NO1' },
+
+  { value: '', label: 'Kristiansand', area: 'NO2' },
   { value: 'Arendal', label: 'Arendal', area: 'NO2' },
-  { value: 'Bodo', label: 'Bodø', area: 'NO4' },
   { value: 'Haugesund', label: 'Haugesund', area: 'NO2' },
   { value: 'Porsgrunn', label: 'Porsgrunn', area: 'NO2' },
   { value: 'Sandefjord', label: 'Sandefjord', area: 'NO2' },
   { value: 'Stavanger', label: 'Stavanger', area: 'NO2' },
   { value: 'Tonsberg', label: 'Tønsberg', area: 'NO2' },
-  { value: 'Alesund', label: 'Ålesund', area: 'NO3' }
+
+  { value: '', label: 'Trondheim', area: 'NO3' },
+  { value: 'Alesund', label: 'Ålesund', area: 'NO3' },
+
+  { value: '', label: 'Tromsø', area: 'NO4' },
+  { value: 'Bodo', label: 'Bodø', area: 'NO4' },
+
+  { value: '', label: 'Bergen', area: 'NO5' },
 ]
 
 // Base cities for each area, used for default selection
@@ -62,6 +71,7 @@ const baseCities: Record<'NO1' | 'NO2' | 'NO3' | 'NO4' | 'NO5', string> = {
   NO4: 'Tromsø',
   NO5: 'Bergen'
 };
+
 
 // Reactive state variables
 const selectedArea = ref('NO1')
