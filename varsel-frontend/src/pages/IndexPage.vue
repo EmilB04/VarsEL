@@ -14,6 +14,15 @@
         <q-input v-model="endHour" label="Sluttid (valgfritt)" type="number" class="q-mb-sm" />
         <q-btn label="Hent priser" type="submit" color="primary" />
       </q-form>
+
+      <!-- Price Chart -->
+      <div v-if="prices.length" class="q-mt-lg">
+        <h5 class="q-mb-md">Prisutvikling i {{ selectedArea }}</h5>
+        <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+          <canvas ref="chartCanvas" style="display: block; width: 100%; height: 100%;"></canvas>
+        </div>
+      </div>
+
       <q-table class="q-mt-lg" v-if="prices.length" :rows="prices" :columns="columns" row-key="time_start" flat bordered />
     </main>
   </q-page>
@@ -23,12 +32,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
 import { api } from 'boot/axios'
 import type { QTableColumn } from 'quasar'
 import FooterSection from 'src/components/FooterSection.vue'
 import HeaderSection from 'src/components/HeaderSection.vue'
 import NavSection from 'src/components/NavSection.vue'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  LineController,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js'
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  LineController,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+)
 
 // Define options for area and city selection
 const areaOptions = [
@@ -81,6 +115,10 @@ const startHour = ref<number | null>(null)
 const endHour = ref<number | null>(null)
 const prices = ref<Price[]>([])
 const isTaxIncluded = ref(false)
+const chartCanvas = ref<HTMLCanvasElement | null>(null)
+let chartInstance: ChartJS | null = null
+
+
 
 const filteredCityOptions = computed(() =>
   cityOptions.filter(city => city.area === selectedArea.value)
@@ -155,8 +193,9 @@ async function fetchPrices() {
 
     prices.value = enrichedPrices;
 
-    // Trigger hot reload by resetting the table data
-    prices.value = [...prices.value];
+    // Create chart after data is loaded and DOM is updated
+    await nextTick();
+    createChart();
   } catch (err) {
     console.error('Could not fetch prices', err);
   }
@@ -167,4 +206,81 @@ watch(selectedArea, () => {
   selectedCity.value = null;
 });
 
+// Clean up chart on component unmount
+onUnmounted(() => {
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+});
+
+
+// Function to create the price chart
+function createChart() {
+  if (!chartCanvas.value || prices.value.length === 0) {
+    return;
+  }
+
+  // Destroy existing chart if it exists
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  const ctx = chartCanvas.value.getContext('2d');
+  if (!ctx) {
+    return;
+  }
+
+  const labels = prices.value.map(price => {
+    const timeStr = price.time_start || '';
+    return timeStr.length >= 16 ? timeStr.slice(11, 16) : timeStr;
+  });
+  const data = prices.value.map(price => typeof price.NOK_per_kWh === 'number' ? price.NOK_per_kWh : parseFloat(price.NOK_per_kWh) || 0);
+
+  try {
+    chartInstance = new ChartJS(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Pris (kr/kWh)',
+          data: data,
+          borderColor: 'rgb(75, 192, 192)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          tension: 0.1,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Strømpriser gjennom dagen'
+          },
+          legend: {
+            display: true
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            title: {
+              display: true,
+              text: 'Pris (kr/kWh)'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Tid'
+            }
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error creating chart:', error);
+  }
+}
 </script>
