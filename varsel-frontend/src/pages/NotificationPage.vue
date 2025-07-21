@@ -78,7 +78,7 @@
 
       <!-- Active Notifications Section -->
       <div class="q-mt-xl">
-        <h5 class="text-h5 q-mb-md text-center">Aktive varsler</h5>
+        <h4 class="text-h5 q-mb-md text-center">Aktive varsler</h4>
 
         <div class="row q-gutter-md justify-center">
           <!-- Price Alerts -->
