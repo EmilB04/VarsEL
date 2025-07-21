@@ -6,18 +6,18 @@
     </header>
     <main>
       <q-form @submit="fetchPrices">
-        <q-select v-model="selectedArea" :options="areaOptions" label="Område" class="q-mb-sm" emit-value map-options />
+        <q-select v-model="selectedArea" :options="areaOptions" label="Område" class="q-mb-sm" emit-value map-options @update:model-value="fetchPrices" />
         <q-select v-model="selectedCity" :options="filteredCityOptions" label="By (valgfritt)" class="q-mb-sm" emit-value
-          map-options :disable="!selectedArea" />
-        <q-input v-model="date" label="Dato" type="date" class="q-mb-sm" />
-        <q-input v-model="startHour" label="Starttid (valgfritt)" type="number" class="q-mb-sm" />
-        <q-input v-model="endHour" label="Sluttid (valgfritt)" type="number" class="q-mb-sm" />
-        <q-btn label="Hent priser" type="submit" color="primary" />
+          map-options :disable="!selectedArea" @update:model-value="fetchPrices" @submit="fetchPrices" />
+        <q-input v-model="date" label="Dato" type="date" class="q-mb-sm" @change="fetchPrices" />
+        <q-input v-model="startHour" label="Starttid (valgfritt)" type="number" class="q-mb-sm" @change="fetchPrices" />
+        <q-input v-model="endHour" label="Sluttid (valgfritt)" type="number" class="q-mb-sm" @change="fetchPrices" />
+        <q-btn label="Fjern valgfrie" type="button" color="primary" @click="clearFilters" />
       </q-form>
 
       <!-- Price Chart -->
       <div v-if="prices.length" class="q-mt-lg">
-        <h5 class="q-mb-md">Prisutvikling i {{ selectedArea }}</h5>
+        <h5 class="q-mb-md">Prisutvikling i {{ getDisplayCity() }}</h5>
         <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
           <canvas ref="chartCanvas" style="display: block; width: 100%; height: 100%;"></canvas>
         </div>
@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onMounted} from 'vue'
 import { api } from 'boot/axios'
 import FooterSection from 'src/components/FooterSection.vue'
 import HeaderSection from 'src/components/HeaderSection.vue'
@@ -84,7 +84,7 @@ import { useChartServices } from 'src/components/Index/ChartScript'
 
 // Reactive state variables
 const selectedArea = ref('NO1')
-const selectedCity = ref(null)
+const selectedCity = ref<string | null>(null)
 const date = ref(new Date().toISOString().slice(0, 10))
 const startHour = ref<number | null>(null)
 const endHour = ref<number | null>(null)
@@ -159,4 +159,30 @@ async function fetchPrices() {
 watch(selectedArea, () => {
   selectedCity.value = null;
 });
+
+onMounted(() => {
+  // Fetch prices on initial load
+  void fetchPrices();
+});
+
+// Function to get the display city name
+function getDisplayCity(): string {
+  if (selectedCity.value) {
+    // Find the selected city in cityOptions to get its label
+    const cityOption = filteredCityOptions.value.find(city => city.value === selectedCity.value);
+    return cityOption ? cityOption.label : selectedCity.value;
+  } else {
+    // Return the default city for the selected area
+    return baseCities[selectedArea.value as keyof typeof baseCities];
+  }
+}
+
+// Function to clear all filters and reset to defaults
+function clearFilters() {
+  selectedCity.value = null;
+  startHour.value = null;
+  endHour.value = null;
+  prices.value = [];
+  return fetchPrices();
+}
 </script>

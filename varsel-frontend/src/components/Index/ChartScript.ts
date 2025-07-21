@@ -64,6 +64,12 @@ export function useChartServices() {
     const minIndex = data.indexOf(minPrice);
     const maxIndex = data.indexOf(maxPrice);
 
+    // Get current time to highlight on chart
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentTime = `${currentHour.toString().padStart(2, '0')}:00`;
+    const currentTimeIndex = labels.indexOf(currentTime);
+
     try {
       chartInstance = new ChartJS(ctx, {
         type: 'line',
@@ -79,16 +85,23 @@ export function useChartServices() {
             pointBackgroundColor: data.map((price, index) => {
               if (index === minIndex) return 'green';
               if (index === maxIndex) return 'red';
+              if (index === currentTimeIndex) return 'blue';
               return 'rgb(75, 192, 192)';
             }),
             pointBorderColor: data.map((price, index) => {
               if (index === minIndex) return 'darkgreen';
               if (index === maxIndex) return 'darkred';
+              if (index === currentTimeIndex) return 'darkblue';
               return 'rgb(75, 192, 192)';
             }),
             pointRadius: data.map((price, index) => {
               if (index === minIndex || index === maxIndex) return 8;
+              if (index === currentTimeIndex) return 10;
               return 4;
+            }),
+            pointBorderWidth: data.map((price, index) => {
+              if (index === currentTimeIndex) return 3;
+              return 1;
             })
           }]
         },
@@ -113,6 +126,8 @@ export function useChartServices() {
                     label += ' (Laveste)';
                   } else if (context.dataIndex === maxIndex) {
                     label += ' (Høyeste)';
+                  } else if (context.dataIndex === currentTimeIndex) {
+                    label += ' (Nå)';
                   }
 
                   return label;
@@ -137,7 +152,25 @@ export function useChartServices() {
                     color: 'white',
                     padding: 4
                   }
-                }
+                },
+                ...(currentTimeIndex !== -1 ? {
+                  currentTimeLine: {
+                    type: 'line',
+                    xMin: currentTimeIndex,
+                    xMax: currentTimeIndex,
+                    borderColor: 'blue',
+                    borderWidth: 2,
+                    borderDash: [3, 3],
+                    label: {
+                      content: 'Nå',
+                      display: true,
+                      position: 'start',
+                      backgroundColor: 'blue',
+                      color: 'white',
+                      padding: 4
+                    }
+                  }
+                } : {})
               }
             }
           },
