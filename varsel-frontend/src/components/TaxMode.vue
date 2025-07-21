@@ -13,7 +13,7 @@
           <template v-slot:avatar>
             <q-icon name="refresh" color="white" />
           </template>
-          Du må hente priser på nytt for å se endringene i MVA-innstillingene.
+          Du må oppdatere siden for å se endringene i MVA-innstillingene.
         </q-banner>
       </q-popup-proxy>
     </q-toggle>
