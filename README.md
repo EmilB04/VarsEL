@@ -18,6 +18,10 @@ VarsEL is a private project designed to fetch and display electricity prices fro
 #### Start Frontend
 Navigate to the `varsel-frontend` directory and run the following command:
 
+````bash
+npm install
+````
+
 ```bash
 quasar dev
 ```
@@ -26,6 +30,11 @@ This will start the frontend development server at `http://localhost:9000`.
 
 #### Start Backend
 Navigate to the `varsel` directory and run the following command:
+
+
+```bash
+mvn clean install
+```
 
 ```bash
 mvn spring-boot:run

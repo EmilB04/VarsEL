@@ -1,21 +1,72 @@
 <template>
   <q-page class="q-pa-md">
     <header>
+      <NavSection />
       <HeaderSection />
     </header>
-    <q-form @submit="fetchPrices">
-      <q-select v-model="selectedArea" :options="areaOptions" label="Område" class="q-mb-sm" emit-value map-options />
-      <q-select v-model="selectedCity" :options="filteredCityOptions" label="By" class="q-mb-sm" emit-value map-options
-        :disable="!selectedArea" />
-      <q-input v-model="date" label="Dato" type="date" class="q-mb-sm" />
-      <q-input v-model="startHour" label="Starttime (valgfritt)" type="number" class="q-mb-sm" />
-      <q-input v-model="endHour" label="Slutttime (valgfritt)" type="number" class="q-mb-sm" />
-      <q-btn label="Hent priser" type="submit" color="primary" />
-    </q-form>
+    <main>
+      <q-form @submit="fetchPrices">
+        <q-select v-model="selectedArea" :options="areaOptions" label="Område" class="q-mb-sm" emit-value map-options @update:model-value="fetchPrices" />
+        <q-select v-model="selectedCity" :options="filteredCityOptions" label="By (valgfritt)" class="q-mb-sm" emit-value
+          map-options :disable="!selectedArea" @update:model-value="fetchPrices" @submit="fetchPrices" />
+        <q-input v-model="date" label="Dato" type="date" class="q-mb-sm" @change="fetchPrices" />
+        <q-input v-model="startHour" label="Starttid (valgfritt)" type="number" class="q-mb-sm" @change="fetchPrices" />
+        <q-input v-model="endHour" label="Sluttid (valgfritt)" type="number" class="q-mb-sm" @change="fetchPrices" />
+        <q-btn label="Fjern valgfrie" type="button" color="primary" @click="clearFilters" />
+      </q-form>
 
-    <q-separator class="q-my-md" />
+      <!-- Price Chart -->
+      <div v-if="prices.length" class="q-mt-lg">
+        <h5 class="q-mb-md">Prisutvikling i {{ getDisplayCity() }}</h5>
+        <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+          <canvas ref="chartCanvas" style="display: block; width: 100%; height: 100%;"></canvas>
+        </div>
 
-    <q-table v-if="prices.length" :rows="prices" :columns="columns" row-key="time_start" flat bordered />
+        <!-- Price Summary -->
+        <div class="q-mt-md">
+          <div class="row q-gutter-md justify-center text-center">
+            <div class="col-md-2 col-sm-6 col-xs-12">
+              <q-card class="text-center">
+                <q-card-section>
+                  <div class="text-h6 text-green">{{ getMinPrice(prices).toFixed(2) }} kr/kWh</div>
+                  <div class="text-subtitle2">Laveste pris</div>
+                  <div class="text-caption">{{ getMinPriceTime(prices) }}</div>
+                </q-card-section>
+              </q-card>
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12">
+              <q-card class="text-center">
+                <q-card-section>
+                  <div class="text-h6 text-red">{{ getMaxPrice(prices).toFixed(2) }} kr/kWh</div>
+                  <div class="text-subtitle2">Høyeste pris</div>
+                  <div class="text-caption">{{ getMaxPriceTime(prices) }}</div>
+                </q-card-section>
+              </q-card>
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12">
+              <q-card class="text-center">
+                <q-card-section>
+                  <div class="text-h6 text-orange">{{ getAvgPrice(prices).toFixed(2) }} kr/kWh</div>
+                  <div class="text-subtitle2">Gjennomsnitt</div>
+                  <div class="text-caption">{{ prices.length }} timer</div>
+                </q-card-section>
+              </q-card>
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12">
+              <q-card class="text-center">
+                <q-card-section>
+                  <div class="text-h6 text-blue">{{ getPriceDifference(prices).toFixed(2) }} kr/kWh</div>
+                  <div class="text-subtitle2">Forskjell</div>
+                  <div class="text-caption">Høyeste - Laveste</div>
+                </q-card-section>
+              </q-card>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <q-table class="q-mt-lg" v-if="prices.length" :rows="prices" :columns="columns" row-key="time_start" flat bordered />
+    </main>
   </q-page>
   <footer class="text-center">
     <FooterSection />
@@ -23,114 +74,115 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, watch, nextTick, onMounted} from 'vue'
 import { api } from 'boot/axios'
-import type { QTableColumn } from 'quasar'
 import FooterSection from 'src/components/FooterSection.vue'
 import HeaderSection from 'src/components/HeaderSection.vue'
-// import { start } from 'repl'
-
-// Define options for area and city selection
-const areaOptions = [
-  { value: 'NO1', label: 'Øst-Norge' },
-  { value: 'NO2', label: 'Sør-Norge' },
-  { value: 'NO3', label: 'Midt-Norge' },
-  { value: 'NO4', label: 'Nord-Norge' },
-  { value: 'NO5', label: 'Vest-Norge' }
-]
-
-// Define specific cities with their areas
-const cityOptions = [
-  { value: 'Moss', label: 'Moss', area: 'NO1' },
-  { value: 'Drammen', label: 'Drammen', area: 'NO1' },
-  { value: 'Fredrikstad', label: 'Fredrikstad', area: 'NO1' },
-  { value: 'Arendal', label: 'Arendal', area: 'NO2' },
-  { value: 'Bodo', label: 'Bodø', area: 'NO4' },
-  { value: 'Haugesund', label: 'Haugesund', area: 'NO2' },
-  { value: 'Porsgrunn', label: 'Porsgrunn', area: 'NO2' },
-  { value: 'Sandefjord', label: 'Sandefjord', area: 'NO2' },
-  { value: 'Stavanger', label: 'Stavanger', area: 'NO2' },
-  { value: 'Tonsberg', label: 'Tønsberg', area: 'NO2' },
-  { value: 'Alesund', label: 'Ålesund', area: 'NO3' }
-]
-
-// Base cities for each area, used for default selection
-const baseCities: Record<'NO1' | 'NO2' | 'NO3' | 'NO4' | 'NO5', string> = {
-  NO1: 'Oslo',
-  NO2: 'Kristiansand',
-  NO3: 'Trondheim',
-  NO4: 'Tromsø',
-  NO5: 'Bergen'
-};
+import NavSection from 'src/components/NavSection.vue'
+import { useTableServices, type Price, baseCities } from 'src/components/Index/TableScript'
+import { useChartServices } from 'src/components/Index/ChartScript'
 
 // Reactive state variables
 const selectedArea = ref('NO1')
-const selectedCity = ref(null)
+const selectedCity = ref<string | null>(null)
 const date = ref(new Date().toISOString().slice(0, 10))
 const startHour = ref<number | null>(null)
 const endHour = ref<number | null>(null)
-const prices = ref([])
+const prices = ref<Price[]>([])
+const isTaxIncluded = ref(false)
 
-const filteredCityOptions = computed(() =>
-  cityOptions.filter(city => city.area === selectedArea.value)
-)
+// Use table services
+const {
+  areaOptions,
+  columns,
+  filteredCityOptions,
+  getMinPrice,
+  getMaxPrice,
+  getAvgPrice,
+  getPriceDifference,
+  getMinPriceTime,
+  getMaxPriceTime
+} = useTableServices(selectedArea)
 
-// Define the columns for the QTable
-const columns: QTableColumn[] = [
-  {
-    name: 'area',
-    label: 'Område',
-    field: row => areaOptions.find(option => option.value === row.area)?.label || row.area,
-    align: 'left' as const
-  },
-  { name: 'city', label: 'By', field: 'city', align: 'left' as const },
-  { name: 'date', label: 'Dato', field: row => {
-      const [year, month, day] = row.date.split('-');
-      return `${day}.${month}.${year}`; // DD.MM.YYYY format
-    }, align: 'left' as const },
-  { name: 'time_start', label: 'Start', field: row => row.time_start.slice(11, 16), align: 'left' as const }, // Only retrieves hour and minute
-  { name: 'time_end', label: 'Slutt', field: row => row.time_end.slice(11, 16), align: 'left' as const }, // Only retrieves hour and minute
-  { name: 'NOK_per_kWh', label: 'Pris (kr/kWh)', field: 'NOK_per_kWh', align: 'right' as const, format: (val: number) => `${val.toFixed(2)} kr` }
-]
+// Use chart services
+const { chartCanvas, createChart } = useChartServices()
 
 async function fetchPrices() {
+  const storedTaxPreference = localStorage.getItem('isTaxIncluded');
+  isTaxIncluded.value = storedTaxPreference === 'true';
+
   try {
     // Use city if chosen, else use area
-    const regionParam = selectedCity.value || selectedArea.value
-    const url = `/prices/${regionParam}/${date.value}`
+    const regionParam = selectedCity.value || selectedArea.value;
+    const url = `/prices/${regionParam}/${date.value}`;
 
     // Build query parames dynamically with standard values
     const params: Record<string, number> = {
       startHour: startHour.value ?? 0, // Standard 0 if null
       endHour: endHour.value ?? 24    // Standard 24 if null
-    }
+    };
 
     // Send GET-call to backend
-    const response = await api.get(url, { params })
+    const response = await api.get(url, { params });
 
     // If reponse is string (from Java), parse it
     const json = typeof response.data === 'string'
       ? JSON.parse(response.data)
-      : response.data
+      : response.data;
 
-    interface Price {
-      time_start: string;
-      time_end: string;
-      NOK_per_kWh: number;
-    }
+    // Enrich each object with area, city, and selected date
+    const enrichedPrices = json.prices.map((price: Price) => {
+      const adjustedPrice = isTaxIncluded.value
+        ? price.NOK_per_kWh * 1.25 // Apply tax if included
+        : price.NOK_per_kWh;
 
-    // Berik hvert objekt med område, by og valgt dato
-    const enrichedPrices = json.prices.map((price: Price) => ({
-      ...price,
-      area: selectedArea.value,
-      city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
-      date: date.value
-    }))
+      return {
+        ...price,
+        NOK_per_kWh: adjustedPrice,
+        area: selectedArea.value,
+        city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
+        date: date.value
+      };
+    });
 
-    prices.value = enrichedPrices
+    prices.value = enrichedPrices;
+
+    // Create chart after data is loaded and DOM is updated
+    await nextTick();
+    createChart(prices.value);
   } catch (err) {
-    console.error('Klarte ikke hente priser:', err)
+    console.error('Could not fetch prices', err);
   }
 }
 
+// Watch for changes in selectedArea to reset city selection
+watch(selectedArea, () => {
+  selectedCity.value = null;
+});
+
+onMounted(() => {
+  // Fetch prices on initial load
+  void fetchPrices();
+});
+
+// Function to get the display city name
+function getDisplayCity(): string {
+  if (selectedCity.value) {
+    // Find the selected city in cityOptions to get its label
+    const cityOption = filteredCityOptions.value.find(city => city.value === selectedCity.value);
+    return cityOption ? cityOption.label : selectedCity.value;
+  } else {
+    // Return the default city for the selected area
+    return baseCities[selectedArea.value as keyof typeof baseCities];
+  }
+}
+
+// Function to clear all filters and reset to defaults
+function clearFilters() {
+  selectedCity.value = null;
+  startHour.value = null;
+  endHour.value = null;
+  prices.value = [];
+  return fetchPrices();
+}
 </script>
