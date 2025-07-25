@@ -9,10 +9,40 @@
         <q-select v-model="selectedArea" :options="areaOptions" label="Område" class="q-mb-sm" emit-value map-options @update:model-value="fetchPrices" />
         <q-select v-model="selectedCity" :options="filteredCityOptions" label="By (valgfritt)" class="q-mb-sm" emit-value
           map-options :disable="!selectedArea" @update:model-value="fetchPrices" @submit="fetchPrices" />
-        <q-input v-model="date" label="Dato" type="date" class="q-mb-sm" @change="fetchPrices" />
+
+        <!-- Date controls -->
+        <div class="row q-gutter-sm items-end q-mb-sm">
+          <div class="col">
+            <q-input v-model="date" label="Dato" type="date" :max="maxAllowedDate" @change="fetchPrices" />
+          </div>
+          <q-btn
+            flat
+            round
+            icon="chevron_left"
+            color="primary"
+            @click="goToPreviousDay"
+            :title="'Vis i går'"
+          />
+          <q-btn
+            flat
+            round
+            icon="chevron_right"
+            color="primary"
+            @click="goToNextDay"
+            :disable="isNextDayDisabled"
+            :title="isNextDayDisabled ? 'Kan bare se en dag frem' : 'Vis i morgen'"
+          />
+        </div>
+
         <q-input v-model="startHour" label="Starttid (valgfritt)" type="number" class="q-mb-sm" @change="fetchPrices" />
         <q-input v-model="endHour" label="Sluttid (valgfritt)" type="number" class="q-mb-sm" @change="fetchPrices" />
-        <q-btn label="Fjern valgfrie" type="button" color="primary" @click="clearFilters" />
+        <q-btn
+          v-if="hasActiveFilters"
+          label="Fjern valgfrie"
+          type="button"
+          color="primary"
+          @click="clearFilters"
+        />
       </q-form>
 
       <!-- Price Chart -->
@@ -74,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted} from 'vue'
+import { ref, watch, nextTick, onMounted, computed} from 'vue'
 import { api } from 'boot/axios'
 import FooterSection from 'src/components/FooterSection.vue'
 import HeaderSection from 'src/components/HeaderSection.vue'
@@ -106,6 +136,30 @@ const {
 
 // Use chart services
 const { chartCanvas, createChart } = useChartServices()
+
+// Computed property to check if there are active filters
+const hasActiveFilters = computed(() => {
+  return selectedCity.value !== null ||
+         startHour.value !== null ||
+         endHour.value !== null
+})
+
+// Computed property to check if next day button should be disabled
+const isNextDayDisabled = computed(() => {
+  const currentDate = new Date(date.value);
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate());
+
+  // Disable if current date is already tomorrow or later
+  return currentDate >= tomorrow;
+})
+
+// Computed property for maximum allowed date (tomorrow)
+const maxAllowedDate = computed(() => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString().slice(0, 10);
+})
 
 async function fetchPrices() {
   const storedTaxPreference = localStorage.getItem('isTaxIncluded');
@@ -184,5 +238,27 @@ function clearFilters() {
   endHour.value = null;
   prices.value = [];
   return fetchPrices();
+}
+
+// Function to go to previous day
+function goToPreviousDay() {
+  const currentDate = new Date(date.value);
+  currentDate.setDate(currentDate.getDate() - 1);
+  date.value = currentDate.toISOString().slice(0, 10);
+  void fetchPrices();
+}
+
+// Function to go to next day
+function goToNextDay() {
+  const currentDate = new Date(date.value);
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  // Only allow going one day ahead from today
+  if (currentDate < tomorrow) {
+    currentDate.setDate(currentDate.getDate() + 1);
+    date.value = currentDate.toISOString().slice(0, 10);
+    void fetchPrices();
+  }
 }
 </script>
