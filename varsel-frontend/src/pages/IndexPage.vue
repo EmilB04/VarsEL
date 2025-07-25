@@ -6,14 +6,37 @@
     </header>
     <main>
       <q-form @submit="fetchPrices">
-        <q-select v-model="selectedArea" :options="areaOptions" label="Område" class="q-mb-sm" emit-value map-options @update:model-value="fetchPrices" />
-        <q-select v-model="selectedCity" :options="filteredCityOptions" label="By (valgfritt)" class="q-mb-sm" emit-value
-          map-options :disable="!selectedArea" @update:model-value="fetchPrices" @submit="fetchPrices" />
+        <q-select
+          v-model="selectedArea"
+          :options="areaOptions"
+          label="Område"
+          class="q-mb-sm"
+          emit-value
+          map-options
+          @update:model-value="fetchPrices"
+        />
+        <q-select
+          v-model="selectedCity"
+          :options="filteredCityOptions"
+          label="By (valgfritt)"
+          class="q-mb-sm"
+          emit-value
+          map-options
+          :disable="!selectedArea"
+          @update:model-value="fetchPrices"
+          @submit="fetchPrices"
+        />
 
         <!-- Date controls -->
         <div class="row q-gutter-sm items-end q-mb-sm">
           <div class="col">
-            <q-input v-model="date" label="Dato" type="date" :max="maxAllowedDate" @change="fetchPrices" />
+            <q-input
+              v-model="date"
+              label="Dato"
+              type="date"
+              :max="maxAllowedDate"
+              @change="fetchPrices"
+            />
           </div>
           <q-btn
             flat
@@ -34,8 +57,20 @@
           />
         </div>
 
-        <q-input v-model="startHour" label="Starttid (valgfritt)" type="number" class="q-mb-sm" @change="fetchPrices" />
-        <q-input v-model="endHour" label="Sluttid (valgfritt)" type="number" class="q-mb-sm" @change="fetchPrices" />
+        <q-input
+          v-model="startHour"
+          label="Starttid (valgfritt)"
+          type="number"
+          class="q-mb-sm"
+          @change="fetchPrices"
+        />
+        <q-input
+          v-model="endHour"
+          label="Sluttid (valgfritt)"
+          type="number"
+          class="q-mb-sm"
+          @change="fetchPrices"
+        />
         <q-btn
           v-if="hasActiveFilters"
           label="Fjern valgfrie"
@@ -48,8 +83,8 @@
       <!-- Price Chart -->
       <div v-if="prices.length" class="q-mt-lg">
         <h5 class="q-mb-md">Prisutvikling i {{ getDisplayCity() }}</h5>
-        <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
-          <canvas ref="chartCanvas" style="display: block; width: 100%; height: 100%;"></canvas>
+        <div class="chart-container" style="position: relative; height: 400px; width: 100%">
+          <canvas ref="chartCanvas" style="display: block; width: 100%; height: 100%"></canvas>
         </div>
 
         <!-- Price Summary -->
@@ -85,7 +120,9 @@
             <div class="col-md-2 col-sm-6 col-xs-12">
               <q-card class="text-center">
                 <q-card-section>
-                  <div class="text-h6 text-blue">{{ getPriceDifference(prices).toFixed(2) }} kr/kWh</div>
+                  <div class="text-h6 text-blue">
+                    {{ getPriceDifference(prices).toFixed(2) }} kr/kWh
+                  </div>
                   <div class="text-subtitle2">Forskjell</div>
                   <div class="text-caption">Høyeste - Laveste</div>
                 </q-card-section>
@@ -95,7 +132,15 @@
         </div>
       </div>
 
-      <q-table class="q-mt-lg" v-if="prices.length" :rows="prices" :columns="columns" row-key="time_start" flat bordered />
+      <q-table
+        class="q-mt-lg"
+        v-if="prices.length"
+        :rows="prices"
+        :columns="columns"
+        row-key="time_start"
+        flat
+        bordered
+      />
     </main>
   </q-page>
   <footer class="text-center">
@@ -104,22 +149,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, computed} from 'vue'
-import { api } from 'boot/axios'
-import FooterSection from 'src/components/FooterSection.vue'
-import HeaderSection from 'src/components/HeaderSection.vue'
-import NavSection from 'src/components/NavSection.vue'
-import { useTableServices, type Price, baseCities } from 'src/components/Index/TableScript'
-import { useChartServices } from 'src/components/Index/ChartScript'
+import { ref, watch, nextTick, onMounted, computed } from 'vue';
+import { api } from 'boot/axios';
+import FooterSection from 'src/components/FooterSection.vue';
+import HeaderSection from 'src/components/HeaderSection.vue';
+import NavSection from 'src/components/NavSection.vue';
+import { useTableServices, type Price, baseCities } from 'src/components/Index/TableScript';
+import { useChartServices } from 'src/components/Index/ChartScript';
 
 // Reactive state variables
-const selectedArea = ref('NO1')
-const selectedCity = ref<string | null>(null)
-const date = ref(new Date().toISOString().slice(0, 10))
-const startHour = ref<number | null>(null)
-const endHour = ref<number | null>(null)
-const prices = ref<Price[]>([])
-const isTaxIncluded = ref(false)
+const selectedArea = ref('NO1');
+const selectedCity = ref<string | null>(null);
+const date = ref(new Date().toISOString().slice(0, 10));
+const startHour = ref<number | null>(null);
+const endHour = ref<number | null>(null);
+const prices = ref<Price[]>([]);
+const isTaxIncluded = ref(false);
 
 // Use table services
 const {
@@ -131,18 +176,16 @@ const {
   getAvgPrice,
   getPriceDifference,
   getMinPriceTime,
-  getMaxPriceTime
-} = useTableServices(selectedArea)
+  getMaxPriceTime,
+} = useTableServices(selectedArea);
 
 // Use chart services
-const { chartCanvas, createChart } = useChartServices()
+const { chartCanvas, createChart } = useChartServices();
 
 // Computed property to check if there are active filters
 const hasActiveFilters = computed(() => {
-  return selectedCity.value !== null ||
-         startHour.value !== null ||
-         endHour.value !== null
-})
+  return selectedCity.value !== null || startHour.value !== null || endHour.value !== null;
+});
 
 // Computed property to check if next day button should be disabled
 const isNextDayDisabled = computed(() => {
@@ -152,14 +195,14 @@ const isNextDayDisabled = computed(() => {
 
   // Disable if current date is already tomorrow or later
   return currentDate >= tomorrow;
-})
+});
 
 // Computed property for maximum allowed date (tomorrow)
 const maxAllowedDate = computed(() => {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   return tomorrow.toISOString().slice(0, 10);
-})
+});
 
 async function fetchPrices() {
   const storedTaxPreference = localStorage.getItem('isTaxIncluded');
@@ -173,16 +216,14 @@ async function fetchPrices() {
     // Build query parames dynamically with standard values
     const params: Record<string, number> = {
       startHour: startHour.value ?? 0, // Standard 0 if null
-      endHour: endHour.value ?? 24    // Standard 24 if null
+      endHour: endHour.value ?? 24, // Standard 24 if null
     };
 
     // Send GET-call to backend
     const response = await api.get(url, { params });
 
     // If reponse is string (from Java), parse it
-    const json = typeof response.data === 'string'
-      ? JSON.parse(response.data)
-      : response.data;
+    const json = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
 
     // Enrich each object with area, city, and selected date
     const enrichedPrices = json.prices.map((price: Price) => {
@@ -195,7 +236,7 @@ async function fetchPrices() {
         NOK_per_kWh: adjustedPrice,
         area: selectedArea.value,
         city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
-        date: date.value
+        date: date.value,
       };
     });
 
@@ -223,7 +264,7 @@ onMounted(() => {
 function getDisplayCity(): string {
   if (selectedCity.value) {
     // Find the selected city in cityOptions to get its label
-    const cityOption = filteredCityOptions.value.find(city => city.value === selectedCity.value);
+    const cityOption = filteredCityOptions.value.find((city) => city.value === selectedCity.value);
     return cityOption ? cityOption.label : selectedCity.value;
   } else {
     // Return the default city for the selected area
