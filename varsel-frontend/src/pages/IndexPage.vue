@@ -111,6 +111,17 @@
             <div class="col-md-2 col-sm-6 col-xs-12">
               <q-card class="text-center">
                 <q-card-section>
+                  <div class="text-h6 text-purple">
+                    {{ getPriceDifference(prices).toFixed(2) }} kr/kWh
+                  </div>
+                  <div class="text-subtitle2">Forskjell</div>
+                  <div class="text-caption">Høyeste - Laveste</div>
+                </q-card-section>
+              </q-card>
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12">
+              <q-card class="text-center">
+                <q-card-section>
                   <div class="text-h6 text-orange">{{ getAvgPrice(prices).toFixed(2) }} kr/kWh</div>
                   <div class="text-subtitle2">Gjennomsnitt</div>
                   <div class="text-caption">{{ prices.length }} timer</div>
@@ -121,10 +132,10 @@
               <q-card class="text-center">
                 <q-card-section>
                   <div class="text-h6 text-blue">
-                    {{ getPriceDifference(prices).toFixed(2) }} kr/kWh
+                    {{ getCurrentPrice(prices).toFixed(2) }} kr/kWh
                   </div>
-                  <div class="text-subtitle2">Forskjell</div>
-                  <div class="text-caption">Høyeste - Laveste</div>
+                  <div class="text-subtitle2">Nåværende pris</div>
+                    <div class="text-caption">Nå {{ new Date().getHours() }}:00</div>
                 </q-card-section>
               </q-card>
             </div>
@@ -178,6 +189,24 @@ const {
   getMinPriceTime,
   getMaxPriceTime,
 } = useTableServices(selectedArea);
+
+// Function to get current price based on current hour
+function getCurrentPrice(prices: Price[]): number {
+  if (!prices.length) return 0;
+
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentTime = `${currentHour.toString().padStart(2, '0')}:00`;
+
+  // Find price for current hour
+  const currentPriceEntry = prices.find(price => {
+    if (!price.time_start) return false;
+    const priceHour = price.time_start.slice(11, 16); // Extract HH:MM from time_start
+    return priceHour === currentTime;
+  });
+
+  return currentPriceEntry ? currentPriceEntry.NOK_per_kWh : 0;
+}
 
 // Use chart services
 const { chartCanvas, createChart } = useChartServices();
