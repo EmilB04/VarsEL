@@ -111,7 +111,7 @@
             <div class="col-md-2 col-sm-6 col-xs-12">
               <q-card class="text-center">
                 <q-card-section>
-                  <div class="text-h6 text-purple">
+                  <div class="text-h6 text-purple-12">
                     {{ getPriceDifference(prices).toFixed(2) }} kr/kWh
                   </div>
                   <div class="text-subtitle2">Forskjell</div>
@@ -332,3 +332,9 @@ function goToNextDay() {
   }
 }
 </script>
+
+<style scoped>
+.q-card {
+  box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;
+}
+</style>
