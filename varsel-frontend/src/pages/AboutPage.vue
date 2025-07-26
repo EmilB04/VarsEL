@@ -5,7 +5,7 @@
       <h1 class="text-h3 text-center">Om VarsEL</h1>
     </header>
     <main>
-      <div class="row q-gutter-lg">
+      <div class="row q-gutter-lg justify-between">
         <div class="col-md-8 col-sm-12">
           <article class="q-mb-lg">
             <h2 class="text-h4 q-mb-md">🔌 Hva er VarsEL?</h2>
@@ -72,8 +72,8 @@
           </article>
         </div>
 
-        <div class="col-sm-12 col-md-3">
-          <div class="flex row justify-center flex-wrap q-gutter-md">
+        <div class="col-sm-12 col-lg-3">
+          <div class="flex row justify-between flex-wrap q-gutter-md" >
             <q-card class="q-mb-lg" style="flex: 1 1 45%; min-width: 280px;">
               <q-card-section>
                 <h2 class="text-h5 q-mb-md">👨‍💻 Om utvikleren</h2>
@@ -94,12 +94,9 @@
                 </p>
                 <q-btn
                   label="Se på GitHub"
-                  icon="open_in_new"
                   color="primary"
                   href="https://github.com/EmilB04/VarsEL"
                   target="_blank"
-                  no-caps
-                  class="full-width"
                 />
               </q-card-section>
             </q-card>
@@ -121,7 +118,7 @@
                   class="q-mt-sm"
                 />
                 <p class="text-caption q-mt-sm">
-                  Offisiell API for norske strømpriser
+                  En tjeneste fra Beneficial Apps AS
                 </p>
               </q-card-section>
             </q-card>
