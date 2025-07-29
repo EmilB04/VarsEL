@@ -6,30 +6,34 @@
     </header>
     <main>
       <q-form @submit="fetchPrices">
-        <q-select
-          v-model="selectedArea"
-          :options="areaOptions"
-          label="Område"
-          class="q-mb-sm"
-          emit-value
-          map-options
-          @update:model-value="fetchPrices"
-        />
-        <q-select
-          v-model="selectedCity"
-          :options="filteredCityOptions"
-          label="By (valgfritt)"
-          class="q-mb-sm"
-          emit-value
-          map-options
-          :disable="!selectedArea"
-          @update:model-value="fetchPrices"
-          @submit="fetchPrices"
-        />
+        <div class="row q-gutter-sm items-end">
+          <h5 class="col-12 text-h6" style="margin-block: 3rem 0rem;">Velg område for å se strømpriser</h5>
+          <q-select
+            v-model="selectedArea"
+            :options="areaOptions"
+            label="Område"
+            class="q-mb-sm col"
+            emit-value
+            map-options
+            @update:model-value="fetchPrices"
+          />
+          <q-select
+            v-model="selectedCity"
+            :options="filteredCityOptions"
+            label="By (valgfritt)"
+            class="q-mb-sm col"
+            emit-value
+            map-options
+            :disable="!selectedArea"
+            @update:model-value="fetchPrices"
+            @submit="fetchPrices"
+          />
+        </div>
 
         <!-- Date controls -->
-        <div class="row q-gutter-sm items-end q-mb-sm">
-          <div class="col">
+        <div class="row q-gutter-sm items-end">
+          <h5 class="col-12 text-h6" style="margin-block: 3rem 0rem;">Velg datoen du ønsker å se strømpriser for</h5>
+          <div class="col q-mb-md">
             <q-input
               v-model="date"
               label="Dato"
@@ -42,7 +46,8 @@
             flat
             round
             icon="chevron_left"
-            color="primary"
+            :color="$q.dark.isActive ? 'black' : 'white'"
+            style="background-color: var(--q-primary); align-self: center;"
             @click="goToPreviousDay"
             :title="'Vis i går'"
           />
@@ -50,32 +55,56 @@
             flat
             round
             icon="chevron_right"
-            color="primary"
+            :color="$q.dark.isActive ? 'black' : 'white'"
+            style="background-color: var(--q-primary); align-self: center;"
             @click="goToNextDay"
             :disable="isNextDayDisabled"
             :title="isNextDayDisabled ? 'Kan bare se en dag frem' : 'Vis i morgen'"
           />
         </div>
 
-        <q-input
-          v-model="startHour"
-          label="Starttid (valgfritt)"
-          type="number"
-          class="q-mb-sm"
-          @change="fetchPrices"
-        />
-        <q-input
-          v-model="endHour"
-          label="Sluttid (valgfritt)"
-          type="number"
-          class="q-mb-sm"
-          @change="fetchPrices"
-        />
+        <!-- Time controls -->
+        <div class="row q-gutter-md">
+            <h5 class="col-12 text-h6" style="margin-block: 3rem 0rem;">Velg tidspunkt for å se strømpriser i spesifikke tidsrom</h5>
+            <q-select
+              v-model="startHour"
+              :options="
+                [...Array(25).keys()].map((h) => ({
+                  label: `${h.toString().padStart(2, '0')}:00`,
+                  value: h,
+                }))
+              "
+              label="Startklokkeslett (valgfritt)"
+              style="margin-top: 0px;"
+              class="q-mb-sm col"
+              emit-value
+              map-options
+              clearable
+              @update:model-value="fetchPrices"
+            />
+            <q-select
+              v-model="endHour"
+              :options="
+                [...Array(25).keys()].map((h) => ({
+                  label: `${h.toString().padStart(2, '0')}:00`,
+                  value: h,
+                }))
+              "
+              label="Sluttklokkeslett (valgfritt)"
+              style="margin-top: 0px;"
+              class="q-mb-sm col"
+              emit-value
+              map-options
+              clearable
+              @update:model-value="fetchPrices"
+            />
+        </div>
         <q-btn
           v-if="hasActiveFilters"
           label="Fjern valgfrie"
           type="button"
           color="primary"
+          :text-color="$q.dark.isActive ? 'black' : 'white'"
           @click="clearFilters"
         />
       </q-form>
@@ -135,7 +164,7 @@
                     {{ getCurrentPrice(prices).toFixed(2) }} kr/kWh
                   </div>
                   <div class="text-subtitle2">Nåværende pris</div>
-                    <div class="text-caption">Nå {{ new Date().getHours() }}:00</div>
+                  <div class="text-caption">Nå {{ new Date().getHours() }}:00</div>
                 </q-card-section>
               </q-card>
             </div>
@@ -199,7 +228,7 @@ function getCurrentPrice(prices: Price[]): number {
   const currentTime = `${currentHour.toString().padStart(2, '0')}:00`;
 
   // Find price for current hour
-  const currentPriceEntry = prices.find(price => {
+  const currentPriceEntry = prices.find((price) => {
     if (!price.time_start) return false;
     const priceHour = price.time_start.slice(11, 16); // Extract HH:MM from time_start
     return priceHour === currentTime;

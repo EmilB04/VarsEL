@@ -4,7 +4,7 @@
       <li><router-link to="/">VarsEL</router-link></li>
       <div class="flex row items-center">
         <li><router-link to="/">Strømpriser</router-link></li>
-        <span class="nav-separator"></span>
+        <!--<span class="nav-separator"></span> -->
         <li><router-link to="/notifications">Notifikasjoner</router-link></li>
       </div>
       <li><router-link to="/about">Om</router-link></li>
