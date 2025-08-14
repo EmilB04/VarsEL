@@ -1,6 +1,6 @@
 <template>
   <div class="flex column items-center justify-center">
-    <h1 class="text-h3 text-center">VarsEL - Hent strømpriser for ditt område</h1>
+    <h1 class="text-h3 text-center">Hent strømpriser for ditt område</h1>
     <div class="flex row q-mt-md">
       <ColorMode />
       <TaxMode />
