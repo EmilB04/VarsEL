@@ -7,6 +7,11 @@ const routes: RouteRecordRaw[] = [
     children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
   },
   {
+    path: '/history',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('pages/HistoryPage.vue') }],
+  },
+  {
     path: '/notifications',
     component: () => import('layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('pages/NotificationPage.vue') }],
@@ -15,6 +20,11 @@ const routes: RouteRecordRaw[] = [
     path: '/about',
     component: () => import('layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('pages/AboutPage.vue') }],
+  },
+  {
+    path: '/settings',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('pages/SettingsPage.vue') }],
   },
 
   // Always leave this as last one,

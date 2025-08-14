@@ -1,0 +1,344 @@
+<template>
+  <q-page class="q-pa-md">
+    <header>
+      <NavSection />
+    </header>
+    <main>
+      <q-form @submit.prevent="fetchPrices">
+        <div class="row q-gutter-sm items-end">
+          <h5 class="col-12 text-h6" style="margin-block: 3rem 0rem">
+            Velg område for å se strømpriser
+          </h5>
+          <q-select v-model="selectedArea" :options="areaOptions" label="Område" class="q-mb-sm col" emit-value
+            map-options />
+          <q-select v-model="selectedCity" :options="filteredCityOptions" label="By (valgfritt)" class="q-mb-sm col"
+            emit-value map-options :disable="!selectedArea" />
+        </div>
+
+        <!-- Date controls -->
+        <div class="row q-gutter-sm items-end">
+          <h5 class="col-12 text-h6" style="margin-block: 3rem 0rem">
+            Velg datoen du ønsker å se strømpriser for
+          </h5>
+          <div class="col q-mb-md">
+            <q-input v-model="date" label="Dato" type="date" :max="maxAllowedDate" />
+          </div>
+          <q-btn flat round icon="chevron_left" :color="$q.dark.isActive ? 'black' : 'white'"
+            style="background-color: var(--q-primary); align-self: center" @click="goToPreviousDay"
+            :title="'Vis i går'" :disable="!date" />
+          <q-btn flat round icon="chevron_right" :color="$q.dark.isActive ? 'black' : 'white'"
+            style="background-color: var(--q-primary); align-self: center" @click="goToNextDay"
+            :disable="isNextDayDisabled || !date" :title="isNextDayDisabled ? 'Kan bare se en dag frem' : 'Vis i morgen'" />
+        </div>
+
+        <!-- Time controls -->
+        <div class="row q-gutter-md">
+          <h5 class="col-12 text-h6" style="margin-block: 3rem 0rem">
+            Velg tidspunkt for å se strømpriser i spesifikke tidsrom
+          </h5>
+          <q-select v-model="startHour" :options="[...Array(25).keys()].map((h) => ({
+            label: `${h.toString().padStart(2, '0')}:00`,
+            value: h,
+          }))
+            " label="Startklokkeslett (valgfritt)" style="margin-top: 0px" class="q-mb-sm col" emit-value map-options
+            clearable />
+          <q-select v-model="endHour" :options="[...Array(25).keys()].map((h) => ({
+            label: `${h.toString().padStart(2, '0')}:00`,
+            value: h,
+          }))
+            " label="Sluttklokkeslett (valgfritt)" style="margin-top: 0px" class="q-mb-sm col" emit-value map-options
+            clearable />
+        </div>
+
+        <!-- Action buttons -->
+        <div class="row q-gutter-md q-mt-md">
+          <q-btn
+            label="Hent priser"
+            type="submit"
+            color="primary"
+            :text-color="$q.dark.isActive ? 'black' : 'white'"
+            :disable="!selectedArea || !date"
+            icon="search"
+            no-caps
+          />
+          <q-btn
+            v-if="hasActiveFilters"
+            label="Fjern valgfrie"
+            type="button"
+            color="secondary"
+            :text-color="$q.dark.isActive ? 'black' : 'white'"
+            @click="clearFilters"
+            icon="clear"
+            no-caps
+          />
+        </div>
+      </q-form>
+
+      <!-- Price Chart -->
+      <div v-if="prices.length" class="q-mt-lg">
+        <h5 class="q-mb-md">Prisutvikling i {{ getDisplayCity() }}</h5>
+        <div class="chart-container" style="position: relative; height: 400px; width: 100%">
+          <canvas ref="chartCanvas" style="display: block; width: 100%; height: 100%"></canvas>
+        </div>
+
+        <!-- Price Summary -->
+        <div class="q-mt-md">
+          <div class="row q-gutter-md justify-center text-center">
+            <div class="col-md-2 col-sm-6 col-xs-12">
+              <q-card class="text-center" style="box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;">
+                <q-card-section>
+                  <div class="text-h6 text-green">{{ getMinPrice(prices).toFixed(2) }} kr/kWh</div>
+                  <div class="text-subtitle2">Laveste pris</div>
+                  <div class="text-caption">{{ getMinPriceTime(prices) }}</div>
+                </q-card-section>
+              </q-card>
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12">
+              <q-card class="text-center" style="box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;">
+                <q-card-section>
+                  <div class="text-h6 text-red">{{ getMaxPrice(prices).toFixed(2) }} kr/kWh</div>
+                  <div class="text-subtitle2">Høyeste pris</div>
+                  <div class="text-caption">{{ getMaxPriceTime(prices) }}</div>
+                </q-card-section>
+              </q-card>
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12">
+              <q-card class="text-center" style="box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;">
+                <q-card-section>
+                  <div class="text-h6 text-purple-12">
+                    {{ getPriceDifference(prices).toFixed(2) }} kr/kWh
+                  </div>
+                  <div class="text-subtitle2">Forskjell</div>
+                  <div class="text-caption">Høyeste - Laveste</div>
+                </q-card-section>
+              </q-card>
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12">
+              <q-card class="text-center" style="box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;">
+                <q-card-section>
+                  <div class="text-h6 text-orange">{{ getAvgPrice(prices).toFixed(2) }} kr/kWh</div>
+                  <div class="text-subtitle2">Gjennomsnitt</div>
+                  <div class="text-caption">{{ prices.length }} timer</div>
+                </q-card-section>
+              </q-card>
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12">
+              <q-card class="text-center" style="box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;">
+                <q-card-section>
+                  <div class="text-h6 text-blue">
+                    {{ getCurrentPrice(prices).toFixed(2) }} kr/kWh
+                  </div>
+                  <div class="text-subtitle2">Nåværende pris</div>
+                  <div class="text-caption">Nå {{ new Date().getHours() }}:00</div>
+                </q-card-section>
+              </q-card>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <q-table class="q-mt-lg" v-if="prices.length" :rows="prices" :columns="columns" row-key="time_start" flat
+        bordered />
+    </main>
+  </q-page>
+  <footer class="text-center">
+    <FooterSection />
+  </footer>
+</template>
+
+<script setup lang="ts">
+import { ref, watch, nextTick, computed } from 'vue';
+import { api } from 'boot/axios';
+import FooterSection from 'src/components/FooterSection.vue';
+import NavSection from 'src/components/NavSection.vue';
+import { useTableServices, type Price, baseCities } from 'src/components/Index/TableScript';
+import { useChartServices } from 'src/components/Index/ChartScript';
+
+// Reactive state variables - all start empty
+const selectedArea = ref<string | null>(null);
+const selectedCity = ref<string | null>(null);
+const date = ref<string>('');
+const startHour = ref<number | null>(null);
+const endHour = ref<number | null>(null);
+const prices = ref<Price[]>([]);
+const isTaxIncluded = ref(false);
+
+// Use table services with a computed ref that provides a default value
+const selectedAreaForServices = computed(() => selectedArea.value || 'NO1');
+const {
+  areaOptions,
+  columns,
+  filteredCityOptions,
+  getMinPrice,
+  getMaxPrice,
+  getAvgPrice,
+  getPriceDifference,
+  getMinPriceTime,
+  getMaxPriceTime,
+} = useTableServices(selectedAreaForServices);
+
+// Function to get current price based on current hour
+function getCurrentPrice(prices: Price[]): number {
+  if (!prices.length) return 0;
+
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentTime = `${currentHour.toString().padStart(2, '0')}:00`;
+
+  // Find price for current hour
+  const currentPriceEntry = prices.find((price) => {
+    if (!price.time_start) return false;
+    const priceHour = price.time_start.slice(11, 16); // Extract HH:MM from time_start
+    return priceHour === currentTime;
+  });
+
+  return currentPriceEntry ? currentPriceEntry.NOK_per_kWh : 0;
+}
+
+// Use chart services
+const { chartCanvas, createChart } = useChartServices();
+
+// Computed property to check if there are active filters
+const hasActiveFilters = computed(() => {
+  return selectedCity.value !== null || startHour.value !== null || endHour.value !== null;
+});
+
+// Computed property to check if next day button should be disabled
+const isNextDayDisabled = computed(() => {
+  if (!date.value) return true;
+
+  const currentDate = new Date(date.value);
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate());
+
+  // Disable if current date is already tomorrow or later
+  return currentDate >= tomorrow;
+});
+
+// Computed property for maximum allowed date (tomorrow)
+const maxAllowedDate = computed(() => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString().slice(0, 10);
+});
+
+async function fetchPrices() {
+  // Validate required fields
+  if (!selectedArea.value || !date.value) {
+    console.error('Area and date are required');
+    return;
+  }
+
+  const storedTaxPreference = localStorage.getItem('isTaxIncluded');
+  isTaxIncluded.value = storedTaxPreference === 'true';
+
+  try {
+    // Use city if chosen, else use area
+    const regionParam = selectedCity.value || selectedArea.value;
+    const url = `/prices/${regionParam}/${date.value}`;
+
+    // Build query parames dynamically with standard values
+    const params: Record<string, number> = {
+      startHour: startHour.value ?? 0, // Standard 0 if null
+      endHour: endHour.value ?? 24, // Standard 24 if null
+    };
+
+    // Send GET-call to backend
+    const response = await api.get(url, { params });
+
+    // If reponse is string (from Java), parse it
+    const json = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+
+    // Enrich each object with area, city, and selected date
+    const enrichedPrices = json.prices.map((price: Price) => {
+      const adjustedPrice = isTaxIncluded.value
+        ? price.NOK_per_kWh * 1.25 // Apply tax if included
+        : price.NOK_per_kWh;
+
+      return {
+        ...price,
+        NOK_per_kWh: adjustedPrice,
+        area: selectedArea.value,
+        city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
+        date: date.value,
+      };
+    });
+
+    prices.value = enrichedPrices;
+
+    // Create chart after data is loaded and DOM is updated
+    await nextTick();
+    createChart(prices.value);
+  } catch (err) {
+    console.error('Could not fetch prices', err);
+  }
+}
+
+// Watch for changes in selectedArea to reset city selection
+watch(selectedArea, () => {
+  selectedCity.value = null;
+});
+
+// No auto-fetch on mount - user must manually fetch prices
+
+// Function to get the display city name
+function getDisplayCity(): string {
+  if (selectedCity.value) {
+    // Find the selected city in cityOptions to get its label
+    const cityOption = filteredCityOptions.value.find((city) => city.value === selectedCity.value);
+    return cityOption ? cityOption.label : selectedCity.value;
+  } else {
+    // Return the default city for the selected area
+    return baseCities[selectedArea.value as keyof typeof baseCities];
+  }
+}
+
+// Function to clear all filters and reset to defaults
+function clearFilters() {
+  selectedCity.value = null;
+  startHour.value = null;
+  endHour.value = null;
+  prices.value = [];
+  // Don't auto-fetch after clearing filters
+}
+
+// Function to go to previous day
+function goToPreviousDay() {
+  if (!date.value) {
+    // If no date selected, use today
+    date.value = new Date().toISOString().slice(0, 10);
+  }
+
+  const currentDate = new Date(date.value);
+  currentDate.setDate(currentDate.getDate() - 1);
+  date.value = currentDate.toISOString().slice(0, 10);
+
+  // Auto-fetch when using navigation buttons if area is selected
+  if (selectedArea.value) {
+    void fetchPrices();
+  }
+}
+
+// Function to go to next day
+function goToNextDay() {
+  if (!date.value) {
+    // If no date selected, use today
+    date.value = new Date().toISOString().slice(0, 10);
+  }
+
+  const currentDate = new Date(date.value);
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  // Only allow going one day ahead from today
+  if (currentDate < tomorrow) {
+    currentDate.setDate(currentDate.getDate() + 1);
+    date.value = currentDate.toISOString().slice(0, 10);
+
+    // Auto-fetch when using navigation buttons if area is selected
+    if (selectedArea.value) {
+      void fetchPrices();
+    }
+  }
+}
+</script>
