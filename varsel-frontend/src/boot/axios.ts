@@ -10,7 +10,8 @@ declare module 'vue' {
 
 // Use environment variable from Vite
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
+  baseURL: import.meta.env.VITE_API_URL
+  // baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
 })
 
 export default boot(({ app }) => {
