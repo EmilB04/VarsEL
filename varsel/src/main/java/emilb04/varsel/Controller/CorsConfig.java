@@ -14,7 +14,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost", "http://localhost:9000")
+                        .allowedOrigins("http://localhost", "http://localhost:9000", "https://varsel.pages.dev")
                         .allowedMethods("*");
             }
         };
