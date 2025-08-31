@@ -1,4 +1,8 @@
+
 # VarsEL
+
+## Live Demo
+VarsEL can be seen at: [https://varsel.pages.dev/](https://varsel.pages.dev/)
 
 VarsEL is a private project designed to fetch and display electricity prices from an API. It consists of a backend service built with Spring Boot and a frontend application developed using Quasar Framework.
 
@@ -14,7 +18,28 @@ VarsEL is a private project designed to fetch and display electricity prices fro
 
 ## Start Application
 
-### Option 1: Normal Localhost Setup
+### Option 1: Quick Start (Recommended)
+From the project root directory, you can start both frontend and backend with a single command:
+
+```bash
+npm install
+npm run dev
+```
+
+This will start both services simultaneously:
+- Backend server at `http://localhost:8080`
+- Frontend development server at `http://localhost:9000`
+
+#### Available npm scripts:
+- `npm run dev` or `npm start` - Start both frontend and backend
+- `npm run frontend` - Start only the frontend
+- `npm run backend` - Start only the backend
+- `npm run build` - Build both frontend and backend
+- `npm run install:all` - Install dependencies for both projects
+- `npm run test` - Run tests for both projects
+- `npm run clean` - Clean build artifacts for both projects
+
+### Option 2: Manual Setup
 #### Start Frontend
 Navigate to the `varsel-frontend` directory and run the following command:
 
@@ -42,7 +67,7 @@ mvn spring-boot:run
 
 This will start the backend server at `http://localhost:8080`.
 
-### Option 2: Using Docker
+### Option 3: Using Docker
 Navigate to the project root directory and run the following command:
 
 ```bash

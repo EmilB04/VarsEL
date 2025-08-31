@@ -1,0 +1,32 @@
+{
+  "name": "varsel-app",
+  "version": "2.0.0",
+  "description": "VarsEL - Electricity Price Monitoring Application",
+  "author": "Emil Berglund <emil.berglund@live.no>",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "start": "npm run dev",
+    "backend": "cd varsel && mvn spring-boot:run",
+    "frontend": "cd varsel-frontend && npm run dev",
+    "build": "concurrently \"npm run build:backend\" \"npm run build:frontend\"",
+    "build:backend": "cd varsel && mvn clean package",
+    "build:frontend": "cd varsel-frontend && npm run build",
+    "install:all": "npm run install:frontend && npm run install:backend",
+    "install:frontend": "cd varsel-frontend && npm install",
+    "install:backend": "echo 'Backend dependencies managed by Maven'",
+    "clean": "concurrently \"npm run clean:backend\" \"npm run clean:frontend\"",
+    "clean:backend": "cd varsel && mvn clean",
+    "clean:frontend": "cd varsel-frontend && rm -rf dist node_modules",
+    "test": "concurrently \"npm run test:backend\" \"npm run test:frontend\"",
+    "test:backend": "cd varsel && mvn test",
+    "test:frontend": "cd varsel-frontend && npm run test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

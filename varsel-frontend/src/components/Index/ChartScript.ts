@@ -118,7 +118,19 @@ export function useChartServices() {
             },
             tooltip: {
               callbacks: {
-                label: function(context) {
+                title: function(context) { // Custom tooltip to show time range for each hour
+                  const hourLabel = context[0]?.label;
+                  if (!hourLabel) return '';
+
+                  const hourPart = hourLabel.split(':')[0];
+                  if (!hourPart) return '';
+
+                  const hour = parseInt(hourPart);
+                  const nextHour = (hour + 1) % 24;
+
+                  return `${hour.toString().padStart(2, '0')}:00 - ${nextHour.toString().padStart(2, '0')}:00`;
+                },
+                label: function(context) { // Custom tooltip to show price with two decimal places and highlight min/max/current
                   const value = context.parsed.y.toFixed(2);
                   let label = `Pris: ${value} kr/kWh`;
 
