@@ -1,4 +1,8 @@
+
 # VarsEL
+
+## Live Demo
+VarsEL can be seen at: [https://varsel.pages.dev/](https://varsel.pages.dev/)
 
 VarsEL is a private project designed to fetch and display electricity prices from an API. It consists of a backend service built with Spring Boot and a frontend application developed using Quasar Framework.
 
