@@ -18,7 +18,7 @@
       <div v-if="prices.length" class="q-mt-lg">
         <h5 class="q-mb-md">Prisutvikling i dag - {{ getDisplayCity() }}</h5>
         <div class="chart-container" style="position: relative; height: 400px; width: 100%">
-          <canvas ref="chartCanvas" style="display: block; width: 100%; height: 100%"></canvas>
+          <canvas ref="localCanvasRef" style="display: block; width: 100%; height: 100%"></canvas>
         </div>
 
         <!-- Price Summary -->
@@ -98,6 +98,15 @@
         </div>
       </div>
 
+      <!-- Loading or Error Banner -->
+      <div v-if="isLoading" class="q-mt-lg">Laster priser...</div>
+      <div v-if="hasError" class="q-mt-lg q-pa-md bg-yellow-2">
+        <strong>⚠️ Note</strong>
+        <div>Hvis backend-tjenesten ikke kjører, kan du starte den manuelt for å gi den en jump-start 😊:</div>
+        <div><a href="https://varsel-hari.onrender.com/api/prices/" target="_blank">https://varsel-hari.onrender.com/api/prices/</a></div>
+        <div class="q-mt-sm"><q-btn label="Prøv igjen" color="primary" @click="fetchTodaysPrices" /></div>
+      </div>
+
       <!-- Simple table showing today's prices -->
       <q-table
         class="q-mt-lg"
@@ -134,6 +143,8 @@ const selectedArea = ref('NO1');
 const selectedCity = ref<string | null>(null);
 const prices = ref<Price[]>([]);
 const isTaxIncluded = ref(false);
+const isLoading = ref(false);
+const hasError = ref(false);
 
 // Use table services
 const {
@@ -175,6 +186,7 @@ function getCurrentPrice(prices: Price[]): number {
 
 // Use chart services
 const { chartCanvas, createChart } = useChartServices();
+const localCanvasRef = ref<HTMLCanvasElement | null>(null);
 
 // Function to fetch and set color mode from localStorage
 function initializeColorMode() {
@@ -199,6 +211,8 @@ async function fetchTodaysPrices() {
   isTaxIncluded.value = storedTaxPreference === 'true';
 
   try {
+    isLoading.value = true;
+    hasError.value = false;
     // Always use today's date
     const today = new Date().toISOString().slice(0, 10);
 
@@ -218,6 +232,15 @@ async function fetchTodaysPrices() {
     // If response is string (from Java), parse it
     const json = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
 
+    // Validate that the backend returned a prices array
+    if (!json || !Array.isArray(json.prices) || json.prices.length === 0) {
+      console.warn('API returned no price data or invalid format', json);
+      hasError.value = true;
+      prices.value = [];
+      isLoading.value = false;
+      return;
+    }
+
     // Enrich each object with area, city, and today's date
     const enrichedPrices = json.prices.map((price: Price) => {
       const adjustedPrice = isTaxIncluded.value
@@ -235,11 +258,21 @@ async function fetchTodaysPrices() {
 
     prices.value = enrichedPrices;
 
-    // Create chart after data is loaded and DOM is updated
+    // Ensure DOM is updated and canvas ref is available
     await nextTick();
-    createChart(prices.value);
+
+    // If the composable's chartCanvas is not bound, prefer the local canvas ref
+    const canvasToUse = localCanvasRef.value ?? chartCanvas.value;
+    if (!canvasToUse) {
+      console.error('Chart creation failed - canvas or data missing');
+    } else {
+      createChart(canvasToUse, prices.value);
+    }
+    isLoading.value = false;
   } catch (err) {
     console.error('Could not fetch today\'s prices', err);
+    hasError.value = true;
+    isLoading.value = false;
   }
 }
 

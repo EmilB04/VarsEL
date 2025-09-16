@@ -268,7 +268,7 @@ async function fetchPrices() {
 
     // Create chart after data is loaded and DOM is updated
     await nextTick();
-    createChart(prices.value);
+    createChart(chartCanvas.value, prices.value);
   } catch (err) {
     console.error('Could not fetch prices', err);
   }
