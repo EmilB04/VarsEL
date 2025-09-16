@@ -33,9 +33,9 @@ export function useChartServices() {
   const chartCanvas = ref<HTMLCanvasElement | null>(null)
   let chartInstance: ChartJS | null = null
 
-  // Function to create the price chart
-  function createChart(prices: Price[]) {
-    if (!chartCanvas.value || prices.length === 0) {
+  // Function to create the price chart. Accept an explicit canvas element
+  function createChart(canvasEl: HTMLCanvasElement | null, prices: Price[]) {
+    if (!canvasEl || prices.length === 0) {
       return;
     }
 
@@ -44,7 +44,7 @@ export function useChartServices() {
       chartInstance.destroy();
     }
 
-    const ctx = chartCanvas.value.getContext('2d');
+    const ctx = canvasEl.getContext('2d');
     if (!ctx) {
       return;
     }
