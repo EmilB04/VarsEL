@@ -1,105 +1,150 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="modern-page q-pa-md">
     <header>
       <NavSection />
-      <h1 class="text-h3 text-center">Få notifikasjoner ved ønsket strømpris</h1>
     </header>
 
     <main>
-      <div class="row q-gutter-lg justify-center">
-        <!-- Price Alert Card -->
-        <div class="col-md-5 col-sm-12">
-          <q-card class="q-pa-md">
+      <div class="hero-section q-mb-xl">
+        <h1 class="text-h4 q-mb-md">Smarte prisvarsler</h1>
+        <p class="text-subtitle1 text-grey-7">Få beskjed når strømmen er billig eller når prisen endrer seg</p>
+      </div>
+
+      <div class="row q-gutter-xl justify-center q-mb-xl">
+        <div class="col-12 col-md-5">
+          <q-card class="alert-setup-card glass-card">
             <q-card-section>
-              <div class="text-h6 q-mb-md">
-                <q-icon name="notifications" class="q-mr-sm" />
-                Prisvarsel
+              <div class="card-header q-mb-md">
+                <div class="icon-wrapper primary-icon">
+                  <q-icon name="notifications_active" size="lg" />
+                </div>
+                <div class="q-mb-lg">
+                  <h3 class="text-h6 q-mb-xs">Prisvarsel</h3>
+                  <p class="text-body2 text-grey-7">Få varsel når strømprisen når en bestemt verdi</p>
+                </div>
               </div>
-              <p class="text-body2 text-grey-7 q-mb-md">
-                Få varsel når strømprisen når en bestemt verdi
-              </p>
 
               <q-form @submit="savePriceAlert" class="q-gutter-md">
-                <q-select v-model="priceAlert.area" :options="areaOptions" label="Område" emit-value map-options
-                  required />
+                <q-select v-model="priceAlert.area" :options="areaOptions" label="Område" emit-value map-options filled
+                  rounded standout required>
+                  <template v-slot:prepend>
+                    <q-icon name="location_on" />
+                  </template>
+                </q-select>
 
                 <q-select v-model="priceAlert.city" :options="filteredCityOptions" label="By (valgfritt)" emit-value
-                  map-options clearable />
+                  map-options clearable filled rounded standout>
+                  <template v-slot:prepend>
+                    <q-icon name="apartment" />
+                  </template>
+                </q-select>
 
                 <q-input v-model.number="priceAlert.targetPrice" type="number" step="0.01" label="Ønsket pris (kr/kWh)"
-                  suffix="kr/kWh" required />
+                  suffix="kr/kWh" filled rounded standout required>
+                  <template v-slot:prepend>
+                    <q-icon name="payments" />
+                  </template>
+                </q-input>
 
                 <q-select v-model="priceAlert.condition" :options="conditionOptions" label="Varsel når prisen er"
-                  emit-value map-options required />
+                  emit-value map-options filled rounded standout required>
+                  <template v-slot:prepend>
+                    <q-icon name="compare_arrows" />
+                  </template>
+                </q-select>
 
-                <div class="row items-center">
-                  <q-toggle v-model="priceAlert.enabled" label="Aktiver prisvarsel" color="primary" />
+                <div class="toggle-wrapper">
+                  <q-toggle v-model="priceAlert.enabled" label="Aktiver prisvarsel" color="primary" size="lg" />
                 </div>
 
-                <q-btn label="Lagre prisvarsel" type="submit" color="primary" icon="save" class="full-width" />
+                <q-btn label="Lagre prisvarsel" type="submit" color="primary" icon="save" class="half-width" unelevated
+                  rounded size="md" no-caps />
               </q-form>
             </q-card-section>
           </q-card>
         </div>
 
-        <!-- Cheapest Hour Alert Card -->
-        <div class="col-md-5 col-sm-12">
-          <q-card class="q-pa-md">
+        <div class="col-12 col-md-5">
+          <q-card class="alert-setup-card glass-card">
             <q-card-section>
-              <div class="text-h6 q-mb-md">
-                <q-icon name="schedule" class="q-mr-sm" />
-                Billigste time-varsel
+              <div class="card-header q-mb-md">
+                <div class="icon-wrapper secondary-icon">
+                  <q-icon name="schedule" size="lg" />
+                </div>
+                <div class="q-mb-lg">
+                  <h3 class="text-h6 q-mb-xs">Billigste time-varsel</h3>
+                  <p class="text-body2 text-grey-7">Få varsel når strømmen er billigst i løpet av dagen</p>
+                </div>
               </div>
-              <p class="text-body2 text-grey-7 q-mb-md">
-                Få varsel når strømmen er billigst i løpet av dagen
-              </p>
 
               <q-form @submit="saveCheapestAlert" class="q-gutter-md">
                 <q-select v-model="cheapestAlert.area" :options="areaOptions" label="Område" emit-value map-options
-                  required />
+                  filled rounded standout required>
+                  <template v-slot:prepend>
+                    <q-icon name="location_on" />
+                  </template>
+                </q-select>
 
                 <q-select v-model="cheapestAlert.city" :options="filteredCheapestCityOptions" label="By (valgfritt)"
-                  emit-value map-options clearable />
+                  emit-value map-options clearable filled rounded standout>
+                  <template v-slot:prepend>
+                    <q-icon name="apartment" />
+                  </template>
+                </q-select>
 
                 <q-select v-model="cheapestAlert.notificationTime" :options="timeOptions" label="Tidspunkt for varsel"
-                  emit-value map-options required />
+                  emit-value map-options filled rounded standout required>
+                  <template v-slot:prepend>
+                    <q-icon name="access_time" />
+                  </template>
+                </q-select>
 
-                <div class="row items-center">
-                  <q-toggle v-model="cheapestAlert.enabled" label="Aktiver billigste time-varsel" color="primary" />
+                <div class="toggle-wrapper">
+                  <q-toggle v-model="cheapestAlert.enabled" label="Aktiver billigste time-varsel" color="primary"
+                    size="lg" />
                 </div>
 
                 <q-btn label="Lagre billigste time-varsel" type="submit" color="secondary" icon="save"
-                  class="full-width" />
+                  class="half-width" rounded size="md" no-caps/>
               </q-form>
             </q-card-section>
           </q-card>
         </div>
       </div>
 
-      <!-- Active Notifications Section -->
-      <div class="q-mt-xl">
-        <h4 class="text-h5 q-mb-md text-center">Aktive varsler</h4>
+      <div class="active-alerts-section">
+        <h2 class="text-h5 q-mb-lg text-center">
+          <q-icon name="notifications" class="q-mr-sm" />
+          Aktive varsler
+        </h2>
 
-        <div class="row q-gutter-md justify-center">
-          <!-- Price Alerts -->
-          <div class="col-md-4 col-sm-12 d-flex flex-column" v-if="savedPriceAlerts.length > 0">
-            <q-card class="flex-grow-1">
+        <div class="row q-gutter-lg justify-center">
+          <div class="col-12 col-md-5" v-if="savedPriceAlerts.length > 0">
+            <q-card class="active-alerts-card glass-card">
               <q-card-section>
-                <div class="text-h6 q-mb-md">Prisvarsler</div>
-                <q-list separator>
-                  <q-item v-for="(alert, index) in savedPriceAlerts" :key="index">
+                <div class="card-title q-mb-md">
+                  <q-icon name="notifications_active" size="md" color="primary" />
+                  <h3 class="text-h6">Prisvarsler</h3>
+                </div>
+                <q-list class="alerts-list">
+                  <q-item v-for="(alert, index) in savedPriceAlerts" :key="index" class="alert-item">
                     <q-item-section>
-                      <q-item-label>
+                      <q-item-label class="alert-location">
+                        <q-icon name="place" size="xs" class="q-mr-xs" />
                         {{ getDisplayLocation(alert.area, alert.city) }}
                       </q-item-label>
-                      <q-item-label caption>
+                      <q-item-label caption class="alert-details">
+                        <q-icon name="trending_flat" size="xs" class="q-mr-xs" />
                         Varsel når prisen er {{ alert.condition }} {{ alert.targetPrice }} kr/kWh
                       </q-item-label>
                     </q-item-section>
-                    <q-item-section side>
-                      <div class="row items-center q-gutter-sm">
-                        <q-toggle v-model="alert.enabled" @update:model-value="updatePriceAlert(index)" />
-                        <q-btn flat round icon="delete" color="negative" size="sm" @click="deletePriceAlert(index)" />
+                    <q-item-section side class="alert-controls">
+                      <div class="row items-center q-gutter-sm no-wrap">
+                        <q-toggle v-model="alert.enabled" @update:model-value="updatePriceAlert(index)" color="primary"
+                          dense />
+                        <q-btn flat round icon="delete" color="negative" size="sm" @click="deletePriceAlert(index)">
+                          <q-tooltip>Slett varsel</q-tooltip>
+                        </q-btn>
                       </div>
                     </q-item-section>
                   </q-item>
@@ -108,26 +153,32 @@
             </q-card>
           </div>
 
-          <!-- Cheapest Hour Alerts -->
-          <div class="col-md-4 col-sm-12 d-flex flex-column" v-if="savedCheapestAlerts.length > 0">
-            <q-card class="flex-grow-1">
+          <div class="col-12 col-md-5" v-if="savedCheapestAlerts.length > 0">
+            <q-card class="active-alerts-card glass-card">
               <q-card-section>
-                <div class="text-h6 q-mb-md">Billigste time-varsler</div>
-                <q-list separator>
-                  <q-item v-for="(alert, index) in savedCheapestAlerts" :key="index">
+                <div class="card-title q-mb-md">
+                  <q-icon name="schedule" size="md" color="secondary" />
+                  <h3 class="text-h6">Billigste time-varsler</h3>
+                </div>
+                <q-list class="alerts-list">
+                  <q-item v-for="(alert, index) in savedCheapestAlerts" :key="index" class="alert-item">
                     <q-item-section>
-                      <q-item-label>
+                      <q-item-label class="alert-location">
+                        <q-icon name="place" size="xs" class="q-mr-xs" />
                         {{ getDisplayLocation(alert.area, alert.city) }}
                       </q-item-label>
-                      <q-item-label caption>
+                      <q-item-label caption class="alert-details">
+                        <q-icon name="access_time" size="xs" class="q-mr-xs" />
                         Daglig varsel kl. {{ alert.notificationTime }}
                       </q-item-label>
                     </q-item-section>
-                    <q-item-section side>
-                      <div class="row items-center q-gutter-sm">
-                        <q-toggle v-model="alert.enabled" @update:model-value="updateCheapestAlert(index)" />
-                        <q-btn flat round icon="delete" color="negative" size="sm"
-                          @click="deleteCheapestAlert(index)" />
+                    <q-item-section side class="alert-controls">
+                      <div class="row items-center q-gutter-sm no-wrap">
+                        <q-toggle v-model="alert.enabled" @update:model-value="updateCheapestAlert(index)"
+                          color="primary" dense />
+                        <q-btn flat round icon="delete" color="negative" size="sm" @click="deleteCheapestAlert(index)">
+                          <q-tooltip>Slett varsel</q-tooltip>
+                        </q-btn>
                       </div>
                     </q-item-section>
                   </q-item>
@@ -137,21 +188,192 @@
           </div>
         </div>
 
-        <!-- No Alerts Message -->
-        <div v-if="savedPriceAlerts.length === 0 && savedCheapestAlerts.length === 0" class="text-center q-pa-xl">
-          <q-icon name="notifications_off" size="4rem" class="text-grey-5" />
-          <p class="text-h6 text-grey-5 q-mt-md">Ingen aktive varsler</p>
-          <p class="text-body2 text-grey-6">Opprett ditt første varsel ovenfor</p>
+        <div v-if="savedPriceAlerts.length === 0 && savedCheapestAlerts.length === 0" class="no-alerts-message">
+          <q-card class="glass-card text-center">
+            <q-card-section class="q-pa-xl">
+              <q-icon name="notifications_off" size="80px" class="text-grey-5 q-mb-md" />
+              <h3 class="text-h5 text-grey-5 q-mb-sm">Ingen aktive varsler</h3>
+              <p class="text-body2 text-grey-6">Opprett ditt første varsel ovenfor for å komme i gang</p>
+            </q-card-section>
+          </q-card>
         </div>
       </div>
-
     </main>
 
+    <footer class="q-mt-xl q-pb-lg">
+      <FooterSection />
+    </footer>
   </q-page>
-  <footer class="text-center">
-    <FooterSection />
-  </footer>
 </template>
+
+<style lang="scss" scoped>
+.modern-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.hero-section {
+  text-align: center;
+  padding: 2rem 0;
+
+  .text-h4 {
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.alert-setup-card {
+  height: 100%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+
+  .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    flex-shrink: 0;
+
+    &.primary-icon {
+      background: #00D9C0;
+      color: white;
+    }
+
+    &.secondary-icon {
+      background: #6366F1;
+      color: white;
+    }
+  }
+
+  h3 {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.toggle-wrapper {
+  padding: 0.5rem 0;
+}
+
+.active-alerts-section {
+  margin-top: 4rem;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+}
+
+.active-alerts-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    h3 {
+      margin: 0;
+      font-weight: 600;
+    }
+  }
+
+  .alerts-list {
+    .alert-item {
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+      background: rgba(0, 0, 0, 0.02);
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(0, 217, 192, 0.08);
+      }
+
+      .alert-location {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .alert-details {
+        display: flex;
+        align-items: center;
+        font-size: 0.875rem;
+        opacity: 0.8;
+      }
+
+      .alert-controls {
+        margin-left: 1rem;
+      }
+    }
+  }
+}
+
+.body--dark {
+  .alerts-list .alert-item {
+    background: rgba(255, 255, 255, 0.05);
+
+    &:hover {
+      background: rgba(0, 217, 192, 0.1);
+    }
+  }
+}
+
+.no-alerts-message {
+  max-width: 600px;
+  margin: 2rem auto 0;
+
+  .q-icon {
+    opacity: 0.3;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 1rem 0;
+
+    .text-h4 {
+      font-size: 1.75rem;
+    }
+  }
+
+  .alert-setup-card .card-header {
+    flex-direction: column;
+    text-align: center;
+
+    .icon-wrapper {
+      margin: 0 auto;
+    }
+  }
+
+  .active-alerts-card .alerts-list .alert-item {
+    flex-direction: column;
+    gap: 1rem;
+
+    .alert-controls {
+      margin-left: 0;
+      align-self: stretch;
+      justify-content: space-between;
+    }
+  }
+}
+</style>
 
 
 <script setup lang="ts">
@@ -426,7 +648,6 @@ onMounted(() => {
 }
 
 .q-card .text-h6 {
-  color: var(--q-primary);
   font-weight: 600;
 }
 

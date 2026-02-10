@@ -1,135 +1,274 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="modern-page q-pa-md">
     <header>
       <NavSection />
     </header>
     <main>
+      <div class="hero-section q-mb-xl">
+        <h1 class="text-h4 q-mb-md">Prishistorikk</h1>
+        <p class="text-subtitle1 text-grey-7">Utforsk og analyser tidligere strømpriser</p>
+      </div>
+
       <q-form @submit.prevent="fetchPrices">
-        <div class="row q-gutter-sm items-end">
-          <h5 class="col-12 text-h6" style="margin-block: 3rem 0rem">
-            Velg område for å se strømpriser
-          </h5>
-          <q-select v-model="selectedArea" :options="areaOptions" label="Område" class="q-mb-sm col" emit-value
-            map-options />
-          <q-select v-model="selectedCity" :options="filteredCityOptions" label="By (valgfritt)" class="q-mb-sm col"
-            emit-value map-options :disable="!selectedArea" />
-        </div>
+        <div class="selector-container glass-card q-pa-lg q-mb-lg">
+          <h3 class="text-h6 q-mb-md">
+            <q-icon name="location_on" class="q-mr-sm" />
+            Velg område
+          </h3>
+          <div class="row q-gutter-md">
+            <q-select
+              v-model="selectedArea"
+              :options="areaOptions"
+              label="Område"
+              class="col-12 col-md"
+              emit-value
+              map-options
+              filled
+              rounded
+              standout
+            >
+              <template v-slot:prepend>
+                <q-icon name="map" />
+              </template>
+            </q-select>
 
-        <!-- Date controls -->
-        <div class="row q-gutter-sm items-end">
-          <h5 class="col-12 text-h6" style="margin-block: 3rem 0rem">
-            Velg datoen du ønsker å se strømpriser for
-          </h5>
-          <div class="col q-mb-md">
-            <q-input v-model="date" label="Dato" type="date" :max="maxAllowedDate" />
+            <q-select
+              v-model="selectedCity"
+              :options="filteredCityOptions"
+              label="By (valgfritt)"
+              class="col-12 col-md"
+              emit-value
+              map-options
+              :disable="!selectedArea"
+              filled
+              rounded
+              standout
+            >
+              <template v-slot:prepend>
+                <q-icon name="apartment" />
+              </template>
+            </q-select>
           </div>
-          <q-btn flat round icon="chevron_left" :color="$q.dark.isActive ? 'black' : 'white'"
-            style="background-color: var(--q-primary); align-self: center" @click="goToPreviousDay"
-            :title="'Vis i går'" :disable="!date" />
-          <q-btn flat round icon="chevron_right" :color="$q.dark.isActive ? 'black' : 'white'"
-            style="background-color: var(--q-primary); align-self: center" @click="goToNextDay"
-            :disable="isNextDayDisabled || !date" :title="isNextDayDisabled ? 'Kan bare se en dag frem' : 'Vis i morgen'" />
         </div>
 
-        <!-- Time controls -->
-        <div class="row q-gutter-md">
-          <h5 class="col-12 text-h6" style="margin-block: 3rem 0rem">
-            Velg tidspunkt for å se strømpriser i spesifikke tidsrom
-          </h5>
-          <q-select v-model="startHour" :options="[...Array(25).keys()].map((h) => ({
-            label: `${h.toString().padStart(2, '0')}:00`,
-            value: h,
-          }))
-            " label="Startklokkeslett (valgfritt)" style="margin-top: 0px" class="q-mb-sm col" emit-value map-options
-            clearable />
-          <q-select v-model="endHour" :options="[...Array(25).keys()].map((h) => ({
-            label: `${h.toString().padStart(2, '0')}:00`,
-            value: h,
-          }))
-            " label="Sluttklokkeslett (valgfritt)" style="margin-top: 0px" class="q-mb-sm col" emit-value map-options
-            clearable />
+        <div class="selector-container glass-card q-pa-lg q-mb-lg">
+          <h3 class="text-h6 q-mb-md">
+            <q-icon name="event" class="q-mr-sm" />
+            Velg dato
+          </h3>
+          <div class="row q-gutter-md items-end">
+            <q-input
+              v-model="date"
+              label="Dato"
+              type="date"
+              :max="maxAllowedDate"
+              class="col-12 col-md"
+              filled
+              rounded
+              standout
+            >
+              <template v-slot:prepend>
+                <q-icon name="calendar_today" />
+              </template>
+            </q-input>
+
+            <div class="date-nav-buttons">
+              <q-btn
+                flat
+                round
+                icon="chevron_left"
+                color="primary"
+                @click="goToPreviousDay"
+                :disable="!date"
+                class="date-nav-btn"
+              >
+                <q-tooltip>Forrige dag</q-tooltip>
+              </q-btn>
+
+              <q-btn
+                flat
+                round
+                icon="chevron_right"
+                color="primary"
+                @click="goToNextDay"
+                :disable="isNextDayDisabled || !date"
+                class="date-nav-btn"
+              >
+                <q-tooltip>{{ isNextDayDisabled ? 'Kan bare se en dag frem' : 'Neste dag' }}</q-tooltip>
+              </q-btn>
+            </div>
+          </div>
         </div>
 
-        <!-- Action buttons -->
-        <div class="row q-gutter-md q-mt-md">
+        <div class="selector-container glass-card q-pa-lg q-mb-lg">
+          <h3 class="text-h6 q-mb-md">
+            <q-icon name="schedule" class="q-mr-sm" />
+            Tidsfilter (valgfritt)
+          </h3>
+          <div class="row q-gutter-md">
+            <q-select
+              v-model="startHour"
+              :options="[...Array(25).keys()].map((h) => ({
+                label: `${h.toString().padStart(2, '0')}:00`,
+                value: h,
+              }))"
+              label="Fra klokkeslett"
+              class="col-12 col-md"
+              emit-value
+              map-options
+              clearable
+              filled
+              rounded
+              standout
+            >
+              <template v-slot:prepend>
+                <q-icon name="access_time" />
+              </template>
+            </q-select>
+
+            <q-select
+              v-model="endHour"
+              :options="[...Array(25).keys()].map((h) => ({
+                label: `${h.toString().padStart(2, '0')}:00`,
+                value: h,
+              }))"
+              label="Til klokkeslett"
+              class="col-12 col-md"
+              emit-value
+              map-options
+              clearable
+              filled
+              rounded
+              standout
+            >
+              <template v-slot:prepend>
+                <q-icon name="schedule" />
+              </template>
+            </q-select>
+          </div>
+        </div>
+
+        <div class="action-buttons q-mb-xl">
           <q-btn
             label="Hent priser"
             type="submit"
             color="primary"
-            :text-color="$q.dark.isActive ? 'black' : 'white'"
+            size="lg"
             :disable="!selectedArea || !date"
             icon="search"
+            unelevated
+            rounded
             no-caps
           />
           <q-btn
             v-if="hasActiveFilters"
-            label="Fjern valgfrie"
+            label="Fjern filtre"
             type="button"
             color="secondary"
-            :text-color="$q.dark.isActive ? 'black' : 'white'"
+            size="lg"
             @click="clearFilters"
             icon="clear"
+            outline
+            rounded
             no-caps
           />
         </div>
       </q-form>
 
-      <!-- Price Chart -->
       <div v-if="prices.length" class="q-mt-lg">
-        <h5 class="q-mb-md">Prisutvikling i {{ getDisplayCity() }}</h5>
-        <div class="chart-container" style="position: relative; height: 400px; width: 100%">
+        <h2 class="text-h5 q-mb-lg">
+          <q-icon name="trending_up" size="sm" class="q-mr-sm" />
+          Prisutvikling i {{ getDisplayCity() }}
+        </h2>
+
+        <div class="chart-container">
           <canvas ref="chartCanvas" style="display: block; width: 100%; height: 100%"></canvas>
         </div>
 
-        <!-- Price Summary -->
-        <div class="q-mt-md">
-          <div class="row q-gutter-md justify-center text-center">
-            <div class="col-md-2 col-sm-6 col-xs-12">
-              <q-card class="text-center" style="box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;">
+        <div class="q-mt-xl">
+          <h3 class="text-h6 q-mb-lg">Prissammendrag</h3>
+          <div class="row q-gutter-md">
+            <div class="col-12 col-sm-6 col-md">
+              <q-card class="price-card glass-card lowest-price">
                 <q-card-section>
-                  <div class="text-h6 text-green">{{ getMinPrice(prices).toFixed(2) }} kr/kWh</div>
-                  <div class="text-subtitle2">Laveste pris</div>
-                  <div class="text-caption">{{ getMinPriceTime(prices) }}</div>
-                </q-card-section>
-              </q-card>
-            </div>
-            <div class="col-md-2 col-sm-6 col-xs-12">
-              <q-card class="text-center" style="box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;">
-                <q-card-section>
-                  <div class="text-h6 text-red">{{ getMaxPrice(prices).toFixed(2) }} kr/kWh</div>
-                  <div class="text-subtitle2">Høyeste pris</div>
-                  <div class="text-caption">{{ getMaxPriceTime(prices) }}</div>
-                </q-card-section>
-              </q-card>
-            </div>
-            <div class="col-md-2 col-sm-6 col-xs-12">
-              <q-card class="text-center" style="box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;">
-                <q-card-section>
-                  <div class="text-h6 text-purple-12">
-                    {{ getPriceDifference(prices).toFixed(2) }} kr/kWh
+                  <div class="card-icon">
+                    <q-icon name="arrow_downward" size="lg" />
                   </div>
-                  <div class="text-subtitle2">Forskjell</div>
-                  <div class="text-caption">Høyeste - Laveste</div>
-                </q-card-section>
-              </q-card>
-            </div>
-            <div class="col-md-2 col-sm-6 col-xs-12">
-              <q-card class="text-center" style="box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;">
-                <q-card-section>
-                  <div class="text-h6 text-orange">{{ getAvgPrice(prices).toFixed(2) }} kr/kWh</div>
-                  <div class="text-subtitle2">Gjennomsnitt</div>
-                  <div class="text-caption">{{ prices.length }} timer</div>
-                </q-card-section>
-              </q-card>
-            </div>
-            <div class="col-md-2 col-sm-6 col-xs-12">
-              <q-card class="text-center" style="box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;">
-                <q-card-section>
-                  <div class="text-h6 text-blue">
-                    {{ getCurrentPrice(prices).toFixed(2) }} kr/kWh
+                  <div class="price-value">{{ getMinPrice(prices).toFixed(2) }}</div>
+                  <div class="price-unit">kr/kWh</div>
+                  <div class="price-label">Laveste pris</div>
+                  <div class="price-time">
+                    <q-icon name="schedule" size="xs" />
+                    {{ getMinPriceTime(prices) }}
                   </div>
-                  <div class="text-subtitle2">Nåværende pris</div>
-                  <div class="text-caption">Nå {{ new Date().getHours() }}:00</div>
+                </q-card-section>
+              </q-card>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md">
+              <q-card class="price-card glass-card highest-price">
+                <q-card-section>
+                  <div class="card-icon">
+                    <q-icon name="arrow_upward" size="lg" />
+                  </div>
+                  <div class="price-value">{{ getMaxPrice(prices).toFixed(2) }}</div>
+                  <div class="price-unit">kr/kWh</div>
+                  <div class="price-label">Høyeste pris</div>
+                  <div class="price-time">
+                    <q-icon name="schedule" size="xs" />
+                    {{ getMaxPriceTime(prices) }}
+                  </div>
+                </q-card-section>
+              </q-card>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md">
+              <q-card class="price-card glass-card difference-price">
+                <q-card-section>
+                  <div class="card-icon">
+                    <q-icon name="trending_flat" size="lg" />
+                  </div>
+                  <div class="price-value">{{ getPriceDifference(prices).toFixed(2) }}</div>
+                  <div class="price-unit">kr/kWh</div>
+                  <div class="price-label">Forskjell</div>
+                  <div class="price-time">
+                    <q-icon name="compare_arrows" size="xs" />
+                    Høy - Lav
+                  </div>
+                </q-card-section>
+              </q-card>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md">
+              <q-card class="price-card glass-card average-price">
+                <q-card-section>
+                  <div class="card-icon">
+                    <q-icon name="insights" size="lg" />
+                  </div>
+                  <div class="price-value">{{ getAvgPrice(prices).toFixed(2) }}</div>
+                  <div class="price-unit">kr/kWh</div>
+                  <div class="price-label">Gjennomsnitt</div>
+                  <div class="price-time">
+                    <q-icon name="hourglass_empty" size="xs" />
+                    {{ prices.length }} timer
+                  </div>
+                </q-card-section>
+              </q-card>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md">
+              <q-card class="price-card glass-card current-price">
+                <q-card-section>
+                  <div class="card-icon">
+                    <q-icon name="schedule" size="lg" />
+                  </div>
+                  <div class="price-value">{{ getCurrentPrice(prices).toFixed(2) }}</div>
+                  <div class="price-unit">kr/kWh</div>
+                  <div class="price-label">Nåværende pris</div>
+                  <div class="price-time">
+                    <q-icon name="access_time" size="xs" />
+                    Nå {{ new Date().getHours() }}:00
+                  </div>
                 </q-card-section>
               </q-card>
             </div>
@@ -137,14 +276,231 @@
         </div>
       </div>
 
-      <q-table class="q-mt-lg" v-if="prices.length" :rows="prices" :columns="columns" row-key="time_start" flat
-        bordered />
+      <q-table
+        class="modern-table q-mt-xl"
+        v-if="prices.length"
+        :rows="prices"
+        :columns="columns"
+        row-key="time_start"
+        flat
+      >
+        <template v-slot:top>
+          <div class="text-h6">
+            <q-icon name="table_chart" class="q-mr-sm" />
+            Detaljert prisoversikt
+          </div>
+        </template>
+      </q-table>
     </main>
   </q-page>
-  <footer class="text-center">
+  <footer class="text-center q-mt-xl q-pb-lg">
     <FooterSection />
   </footer>
 </template>
+
+<style lang="scss" scoped>
+.modern-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.hero-section {
+  text-align: center;
+  padding: 2rem 0;
+
+  .text-h4 {
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.selector-container {
+  h3 {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+  }
+}
+
+.date-nav-buttons {
+  display: flex;
+  gap: 0.5rem;
+
+  .date-nav-btn {
+    background: rgba(0, 217, 192, 0.1);
+
+    &:hover {
+      background: rgba(0, 217, 192, 0.2);
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.chart-container {
+  position: relative;
+  height: 450px;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+// Reuse price card styles from IndexPage
+.price-card {
+  text-align: center;
+  padding: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+
+  &:hover {
+    transform: translateY(-4px) scale(1.02);
+    border-color: currentColor;
+  }
+
+  .card-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 1rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .price-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .price-unit {
+    font-size: 0.875rem;
+    opacity: 0.8;
+    margin-bottom: 0.5rem;
+  }
+
+  .price-label {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .price-time {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+}
+
+.lowest-price {
+  .card-icon {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: white;
+  }
+  .price-value {
+    color: #10B981;
+  }
+}
+
+.highest-price {
+  .card-icon {
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    color: white;
+  }
+  .price-value {
+    color: #EF4444;
+  }
+}
+
+.current-price {
+  .card-icon {
+    background: linear-gradient(135deg, #3B82F6, #2563EB);
+    color: white;
+  }
+  .price-value {
+    color: #3B82F6;
+  }
+}
+
+.average-price {
+  .card-icon {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: white;
+  }
+  .price-value {
+    color: #F59E0B;
+  }
+}
+
+.difference-price {
+  .card-icon {
+    background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+    color: white;
+  }
+  .price-value {
+    color: #8B5CF6;
+  }
+}
+
+.body--dark {
+  .price-value {
+    filter: brightness(1.3);
+  }
+}
+
+// Modern Table
+.modern-table {
+  border-radius: 16px;
+  overflow: hidden;
+
+  :deep(thead tr th) {
+    background: linear-gradient(135deg, rgba(0, 217, 192, 0.1), rgba(99, 102, 241, 0.1));
+    font-weight: 700;
+    font-size: 0.875rem;
+  }
+
+  :deep(tbody tr:hover) {
+    background: rgba(0, 217, 192, 0.05);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 1rem 0;
+
+    .text-h4 {
+      font-size: 1.75rem;
+    }
+  }
+
+  .chart-container {
+    height: 300px;
+  }
+
+  .price-card {
+    .price-value {
+      font-size: 2rem;
+    }
+  }
+
+  .action-buttons {
+    flex-direction: column;
+
+    .q-btn {
+      width: 100%;
+    }
+  }
+}
+</style>
 
 <script setup lang="ts">
 import { ref, watch, nextTick, computed } from 'vue';
