@@ -1,26 +1,32 @@
 // Quasar SCSS (& Sass) Variables
 // --------------------------------------------------
-// To customize the look and feel of this app, you can override
-// the Sass/SCSS variables found in Quasar's source Sass/SCSS files.
+// Modern Design System - 2026
 
-// Check documentation for full list of Quasar variables
+// Primary Brand Colors - Vibrant & Modern
+$primary   : #00D9C0;
+$secondary : #6366F1;
+$accent    : #EC4899;
 
-// Your own variables (that are declared here) and Quasar's own
-// ones will be available out of the box in your .vue/.scss/.sass files
+// Dark Mode Colors
+$dark      : #0F172A;
+$dark-page : #0B1120;
+$light-page: #F8FAFC;
 
-// It's highly recommended to change the default colors
-// to match your app's branding.
-// Tip: Use the "Theme Builder" on Quasar's documentation website.
+// Semantic Colors
+$positive  : #10B981;
+$negative  : #EF4444;
+$info      : #3B82F6;
+$warning   : #F59E0B;
 
-$primary   : #00b3a4;
-$secondary : #26A69A;
-$accent    : #9C27B0;
+// Gradient Colors
+$gradient-start: #00D9C0;
+$gradient-mid: #00B4E6;
+$gradient-end: #6366F1;
 
-$dark      : #1D1D1D;
-$dark-page : #121212;
-$light-page: #F5F5F5;
-
-$positive  : #21BA45;
-$negative  : #C10015;
-$info      : #31CCEC;
-$warning   : #F2C037;
+// Neutral Shades
+$neutral-50: #F8FAFC;
+$neutral-100: #F1F5F9;
+$neutral-200: #E2E8F0;
+$neutral-300: #CBD5E1;
+$neutral-800: #1E293B;
+$neutral-900: #0F172A;

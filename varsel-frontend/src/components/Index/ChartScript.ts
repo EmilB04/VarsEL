@@ -131,7 +131,7 @@ export function useChartServices() {
                   return `${hour.toString().padStart(2, '0')}:00 - ${nextHour.toString().padStart(2, '0')}:00`;
                 },
                 label: function(context) { // Custom tooltip to show price with two decimal places and highlight min/max/current
-                  const value = context.parsed.y.toFixed(2);
+                  const value = (context.parsed.y ?? 0).toFixed(2);
                   let label = `Pris: ${value} kr/kWh`;
 
                   if (context.dataIndex === minIndex) {
