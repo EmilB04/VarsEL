@@ -1,13 +1,13 @@
 <template>
-  <q-page class="modern-page q-pa-md">
+  <q-page class="q-pa-md">
     <header>
       <NavSection />
     </header>
     <main>
-      <div class="hero-section q-mb-xl">
-        <h1 class="text-h4 q-mb-md">Dagens strømpriser</h1>
-        <p class="text-subtitle1 text-grey-7">Se strømpriser i sanntid og planlegg strømbruket ditt smart</p>
-      </div>
+      <HeroSection
+        title="Dagens strømpriser"
+        description="Se strømpriser i sanntid og planlegg strømbruket ditt smart"
+      />
 
       <div class="selector-container glass-card q-pa-lg q-mb-xl">
         <div class="row q-gutter-md">
@@ -20,7 +20,6 @@
             map-options
             @update:model-value="fetchTodaysPrices"
             filled
-            rounded
             standout
           >
             <template v-slot:prepend>
@@ -38,7 +37,6 @@
             :disable="!selectedArea"
             @update:model-value="fetchTodaysPrices"
             filled
-            rounded
             standout
           >
             <template v-slot:prepend>
@@ -147,28 +145,6 @@
             </div>
           </div>
         </div>
-
-        <div class="q-mt-xl">
-          <div class="action-cards row q-gutter-md justify-center">
-            <q-card class="action-card glass-card col-12 col-sm-5" @click="$router.push('/history')">
-              <q-card-section class="text-center">
-                <q-icon name="history" size="xl" color="primary" class="q-mb-md" />
-                <div class="text-h6 q-mb-sm">Se historikk</div>
-                <p class="text-grey-7 text-body2">Utforsk prishistorikk og trender</p>
-                <q-btn flat color="primary" label="Gå til historikk" icon-right="arrow_forward" />
-              </q-card-section>
-            </q-card>
-
-            <q-card class="action-card glass-card col-12 col-sm-5" @click="$router.push('/notifications')">
-              <q-card-section class="text-center">
-                <q-icon name="notifications_active" size="xl" color="secondary" class="q-mb-md" />
-                <div class="text-h6 q-mb-sm">Sett opp varsler</div>
-                <p class="text-grey-7 text-body2">Få beskjed når prisene er lave</p>
-                <q-btn flat color="secondary" label="Konfigurer varsler" icon-right="arrow_forward" />
-              </q-card-section>
-            </q-card>
-          </div>
-        </div>
       </div>
 
       <div v-if="isLoading" class="loading-state q-mt-lg q-pa-xl text-center">
@@ -193,7 +169,7 @@
       </q-banner>
 
       <q-table
-        class="modern-table q-mt-xl"
+        class="table q-mt-xl"
         v-if="prices.length"
         :rows="prices"
         :columns="simplifiedColumns"
@@ -216,12 +192,8 @@
 </template>
 
 <style lang="scss" scoped>
-.modern-page {
-  max-width: 1400px;
-  margin: 0 auto;
-}
 
-.hero-section {
+:deep(.hero-section) {
   text-align: center;
   padding: 2rem 0;
 
@@ -242,7 +214,6 @@
   margin-bottom: 2rem;
 }
 
-// Modern Price Cards
 .price-card {
   text-align: center;
   padding: 0.5rem;
@@ -386,13 +357,12 @@
   }
 }
 
-// Modern Table
-.modern-table {
+.table {
   border-radius: 16px;
   overflow: hidden;
 
   :deep(thead tr th) {
-    background: linear-gradient(135deg, rgba(0, 217, 192, 0.1), rgba(99, 102, 241, 0.1));
+    background: rgba(255, 255, 255, 0.1);
     font-weight: 700;
     font-size: 0.875rem;
   }
@@ -404,7 +374,7 @@
 
 // Responsive adjustments
 @media (max-width: 768px) {
-  .hero-section {
+  :deep(.hero-section) {
     padding: 1rem 0;
 
     .text-h4 {
@@ -428,9 +398,10 @@
 import { ref, nextTick, onMounted } from 'vue';
 import { api } from 'boot/axios';
 import FooterSection from 'src/components/FooterSection.vue';
+import HeroSection from 'src/components/HeroSection.vue';
 import NavSection from 'src/components/NavSection.vue';
-import { useTableServices, type Price, baseCities } from 'src/components/Index/TableScript';
-import { useChartServices } from 'src/components/Index/ChartScript';
+import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
+import { useChartServices } from 'src/scripts/ChartScript';
 
 // Reactive state variables - simplified for today only
 const selectedArea = ref('NO1');
