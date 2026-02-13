@@ -1,14 +1,14 @@
 <template>
-  <q-page class="modern-page q-pa-md">
+  <q-page class="q-pa-md">
     <header>
       <NavSection />
     </header>
 
     <main>
-      <div class="hero-section q-mb-xl">
-        <h1 class="text-h4 q-mb-md">Smarte prisvarsler</h1>
-        <p class="text-subtitle1 text-grey-7">Få beskjed når strømmen er billig eller når prisen endrer seg</p>
-      </div>
+      <HeroSection
+        title="Smarte prisvarsler"
+        description="Få beskjed når strømmen er billig eller når prisen endrer seg"
+      />
 
       <div class="row q-gutter-xl justify-center q-mb-xl">
         <div class="col-12 col-md-5">
@@ -20,45 +20,92 @@
                 </div>
                 <div class="q-mb-lg">
                   <h3 class="text-h6 q-mb-xs">Prisvarsel</h3>
-                  <p class="text-body2 text-grey-7">Få varsel når strømprisen når en bestemt verdi</p>
+                  <p class="text-body2 text-grey-7">
+                    Få varsel når strømprisen når en bestemt verdi
+                  </p>
                 </div>
               </div>
 
               <q-form @submit="savePriceAlert" class="q-gutter-md">
-                <q-select v-model="priceAlert.area" :options="areaOptions" label="Område" emit-value map-options filled
-                  rounded standout required>
+                <q-select
+                  v-model="priceAlert.area"
+                  :options="areaOptions"
+                  label="Område"
+                  emit-value
+                  map-options
+                  filled
+                  standout
+                  required
+                >
                   <template v-slot:prepend>
                     <q-icon name="location_on" />
                   </template>
                 </q-select>
 
-                <q-select v-model="priceAlert.city" :options="filteredCityOptions" label="By (valgfritt)" emit-value
-                  map-options clearable filled rounded standout>
+                <q-select
+                  v-model="priceAlert.city"
+                  :options="filteredCityOptions"
+                  label="By (valgfritt)"
+                  emit-value
+                  map-options
+                  clearable
+                  filled
+                  standout
+                >
                   <template v-slot:prepend>
                     <q-icon name="apartment" />
                   </template>
                 </q-select>
 
-                <q-input v-model.number="priceAlert.targetPrice" type="number" step="0.01" label="Ønsket pris (kr/kWh)"
-                  suffix="kr/kWh" filled rounded standout required>
+                <q-input
+                  v-model.number="priceAlert.targetPrice"
+                  type="number"
+                  step="0.01"
+                  label="Ønsket pris (kr/kWh)"
+                  suffix="kr/kWh"
+                  filled
+                  standout
+                  required
+                >
                   <template v-slot:prepend>
                     <q-icon name="payments" />
                   </template>
                 </q-input>
 
-                <q-select v-model="priceAlert.condition" :options="conditionOptions" label="Varsel når prisen er"
-                  emit-value map-options filled rounded standout required>
+                <q-select
+                  v-model="priceAlert.condition"
+                  :options="conditionOptions"
+                  label="Varsel når prisen er"
+                  emit-value
+                  map-options
+                  filled
+                  standout
+                  required
+                >
                   <template v-slot:prepend>
                     <q-icon name="compare_arrows" />
                   </template>
                 </q-select>
 
                 <div class="toggle-wrapper">
-                  <q-toggle v-model="priceAlert.enabled" label="Aktiver prisvarsel" color="primary" size="lg" />
+                  <q-toggle
+                    v-model="priceAlert.enabled"
+                    label="Aktiver prisvarsel"
+                    color="primary"
+                    size="lg"
+                  />
                 </div>
 
-                <q-btn label="Lagre prisvarsel" type="submit" color="primary" icon="save" class="half-width" unelevated
-                  rounded size="md" no-caps />
+                <q-btn
+                  label="Lagre prisvarsel"
+                  type="submit"
+                  color="primary"
+                  icon="save"
+                  class="half-width"
+                  unelevated
+                  size="md"
+                  no-caps
+                />
               </q-form>
             </q-card-section>
           </q-card>
@@ -73,39 +120,76 @@
                 </div>
                 <div class="q-mb-lg">
                   <h3 class="text-h6 q-mb-xs">Billigste time-varsel</h3>
-                  <p class="text-body2 text-grey-7">Få varsel når strømmen er billigst i løpet av dagen</p>
+                  <p class="text-body2 text-grey-7">
+                    Få varsel når strømmen er billigst i løpet av dagen
+                  </p>
                 </div>
               </div>
 
               <q-form @submit="saveCheapestAlert" class="q-gutter-md">
-                <q-select v-model="cheapestAlert.area" :options="areaOptions" label="Område" emit-value map-options
-                  filled rounded standout required>
+                <q-select
+                  v-model="cheapestAlert.area"
+                  :options="areaOptions"
+                  label="Område"
+                  emit-value
+                  map-options
+                  filled
+                  standout
+                  required
+                >
                   <template v-slot:prepend>
                     <q-icon name="location_on" />
                   </template>
                 </q-select>
 
-                <q-select v-model="cheapestAlert.city" :options="filteredCheapestCityOptions" label="By (valgfritt)"
-                  emit-value map-options clearable filled rounded standout>
+                <q-select
+                  v-model="cheapestAlert.city"
+                  :options="filteredCheapestCityOptions"
+                  label="By (valgfritt)"
+                  emit-value
+                  map-options
+                  clearable
+                  filled
+                  standout
+                >
                   <template v-slot:prepend>
                     <q-icon name="apartment" />
                   </template>
                 </q-select>
 
-                <q-select v-model="cheapestAlert.notificationTime" :options="timeOptions" label="Tidspunkt for varsel"
-                  emit-value map-options filled rounded standout required>
+                <q-select
+                  v-model="cheapestAlert.notificationTime"
+                  :options="timeOptions"
+                  label="Tidspunkt for varsel"
+                  emit-value
+                  map-options
+                  filled
+                  standout
+                  required
+                >
                   <template v-slot:prepend>
                     <q-icon name="access_time" />
                   </template>
                 </q-select>
 
                 <div class="toggle-wrapper">
-                  <q-toggle v-model="cheapestAlert.enabled" label="Aktiver billigste time-varsel" color="primary"
-                    size="lg" />
+                  <q-toggle
+                    v-model="cheapestAlert.enabled"
+                    label="Aktiver billigste time-varsel"
+                    color="primary"
+                    size="lg"
+                  />
                 </div>
 
-                <q-btn label="Lagre billigste time-varsel" type="submit" color="secondary" icon="save"
-                  class="half-width" rounded size="md" no-caps/>
+                <q-btn
+                  label="Lagre billigste time-varsel"
+                  type="submit"
+                  color="secondary"
+                  icon="save"
+                  class="half-width"
+                  size="md"
+                  no-caps
+                />
               </q-form>
             </q-card-section>
           </q-card>
@@ -127,7 +211,11 @@
                   <h3 class="text-h6">Prisvarsler</h3>
                 </div>
                 <q-list class="alerts-list">
-                  <q-item v-for="(alert, index) in savedPriceAlerts" :key="index" class="alert-item">
+                  <q-item
+                    v-for="(alert, index) in savedPriceAlerts"
+                    :key="index"
+                    class="alert-item"
+                  >
                     <q-item-section>
                       <q-item-label class="alert-location">
                         <q-icon name="place" size="xs" class="q-mr-xs" />
@@ -140,9 +228,20 @@
                     </q-item-section>
                     <q-item-section side class="alert-controls">
                       <div class="row items-center q-gutter-sm no-wrap">
-                        <q-toggle v-model="alert.enabled" @update:model-value="updatePriceAlert(index)" color="primary"
-                          dense />
-                        <q-btn flat round icon="delete" color="negative" size="sm" @click="deletePriceAlert(index)">
+                        <q-toggle
+                          v-model="alert.enabled"
+                          @update:model-value="updatePriceAlert(index)"
+                          color="primary"
+                          dense
+                        />
+                        <q-btn
+                          flat
+                          round
+                          icon="delete"
+                          color="negative"
+                          size="sm"
+                          @click="deletePriceAlert(index)"
+                        >
                           <q-tooltip>Slett varsel</q-tooltip>
                         </q-btn>
                       </div>
@@ -161,7 +260,11 @@
                   <h3 class="text-h6">Billigste time-varsler</h3>
                 </div>
                 <q-list class="alerts-list">
-                  <q-item v-for="(alert, index) in savedCheapestAlerts" :key="index" class="alert-item">
+                  <q-item
+                    v-for="(alert, index) in savedCheapestAlerts"
+                    :key="index"
+                    class="alert-item"
+                  >
                     <q-item-section>
                       <q-item-label class="alert-location">
                         <q-icon name="place" size="xs" class="q-mr-xs" />
@@ -174,9 +277,20 @@
                     </q-item-section>
                     <q-item-section side class="alert-controls">
                       <div class="row items-center q-gutter-sm no-wrap">
-                        <q-toggle v-model="alert.enabled" @update:model-value="updateCheapestAlert(index)"
-                          color="primary" dense />
-                        <q-btn flat round icon="delete" color="negative" size="sm" @click="deleteCheapestAlert(index)">
+                        <q-toggle
+                          v-model="alert.enabled"
+                          @update:model-value="updateCheapestAlert(index)"
+                          color="primary"
+                          dense
+                        />
+                        <q-btn
+                          flat
+                          round
+                          icon="delete"
+                          color="negative"
+                          size="sm"
+                          @click="deleteCheapestAlert(index)"
+                        >
                           <q-tooltip>Slett varsel</q-tooltip>
                         </q-btn>
                       </div>
@@ -188,12 +302,17 @@
           </div>
         </div>
 
-        <div v-if="savedPriceAlerts.length === 0 && savedCheapestAlerts.length === 0" class="no-alerts-message">
+        <div
+          v-if="savedPriceAlerts.length === 0 && savedCheapestAlerts.length === 0"
+          class="no-alerts-message"
+        >
           <q-card class="glass-card text-center">
             <q-card-section class="q-pa-xl">
               <q-icon name="notifications_off" size="80px" class="text-grey-5 q-mb-md" />
               <h3 class="text-h5 text-grey-5 q-mb-sm">Ingen aktive varsler</h3>
-              <p class="text-body2 text-grey-6">Opprett ditt første varsel ovenfor for å komme i gang</p>
+              <p class="text-body2 text-grey-6">
+                Opprett ditt første varsel ovenfor for å komme i gang
+              </p>
             </q-card-section>
           </q-card>
         </div>
@@ -207,12 +326,7 @@
 </template>
 
 <style lang="scss" scoped>
-.modern-page {
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.hero-section {
+:deep(.hero-section) {
   text-align: center;
   padding: 2rem 0;
 
@@ -242,12 +356,12 @@
     flex-shrink: 0;
 
     &.primary-icon {
-      background: #00D9C0;
+      background: #00d9c0;
       color: white;
     }
 
     &.secondary-icon {
-      background: #6366F1;
+      background: #6366f1;
       color: white;
     }
   }
@@ -345,7 +459,7 @@
 }
 
 @media (max-width: 768px) {
-  .hero-section {
+  :deep(.hero-section) {
     padding: 1rem 0;
 
     .text-h4 {
@@ -375,29 +489,29 @@
 }
 </style>
 
-
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useQuasar } from 'quasar'
-import FooterSection from 'src/components/FooterSection.vue'
-import NavSection from 'src/components/NavSection.vue'
+import { ref, computed, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
+import FooterSection from 'src/components/FooterSection.vue';
+import HeroSection from 'src/components/HeroSection.vue';
+import NavSection from 'src/components/NavSection.vue';
 
-const $q = useQuasar()
+const $q = useQuasar();
 
 // Define interfaces
 interface PriceAlert {
-  area: string
-  city?: string
-  targetPrice: number
-  condition: string
-  enabled: boolean
+  area: string;
+  city?: string;
+  targetPrice: number;
+  condition: string;
+  enabled: boolean;
 }
 
 interface CheapestAlert {
-  area: string
-  city?: string
-  notificationTime: string
-  enabled: boolean
+  area: string;
+  city?: string;
+  notificationTime: string;
+  enabled: boolean;
 }
 
 // Reactive data
@@ -406,18 +520,18 @@ const priceAlert = ref<PriceAlert>({
   city: '',
   targetPrice: 0,
   condition: 'under',
-  enabled: true
-})
+  enabled: true,
+});
 
 const cheapestAlert = ref<CheapestAlert>({
   area: '',
   city: '',
   notificationTime: '07:00',
-  enabled: true
-})
+  enabled: true,
+});
 
-const savedPriceAlerts = ref<PriceAlert[]>([])
-const savedCheapestAlerts = ref<CheapestAlert[]>([])
+const savedPriceAlerts = ref<PriceAlert[]>([]);
+const savedCheapestAlerts = ref<CheapestAlert[]>([]);
 
 // Options data
 const areaOptions = [
@@ -425,8 +539,8 @@ const areaOptions = [
   { value: 'NO2', label: 'Sør-Norge' },
   { value: 'NO3', label: 'Midt-Norge' },
   { value: 'NO4', label: 'Nord-Norge' },
-  { value: 'NO5', label: 'Vest-Norge' }
-]
+  { value: 'NO5', label: 'Vest-Norge' },
+];
 
 const cityOptions = [
   { value: 'Oslo', label: 'Oslo', area: 'NO1' },
@@ -449,14 +563,13 @@ const cityOptions = [
   { value: 'Bodo', label: 'Bodø', area: 'NO4' },
 
   { value: 'Bergen', label: 'Bergen', area: 'NO5' },
-]
-
+];
 
 const conditionOptions = [
   { label: 'under', value: 'under' },
   { label: 'over', value: 'over' },
-  { label: 'lik', value: 'equal' }
-]
+  { label: 'lik', value: 'equal' },
+];
 
 const timeOptions = [
   { label: '01:00', value: '01:00' },
@@ -483,30 +596,30 @@ const timeOptions = [
   { label: '22:00', value: '22:00' },
   { label: '23:00', value: '23:00' },
   { label: '00:00', value: '00:00' },
-]
+];
 // Computed properties
 const filteredCityOptions = computed(() => {
-  if (!priceAlert.value.area) return []
-  return cityOptions.filter(city => city.area === priceAlert.value.area)
-})
+  if (!priceAlert.value.area) return [];
+  return cityOptions.filter((city) => city.area === priceAlert.value.area);
+});
 
 const filteredCheapestCityOptions = computed(() => {
-  if (!cheapestAlert.value.area) return []
-  return cityOptions.filter(city => city.area === cheapestAlert.value.area)
-})
+  if (!cheapestAlert.value.area) return [];
+  return cityOptions.filter((city) => city.area === cheapestAlert.value.area);
+});
 
 // Methods
 const savePriceAlert = () => {
   if (!priceAlert.value.area || !priceAlert.value.targetPrice) {
     $q.notify({
       type: 'negative',
-      message: 'Vennligst fyll ut alle påkrevde felt'
-    })
-    return
+      message: 'Vennligst fyll ut alle påkrevde felt',
+    });
+    return;
   }
 
-  savedPriceAlerts.value.push({ ...priceAlert.value })
-  savePriceAlertsToStorage()
+  savedPriceAlerts.value.push({ ...priceAlert.value });
+  savePriceAlertsToStorage();
 
   // Reset form
   priceAlert.value = {
@@ -514,132 +627,132 @@ const savePriceAlert = () => {
     city: '',
     targetPrice: 0,
     condition: 'under',
-    enabled: true
-  }
+    enabled: true,
+  };
 
   $q.notify({
     type: 'positive',
     message: 'Prisvarsel lagret!',
-    caption: 'Du vil få varsel når betingelsene oppfylles'
-  })
-}
+    caption: 'Du vil få varsel når betingelsene oppfylles',
+  });
+};
 
 const saveCheapestAlert = () => {
   if (!cheapestAlert.value.area || !cheapestAlert.value.notificationTime) {
     $q.notify({
       type: 'negative',
-      message: 'Vennligst fyll ut alle påkrevde felt'
-    })
-    return
+      message: 'Vennligst fyll ut alle påkrevde felt',
+    });
+    return;
   }
 
-  savedCheapestAlerts.value.push({ ...cheapestAlert.value })
-  saveCheapestAlertsToStorage()
+  savedCheapestAlerts.value.push({ ...cheapestAlert.value });
+  saveCheapestAlertsToStorage();
 
   // Reset form
   cheapestAlert.value = {
     area: '',
     city: '',
     notificationTime: '07:00',
-    enabled: true
-  }
+    enabled: true,
+  };
 
   $q.notify({
     type: 'positive',
     message: 'Billigste time-varsel lagret!',
-    caption: 'Du vil få daglig varsel om billigste time'
-  })
-}
+    caption: 'Du vil få daglig varsel om billigste time',
+  });
+};
 
 const updatePriceAlert = (index: number) => {
-  const alert = savedPriceAlerts.value[index]
-  if (!alert) return
+  const alert = savedPriceAlerts.value[index];
+  if (!alert) return;
 
-  savePriceAlertsToStorage()
+  savePriceAlertsToStorage();
   $q.notify({
     type: 'info',
-    message: alert.enabled ? 'Prisvarsel aktivert' : 'Prisvarsel deaktivert'
-  })
-}
+    message: alert.enabled ? 'Prisvarsel aktivert' : 'Prisvarsel deaktivert',
+  });
+};
 
 const updateCheapestAlert = (index: number) => {
-  const alert = savedCheapestAlerts.value[index]
-  if (!alert) return
+  const alert = savedCheapestAlerts.value[index];
+  if (!alert) return;
 
-  saveCheapestAlertsToStorage()
+  saveCheapestAlertsToStorage();
   $q.notify({
     type: 'info',
-    message: alert.enabled ? 'Billigste time-varsel aktivert' : 'Billigste time-varsel deaktivert'
-  })
-}
+    message: alert.enabled ? 'Billigste time-varsel aktivert' : 'Billigste time-varsel deaktivert',
+  });
+};
 
 const deletePriceAlert = (index: number) => {
   if (confirm('Er du sikker på at du vil slette dette prisvarselet?')) {
-    savedPriceAlerts.value.splice(index, 1)
-    savePriceAlertsToStorage()
+    savedPriceAlerts.value.splice(index, 1);
+    savePriceAlertsToStorage();
     $q.notify({
       type: 'positive',
-      message: 'Prisvarsel slettet'
-    })
+      message: 'Prisvarsel slettet',
+    });
   }
-}
+};
 
 const deleteCheapestAlert = (index: number) => {
   if (confirm('Er du sikker på at du vil slette dette varselet?')) {
-    savedCheapestAlerts.value.splice(index, 1)
-    saveCheapestAlertsToStorage()
+    savedCheapestAlerts.value.splice(index, 1);
+    saveCheapestAlertsToStorage();
     $q.notify({
       type: 'positive',
-      message: 'Billigste time-varsel slettet'
-    })
+      message: 'Billigste time-varsel slettet',
+    });
   }
-}
+};
 
 const getDisplayLocation = (area: string, city?: string) => {
   if (city) {
-    return city
+    return city;
   }
 
-  const areaOption = areaOptions.find(option => option.value === area)
-  return areaOption ? areaOption.label : area
-}
+  const areaOption = areaOptions.find((option) => option.value === area);
+  return areaOption ? areaOption.label : area;
+};
 
 // Storage methods
 const savePriceAlertsToStorage = () => {
-  localStorage.setItem('varsel-price-alerts', JSON.stringify(savedPriceAlerts.value))
-}
+  localStorage.setItem('varsel-price-alerts', JSON.stringify(savedPriceAlerts.value));
+};
 
 const saveCheapestAlertsToStorage = () => {
-  localStorage.setItem('varsel-cheapest-alerts', JSON.stringify(savedCheapestAlerts.value))
-}
+  localStorage.setItem('varsel-cheapest-alerts', JSON.stringify(savedCheapestAlerts.value));
+};
 
 const loadPriceAlertsFromStorage = () => {
-  const stored = localStorage.getItem('varsel-price-alerts')
+  const stored = localStorage.getItem('varsel-price-alerts');
   if (stored) {
     try {
-      savedPriceAlerts.value = JSON.parse(stored)
+      savedPriceAlerts.value = JSON.parse(stored);
     } catch (error) {
-      console.error('Error loading price alerts from storage:', error)
+      console.error('Error loading price alerts from storage:', error);
     }
   }
-}
+};
 
 const loadCheapestAlertsFromStorage = () => {
-  const stored = localStorage.getItem('varsel-cheapest-alerts')
+  const stored = localStorage.getItem('varsel-cheapest-alerts');
   if (stored) {
     try {
-      savedCheapestAlerts.value = JSON.parse(stored)
+      savedCheapestAlerts.value = JSON.parse(stored);
     } catch (error) {
-      console.error('Error loading cheapest alerts from storage:', error)
+      console.error('Error loading cheapest alerts from storage:', error);
     }
   }
-}
+};
 
 // Lifecycle
 onMounted(() => {
-  loadPriceAlertsFromStorage()
-  loadCheapestAlertsFromStorage()
-})
+  loadPriceAlertsFromStorage();
+  loadCheapestAlertsFromStorage();
+});
 </script>
 
 <style scoped>

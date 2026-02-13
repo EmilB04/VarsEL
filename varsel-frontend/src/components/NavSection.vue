@@ -1,11 +1,11 @@
 <template>
-  <nav class="modern-nav">
-    <div class="nav-container">
-      <router-link to="/" class="logo-link">
+  <nav class="q-py-md q-mb-lg">
+    <div class="nav-container flex items-center justify-between">
+      <router-link to="/" class="logo-link flex items-center">
         <span class="logo-text">VarsEL</span>
       </router-link>
 
-      <ul class="nav-menu">
+      <ul class="nav-menu flex items-center">
         <li>
           <router-link to="/" class="nav-link">
             <q-icon name="schedule" class="nav-icon" />
@@ -42,15 +42,8 @@
 </template>
 
 <style lang="scss" scoped>
-.modern-nav {
-  padding: 1rem 0;
-  margin-bottom: 2rem;
-}
 
 .nav-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 1rem 1.5rem;
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px) saturate(180%);
@@ -60,15 +53,12 @@
 }
 
 .body--dark .nav-container {
-  background: rgba(15, 23, 42, 0.7);
+  background: $dark-container;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 }
 
 .logo-link {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
   text-decoration: none;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -81,6 +71,7 @@
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.025em;
+  color: #000;
 }
 
 .body--dark .logo-text {
@@ -88,12 +79,8 @@
 }
 
 .nav-menu {
-  display: flex;
   list-style: none;
-  margin: 0;
-  padding: 0;
   gap: 0.5rem;
-  align-items: center;
 }
 
 .nav-link {
@@ -123,7 +110,7 @@
   }
 
   &.router-link-active {
-    background: linear-gradient(135deg, #00D9C0 0%, #00B4E6 100%);
+    background-color: $primary;
     color: white;
     box-shadow: 0 4px 12px rgba(0, 217, 192, 0.3);
 
@@ -134,18 +121,21 @@
 }
 
 // Mobile Responsive
-@media (max-width: 768px) {
+@media (max-width: 868px) {
   .nav-menu {
     gap: 0.25rem;
+    padding-block: 0;
+    padding-inline: 1rem;
+  }
+  .nav-container {
+    justify-content: center;
+    padding: 0;
   }
 
   .nav-link {
     padding: 0.5rem 0.75rem;
     font-size: 0.8rem;
 
-    span {
-      display: none;
-    }
 
     .nav-icon {
       font-size: 1.25rem;
@@ -157,5 +147,3 @@
   }
 }
 </style>
-<script scoped setup lang="ts">
-</script>

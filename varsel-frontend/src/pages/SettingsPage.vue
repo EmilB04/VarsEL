@@ -1,13 +1,13 @@
 <template>
-  <q-page class="modern-page q-pa-md">
+  <q-page class="q-pa-md">
     <header>
       <NavSection />
     </header>
     <main>
-      <div class="hero-section q-mb-xl">
-        <h1 class="text-h4 q-mt-md q-mb-md">Innstillinger</h1>
-        <p class="text-subtitle1 text-grey-7">Tilpass applikasjonen etter dine preferanser</p>
-      </div>
+      <HeroSection
+        title="Innstillinger"
+        description="Tilpass applikasjonen etter dine preferanser"
+      />
 
       <div class="settings-container">
         <div class="row q-gutter-lg justify-center">
@@ -33,27 +33,14 @@
             </q-card-section>
           </q-card>
         </div>
-
-        <q-banner class="info-banner glass-card q-mt-xl" rounded>
-          <template v-slot:avatar>
-            <q-icon name="info" color="info" size="lg" />
-          </template>
-          <div class="text-body1">
-            <strong>Tips:</strong> Endringer lagres automatisk og påvirker alle visninger av strømpriser.
-          </div>
-        </q-banner>
       </div>
     </main>
   </q-page>
 </template>
 
 <style lang="scss" scoped>
-.modern-page {
-  max-width: 1400px;
-  margin: 0 auto;
-}
 
-.hero-section {
+:deep(.hero-section) {
   text-align: center;
   padding: 2rem 0;
   position: relative;
@@ -92,7 +79,7 @@
 }
 
 @media (max-width: 768px) {
-  .hero-section {
+  :deep(.hero-section) {
     padding: 1rem 0;
 
     .text-h4 {
@@ -104,6 +91,7 @@
 
 <script setup lang="ts">
 import ColorMode from 'src/components/ColorMode.vue'
+import HeroSection from 'src/components/HeroSection.vue'
 import NavSection from 'src/components/NavSection.vue';
 import TaxMode from 'src/components/TaxMode.vue'
 </script>

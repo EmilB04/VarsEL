@@ -1,17 +1,17 @@
 <template>
-  <q-page class="modern-page q-pa-md">
+  <q-page class="q-pa-md">
     <header>
       <NavSection />
     </header>
 
     <main>
-      <div class="hero-section q-mb-xl">
+      <HeroSection title="Om VarsEL" description="Din smarte partner for strømforbruk">
+      <template #prepend>
         <div class="hero-icon q-mb-md">
-          <q-icon name="bolt" size="80px" color="primary" />
+        <q-icon name="bolt" size="80px" color="primary" />
         </div>
-        <h1 class="text-h3 q-mb-md">Om VarsEL</h1>
-        <p class="text-h6 text-grey-7">Din smarte partner for strømforbruk</p>
-      </div>
+      </template>
+      </HeroSection>
 
       <div class="content-container">
         <div class="row q-gutter-xl">
@@ -228,12 +228,8 @@
 </template>
 
 <style lang="scss" scoped>
-.modern-page {
-  max-width: 1400px;
-  margin: 0 auto;
-}
 
-.hero-section {
+:deep(.hero-section) {
   text-align: center;
   padding: 3rem 0;
 
@@ -241,7 +237,7 @@
     animation: pulse 2s infinite;
   }
 
-  .text-h3 {
+  .text-h4 {
     font-weight: 800;
     margin-bottom: 0.5rem;
   }
@@ -317,12 +313,8 @@
 }
 
 @media (max-width: 768px) {
-  .hero-section {
+  :deep(.hero-section) {
     padding: 2rem 0;
-
-    .text-h3 {
-      font-size: 2rem;
-    }
 
     .hero-icon .q-icon {
       font-size: 60px;
@@ -333,5 +325,6 @@
 
 <script setup lang="ts">
 import FooterSection from 'src/components/FooterSection.vue';
+import HeroSection from 'src/components/HeroSection.vue';
 import NavSection from 'src/components/NavSection.vue';
 </script>

@@ -25,15 +25,6 @@
     <p class="switch-description">
       {{ isTaxIncluded ? 'Priser inkluderer 25% MVA' : 'Priser vises uten MVA' }}
     </p>
-
-    <q-banner v-if="showRefreshNote" class="refresh-note q-mt-md" dense rounded>
-      <template v-slot:avatar>
-        <q-icon name="info" color="warning" />
-      </template>
-      <div class="text-caption">
-        <strong>Tips:</strong> Oppdater siden for å se endringene
-      </div>
-    </q-banner>
   </div>
 </template>
 

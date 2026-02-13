@@ -1,13 +1,10 @@
 <template>
-  <q-page class="modern-page q-pa-md">
+  <q-page class="q-pa-md">
     <header>
       <NavSection />
     </header>
     <main>
-      <div class="hero-section q-mb-xl">
-        <h1 class="text-h4 q-mb-md">Prishistorikk</h1>
-        <p class="text-subtitle1 text-grey-7">Utforsk og analyser tidligere strømpriser</p>
-      </div>
+      <HeroSection title="Prishistorikk" description="Utforsk og analyser tidligere strømpriser" />
 
       <q-form @submit.prevent="fetchPrices">
         <div class="selector-container glass-card q-pa-lg q-mb-lg">
@@ -24,7 +21,6 @@
               emit-value
               map-options
               filled
-              rounded
               standout
             >
               <template v-slot:prepend>
@@ -41,7 +37,6 @@
               map-options
               :disable="!selectedArea"
               filled
-              rounded
               standout
             >
               <template v-slot:prepend>
@@ -64,7 +59,6 @@
               :max="maxAllowedDate"
               class="col-12 col-md"
               filled
-              rounded
               standout
             >
               <template v-slot:prepend>
@@ -94,7 +88,9 @@
                 :disable="isNextDayDisabled || !date"
                 class="date-nav-btn"
               >
-                <q-tooltip>{{ isNextDayDisabled ? 'Kan bare se en dag frem' : 'Neste dag' }}</q-tooltip>
+                <q-tooltip>{{
+                  isNextDayDisabled ? 'Kan bare se en dag frem' : 'Neste dag'
+                }}</q-tooltip>
               </q-btn>
             </div>
           </div>
@@ -108,17 +104,18 @@
           <div class="row q-gutter-md">
             <q-select
               v-model="startHour"
-              :options="[...Array(25).keys()].map((h) => ({
-                label: `${h.toString().padStart(2, '0')}:00`,
-                value: h,
-              }))"
+              :options="
+                [...Array(25).keys()].map((h) => ({
+                  label: `${h.toString().padStart(2, '0')}:00`,
+                  value: h,
+                }))
+              "
               label="Fra klokkeslett"
               class="col-12 col-md"
               emit-value
               map-options
               clearable
               filled
-              rounded
               standout
             >
               <template v-slot:prepend>
@@ -128,17 +125,18 @@
 
             <q-select
               v-model="endHour"
-              :options="[...Array(25).keys()].map((h) => ({
-                label: `${h.toString().padStart(2, '0')}:00`,
-                value: h,
-              }))"
+              :options="
+                [...Array(25).keys()].map((h) => ({
+                  label: `${h.toString().padStart(2, '0')}:00`,
+                  value: h,
+                }))
+              "
               label="Til klokkeslett"
               class="col-12 col-md"
               emit-value
               map-options
               clearable
               filled
-              rounded
               standout
             >
               <template v-slot:prepend>
@@ -157,19 +155,17 @@
             :disable="!selectedArea || !date"
             icon="search"
             unelevated
-            rounded
             no-caps
           />
           <q-btn
             v-if="hasActiveFilters"
             label="Fjern filtre"
             type="button"
-            color="secondary"
+            color="negative"
             size="lg"
             @click="clearFilters"
             icon="clear"
             outline
-            rounded
             no-caps
           />
         </div>
@@ -299,12 +295,8 @@
 </template>
 
 <style lang="scss" scoped>
-.modern-page {
-  max-width: 1400px;
-  margin: 0 auto;
-}
 
-.hero-section {
+:deep(.hero-section) {
   text-align: center;
   padding: 2rem 0;
 
@@ -403,51 +395,56 @@
 
 .lowest-price {
   .card-icon {
-    background: linear-gradient(135deg, #10B981, #059669);
+    background: linear-gradient(135deg, #10b981, #059669);
     color: white;
   }
+
   .price-value {
-    color: #10B981;
+    color: #10b981;
   }
 }
 
 .highest-price {
   .card-icon {
-    background: linear-gradient(135deg, #EF4444, #DC2626);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
   }
+
   .price-value {
-    color: #EF4444;
+    color: #ef4444;
   }
 }
 
 .current-price {
   .card-icon {
-    background: linear-gradient(135deg, #3B82F6, #2563EB);
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
   }
+
   .price-value {
-    color: #3B82F6;
+    color: #3b82f6;
   }
 }
 
 .average-price {
   .card-icon {
-    background: linear-gradient(135deg, #F59E0B, #D97706);
+    background: linear-gradient(135deg, #f59e0b, #d97706);
     color: white;
   }
+
   .price-value {
-    color: #F59E0B;
+    color: #f59e0b;
   }
 }
 
 .difference-price {
   .card-icon {
-    background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
     color: white;
   }
+
   .price-value {
-    color: #8B5CF6;
+    color: #8b5cf6;
   }
 }
 
@@ -474,7 +471,7 @@
 }
 
 @media (max-width: 768px) {
-  .hero-section {
+  :deep(.hero-section) {
     padding: 1rem 0;
 
     .text-h4 {
@@ -506,9 +503,10 @@
 import { ref, watch, nextTick, computed } from 'vue';
 import { api } from 'boot/axios';
 import FooterSection from 'src/components/FooterSection.vue';
+import HeroSection from 'src/components/HeroSection.vue';
 import NavSection from 'src/components/NavSection.vue';
-import { useTableServices, type Price, baseCities } from 'src/components/Index/TableScript';
-import { useChartServices } from 'src/components/Index/ChartScript';
+import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
+import { useChartServices } from 'src/scripts/ChartScript';
 
 // Reactive state variables - all start empty
 const selectedArea = ref<string | null>(null);

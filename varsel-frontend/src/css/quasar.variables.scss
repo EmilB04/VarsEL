@@ -8,9 +8,13 @@ $secondary : #6366F1;
 $accent    : #EC4899;
 
 // Dark Mode Colors
-$dark      : #0F172A;
-$dark-page : #0B1120;
+$dark      : #1c1f1f;
+$dark-page : #121212;
 $light-page: #F8FAFC;
+
+// Dark container surfaces (cards/panels) in dark mode
+$dark-container: rgba($dark, 0.7);
+$dark-container-soft: rgba($dark, 0.5);
 
 // Semantic Colors
 $positive  : #10B981;
