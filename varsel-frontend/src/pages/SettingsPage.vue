@@ -7,9 +7,10 @@
       <HeroSection
         title="Innstillinger"
         description="Tilpass applikasjonen etter dine preferanser"
+        class="q-py-xl"
       />
 
-      <div class="settings-container">
+      <div class="settings-container q-mx-auto">
         <div class="row q-gutter-lg justify-center">
           <q-card class="settings-card glass-card col-12 col-md-5">
             <q-card-section>
@@ -42,18 +43,11 @@
 
 :deep(.hero-section) {
   text-align: center;
-  padding: 2rem 0;
   position: relative;
-
-  .text-h4 {
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-  }
 }
 
 .settings-container {
   max-width: 1200px;
-  margin: 0 auto;
 }
 
 .settings-card {
@@ -74,17 +68,11 @@
 
 .info-banner {
   max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 @media (max-width: 768px) {
-  :deep(.hero-section) {
-    padding: 1rem 0;
-
-    .text-h4 {
-      font-size: 1.75rem;
-    }
+  .settings-container {
+    // padding already handled via q-pa-md on q-page
   }
 }
 </style>

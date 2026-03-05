@@ -7,6 +7,7 @@
       <HeroSection
         title="Dagens strømpriser"
         description="Se strømpriser i sanntid og planlegg strømbruket ditt smart"
+        class="q-py-xl"
       />
 
       <div class="selector-container glass-card q-pa-lg q-mb-xl">
@@ -52,99 +53,11 @@
           Prisutvikling i dag - {{ getDisplayCity() }}
         </h2>
 
-        <div class="chart-container">
+        <div class="chart-container q-mb-xl">
           <canvas ref="localCanvasRef" style="display: block; width: 100%; height: 100%"></canvas>
         </div>
 
-        <div class="q-mt-xl">
-          <h3 class="text-h6 q-mb-lg">Prissammendrag</h3>
-          <div class="row q-gutter-md">
-            <div class="col-12 col-sm-6 col-md">
-              <q-card class="price-card glass-card lowest-price">
-                <q-card-section>
-                  <div class="card-icon">
-                    <q-icon name="arrow_downward" size="lg" />
-                  </div>
-                  <div class="price-value">{{ getMinPrice(prices).toFixed(2) }}</div>
-                  <div class="price-unit">kr/kWh</div>
-                  <div class="price-label">Laveste pris</div>
-                  <div class="price-time">
-                    <q-icon name="schedule" size="xs" />
-                    {{ getMinPriceTime(prices) }}
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
-
-            <div class="col-12 col-sm-6 col-md">
-              <q-card class="price-card glass-card highest-price">
-                <q-card-section>
-                  <div class="card-icon">
-                    <q-icon name="arrow_upward" size="lg" />
-                  </div>
-                  <div class="price-value">{{ getMaxPrice(prices).toFixed(2) }}</div>
-                  <div class="price-unit">kr/kWh</div>
-                  <div class="price-label">Høyeste pris</div>
-                  <div class="price-time">
-                    <q-icon name="schedule" size="xs" />
-                    {{ getMaxPriceTime(prices) }}
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
-
-            <div class="col-12 col-sm-6 col-md">
-              <q-card class="price-card glass-card current-price">
-                <q-card-section>
-                  <div class="card-icon">
-                    <q-icon name="schedule" size="lg" />
-                  </div>
-                  <div class="price-value">{{ getCurrentPrice(prices).toFixed(2) }}</div>
-                  <div class="price-unit">kr/kWh</div>
-                  <div class="price-label">Nåværende pris</div>
-                  <div class="price-time">
-                    <q-icon name="access_time" size="xs" />
-                    Nå {{ new Date().getHours() }}:00
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
-
-            <div class="col-12 col-sm-6 col-md">
-              <q-card class="price-card glass-card average-price">
-                <q-card-section>
-                  <div class="card-icon">
-                    <q-icon name="insights" size="lg" />
-                  </div>
-                  <div class="price-value">{{ getAvgPrice(prices).toFixed(2) }}</div>
-                  <div class="price-unit">kr/kWh</div>
-                  <div class="price-label">Gjennomsnitt</div>
-                  <div class="price-time">
-                    <q-icon name="hourglass_empty" size="xs" />
-                    24 timer
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
-
-            <div class="col-12 col-sm-6 col-md">
-              <q-card class="price-card glass-card difference-price">
-                <q-card-section>
-                  <div class="card-icon">
-                    <q-icon name="trending_flat" size="lg" />
-                  </div>
-                  <div class="price-value">{{ getPriceDifference(prices).toFixed(2) }}</div>
-                  <div class="price-unit">kr/kWh</div>
-                  <div class="price-label">Forskjell</div>
-                  <div class="price-time">
-                    <q-icon name="compare_arrows" size="xs" />
-                    Høy - Lav
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
-          </div>
-        </div>
+        <PriceSummary :prices="prices" />
       </div>
 
       <div v-if="isLoading" class="loading-state q-mt-lg q-pa-xl text-center">
@@ -152,7 +65,17 @@
         <p class="q-mt-md text-subtitle1">Laster priser...</p>
       </div>
 
-      <q-banner v-if="hasError" class="error-banner glass-card q-mt-lg" rounded>
+      <q-banner v-if="loadingTakingLong" class="glass-card q-mt-lg q-pa-lg" type="info" rounded>
+        <template v-slot:avatar>
+          <q-icon name="info" color="info" size="lg" />
+        </template>
+        <div class="text-body1"><strong>Henter data tar lengre tid enn forventet</strong></div>
+        <div class="text-body2 q-mt-sm">
+          Backend-tjenesten starter. Vennligst vent <strong>{{ formatCountdown(loadingCountdownSeconds) }}</strong>.
+        </div>
+      </q-banner>
+
+      <q-banner v-if="hasError" class="error-banner glass-card q-mt-lg q-pa-lg" rounded>
         <template v-slot:avatar>
           <q-icon name="warning" color="warning" size="lg" />
         </template>
@@ -195,125 +118,12 @@
 
 :deep(.hero-section) {
   text-align: center;
-  padding: 2rem 0;
-
-  .text-h4 {
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-  }
-}
-
-.selector-container {
-  padding: 2rem;
 }
 
 .chart-container {
   position: relative;
   height: 450px;
   width: 100%;
-  margin-bottom: 2rem;
-}
-
-.price-card {
-  text-align: center;
-  padding: 0.5rem;
-  border: 2px solid transparent;
-
-  .card-icon {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 56px;
-    height: 56px;
-    margin: 0 auto 1rem;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .price-value {
-    font-size: 2.5rem;
-    font-weight: 800;
-    line-height: 1;
-    margin-bottom: 0.25rem;
-  }
-
-  .price-unit {
-    font-size: 0.875rem;
-    opacity: 0.8;
-    margin-bottom: 0.5rem;
-  }
-
-  .price-label {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-
-  .price-time {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    font-size: 0.75rem;
-    opacity: 0.7;
-  }
-}
-
-.lowest-price {
-  .card-icon {
-    background: #10B981;
-    color: white;
-  }
-  .price-value {
-    color: #10B981;
-  }
-}
-
-.highest-price {
-  .card-icon {
-    background: #EF4444;
-    color: white;
-  }
-  .price-value {
-    color: #EF4444;
-  }
-}
-
-.current-price {
-  .card-icon {
-    background: #3B82F6;
-    color: white;
-  }
-  .price-value {
-    color: #3B82F6;
-  }
-}
-
-.average-price {
-  .card-icon {
-    background: #F59E0B;
-    color: white;
-  }
-  .price-value {
-    color: #F59E0B;
-  }
-}
-
-.difference-price {
-  .card-icon {
-    background: #8B5CF6;
-    color: white;
-  }
-  .price-value {
-    color: #8B5CF6;
-  }
-}
-
-// Dark mode adjustments
-.body--dark {
-  .price-value {
-    filter: brightness(1.3);
-  }
 }
 
 // Action Cards
@@ -345,8 +155,6 @@
 }
 
 .error-banner {
-  padding: 1.5rem;
-
   a {
     text-decoration: none;
     font-weight: 600;
@@ -368,14 +176,14 @@
   }
 
   :deep(tbody tr:hover) {
-    background: rgba(0, 217, 192, 0.05);
+    background: rgba($primary, 0.05);
   }
 }
 
 // Responsive adjustments
 @media (max-width: 768px) {
   :deep(.hero-section) {
-    padding: 1rem 0;
+    // padding already handled by q-py-md class
 
     .text-h4 {
       font-size: 1.75rem;
@@ -385,21 +193,16 @@
   .chart-container {
     height: 300px;
   }
-
-  .price-card {
-    .price-value {
-      font-size: 2rem;
-    }
-  }
 }
 </style>
 
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue';
+import { ref, nextTick, onMounted, watch } from 'vue';
 import { api } from 'boot/axios';
 import FooterSection from 'src/components/FooterSection.vue';
 import HeroSection from 'src/components/HeroSection.vue';
 import NavSection from 'src/components/NavSection.vue';
+import PriceSummary from 'src/components/PriceSummary.vue';
 import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
 import { useChartServices } from 'src/scripts/ChartScript';
 
@@ -410,17 +213,17 @@ const prices = ref<Price[]>([]);
 const isTaxIncluded = ref(false);
 const isLoading = ref(false);
 const hasError = ref(false);
+const countdownSeconds = ref(180); // 3 minutes for error state
+const loadingCountdownSeconds = ref(0); // Countdown for loading taking too long
+const loadingTakingLong = ref(false); // Track if loading takes more than 2 seconds
+let countdownInterval: ReturnType<typeof setInterval> | null = null;
+let loadingCountdownInterval: ReturnType<typeof setInterval> | null = null;
+let loadingTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
 // Use table services
 const {
   areaOptions,
   filteredCityOptions,
-  getMinPrice,
-  getMaxPrice,
-  getAvgPrice,
-  getPriceDifference,
-  getMinPriceTime,
-  getMaxPriceTime,
 } = useTableServices(selectedArea);
 
 // Simplified columns for today's view
@@ -431,27 +234,62 @@ const simplifiedColumns = [
     format: (val: number) => val.toFixed(3) },
 ];
 
-// Function to get current price based on current hour
-function getCurrentPrice(prices: Price[]): number {
-  if (!prices.length) return 0;
-
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentTime = `${currentHour.toString().padStart(2, '0')}:00`;
-
-  // Find price for current hour
-  const currentPriceEntry = prices.find((price) => {
-    if (!price.time_start) return false;
-    const priceHour = price.time_start.slice(11, 16); // Extract HH:MM from time_start
-    return priceHour === currentTime;
-  });
-
-  return currentPriceEntry ? currentPriceEntry.NOK_per_kWh : 0;
-}
-
 // Use chart services
 const { chartCanvas, createChart } = useChartServices();
 const localCanvasRef = ref<HTMLCanvasElement | null>(null);
+
+// Function to format countdown display (MM:SS)
+function formatCountdown(seconds: number): string {
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Watch for error state changes to start/stop countdown
+watch(hasError, (newValue) => {
+  if (newValue) {
+    countdownSeconds.value = 180; // Reset to 3 minutes
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      countdownSeconds.value--;
+      if (countdownSeconds.value <= 0) {
+        if (countdownInterval) clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+    }, 1000);
+  } else {
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+});
+
+// Watch for loading state changes to show alert if taking more than 2 seconds
+watch(isLoading, (newValue) => {
+  if (newValue) {
+    loadingTakingLong.value = false;
+    if (loadingTimeoutId) clearTimeout(loadingTimeoutId);
+    if (loadingCountdownInterval) clearInterval(loadingCountdownInterval);
+    loadingTimeoutId = setTimeout(() => {
+      loadingTakingLong.value = true;
+      // Start countdown from 60 seconds when banner appears
+      loadingCountdownSeconds.value = 60;
+      if (loadingCountdownInterval) clearInterval(loadingCountdownInterval);
+      loadingCountdownInterval = setInterval(() => {
+        loadingCountdownSeconds.value--;
+        if (loadingCountdownSeconds.value <= 0) {
+          if (loadingCountdownInterval) clearInterval(loadingCountdownInterval);
+          loadingCountdownInterval = null;
+        }
+      }, 1000);
+    }, 2000);
+  } else {
+    loadingTakingLong.value = false;
+    if (loadingTimeoutId) clearTimeout(loadingTimeoutId);
+    if (loadingCountdownInterval) clearInterval(loadingCountdownInterval);
+    loadingTimeoutId = null;
+    loadingCountdownInterval = null;
+  }
+});
 
 async function fetchTodaysPrices() {
   const storedTaxPreference = localStorage.getItem('isTaxIncluded');

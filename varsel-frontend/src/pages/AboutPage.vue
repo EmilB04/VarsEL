@@ -5,7 +5,7 @@
     </header>
 
     <main>
-      <HeroSection title="Om VarsEL" description="Din smarte partner for strømforbruk">
+      <HeroSection title="Om VarsEL" description="Din smarte partner for strømforbruk" class="q-py-xl">
       <template #prepend>
         <div class="hero-icon q-mb-md">
         <q-icon name="bolt" size="80px" color="primary" />
@@ -231,15 +231,9 @@
 
 :deep(.hero-section) {
   text-align: center;
-  padding: 3rem 0;
 
   .hero-icon {
     animation: pulse 2s infinite;
-  }
-
-  .text-h4 {
-    font-weight: 800;
-    margin-bottom: 0.5rem;
   }
 }
 
@@ -287,7 +281,7 @@
         content: '✓';
         position: absolute;
         left: 0;
-        color: #10B981;
+        color: $positive;
         font-weight: bold;
         font-size: 1.2rem;
       }
@@ -306,20 +300,14 @@
 }
 
 .dev-icon {
-  background: linear-gradient(135deg, #00D9C0, #6366F1);
+  background: linear-gradient(135deg, $primary, $secondary);
   border-radius: 50%;
   padding: 1rem;
   color: white;
 }
 
 @media (max-width: 768px) {
-  :deep(.hero-section) {
-    padding: 2rem 0;
-
-    .hero-icon .q-icon {
-      font-size: 60px;
-    }
-  }
+  // spacing handled via classes
 }
 </style>
 

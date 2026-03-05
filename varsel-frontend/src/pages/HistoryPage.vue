@@ -4,7 +4,7 @@
       <NavSection />
     </header>
     <main>
-      <HeroSection title="Prishistorikk" description="Utforsk og analyser tidligere strømpriser" />
+      <HeroSection title="Prishistorikk" description="Utforsk og analyser tidligere strømpriser" class="q-py-xl" />
 
       <q-form @submit.prevent="fetchPrices">
         <div class="selector-container glass-card q-pa-lg q-mb-lg">
@@ -177,99 +177,11 @@
           Prisutvikling i {{ getDisplayCity() }}
         </h2>
 
-        <div class="chart-container">
+        <div class="chart-container q-mb-xl">
           <canvas ref="chartCanvas" style="display: block; width: 100%; height: 100%"></canvas>
         </div>
 
-        <div class="q-mt-xl">
-          <h3 class="text-h6 q-mb-lg">Prissammendrag</h3>
-          <div class="row q-gutter-md">
-            <div class="col-12 col-sm-6 col-md">
-              <q-card class="price-card glass-card lowest-price">
-                <q-card-section>
-                  <div class="card-icon">
-                    <q-icon name="arrow_downward" size="lg" />
-                  </div>
-                  <div class="price-value">{{ getMinPrice(prices).toFixed(2) }}</div>
-                  <div class="price-unit">kr/kWh</div>
-                  <div class="price-label">Laveste pris</div>
-                  <div class="price-time">
-                    <q-icon name="schedule" size="xs" />
-                    {{ getMinPriceTime(prices) }}
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
-
-            <div class="col-12 col-sm-6 col-md">
-              <q-card class="price-card glass-card highest-price">
-                <q-card-section>
-                  <div class="card-icon">
-                    <q-icon name="arrow_upward" size="lg" />
-                  </div>
-                  <div class="price-value">{{ getMaxPrice(prices).toFixed(2) }}</div>
-                  <div class="price-unit">kr/kWh</div>
-                  <div class="price-label">Høyeste pris</div>
-                  <div class="price-time">
-                    <q-icon name="schedule" size="xs" />
-                    {{ getMaxPriceTime(prices) }}
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
-
-            <div class="col-12 col-sm-6 col-md">
-              <q-card class="price-card glass-card difference-price">
-                <q-card-section>
-                  <div class="card-icon">
-                    <q-icon name="trending_flat" size="lg" />
-                  </div>
-                  <div class="price-value">{{ getPriceDifference(prices).toFixed(2) }}</div>
-                  <div class="price-unit">kr/kWh</div>
-                  <div class="price-label">Forskjell</div>
-                  <div class="price-time">
-                    <q-icon name="compare_arrows" size="xs" />
-                    Høy - Lav
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
-
-            <div class="col-12 col-sm-6 col-md">
-              <q-card class="price-card glass-card average-price">
-                <q-card-section>
-                  <div class="card-icon">
-                    <q-icon name="insights" size="lg" />
-                  </div>
-                  <div class="price-value">{{ getAvgPrice(prices).toFixed(2) }}</div>
-                  <div class="price-unit">kr/kWh</div>
-                  <div class="price-label">Gjennomsnitt</div>
-                  <div class="price-time">
-                    <q-icon name="hourglass_empty" size="xs" />
-                    {{ prices.length }} timer
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
-
-            <div class="col-12 col-sm-6 col-md">
-              <q-card class="price-card glass-card current-price">
-                <q-card-section>
-                  <div class="card-icon">
-                    <q-icon name="schedule" size="lg" />
-                  </div>
-                  <div class="price-value">{{ getCurrentPrice(prices).toFixed(2) }}</div>
-                  <div class="price-unit">kr/kWh</div>
-                  <div class="price-label">Nåværende pris</div>
-                  <div class="price-time">
-                    <q-icon name="access_time" size="xs" />
-                    Nå {{ new Date().getHours() }}:00
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
-          </div>
-        </div>
+        <PriceSummary :prices="prices" />
       </div>
 
       <q-table
@@ -298,12 +210,6 @@
 
 :deep(.hero-section) {
   text-align: center;
-  padding: 2rem 0;
-
-  .text-h4 {
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-  }
 }
 
 .selector-container {
@@ -319,10 +225,10 @@
   gap: 0.5rem;
 
   .date-nav-btn {
-    background: rgba(0, 217, 192, 0.1);
+    background: rgba($primary, 0.1);
 
     &:hover {
-      background: rgba(0, 217, 192, 0.2);
+      background: rgba($primary, 0.2);
     }
   }
 }
@@ -338,120 +244,6 @@
   position: relative;
   height: 450px;
   width: 100%;
-  margin-bottom: 2rem;
-}
-
-// Reuse price card styles from IndexPage
-.price-card {
-  text-align: center;
-  padding: 0.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 2px solid transparent;
-
-  &:hover {
-    transform: translateY(-4px) scale(1.02);
-    border-color: currentColor;
-  }
-
-  .card-icon {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 56px;
-    height: 56px;
-    margin: 0 auto 1rem;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .price-value {
-    font-size: 2.5rem;
-    font-weight: 800;
-    line-height: 1;
-    margin-bottom: 0.25rem;
-  }
-
-  .price-unit {
-    font-size: 0.875rem;
-    opacity: 0.8;
-    margin-bottom: 0.5rem;
-  }
-
-  .price-label {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-
-  .price-time {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    font-size: 0.75rem;
-    opacity: 0.7;
-  }
-}
-
-.lowest-price {
-  .card-icon {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-  }
-
-  .price-value {
-    color: #10b981;
-  }
-}
-
-.highest-price {
-  .card-icon {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-  }
-
-  .price-value {
-    color: #ef4444;
-  }
-}
-
-.current-price {
-  .card-icon {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
-  }
-
-  .price-value {
-    color: #3b82f6;
-  }
-}
-
-.average-price {
-  .card-icon {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: white;
-  }
-
-  .price-value {
-    color: #f59e0b;
-  }
-}
-
-.difference-price {
-  .card-icon {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-    color: white;
-  }
-
-  .price-value {
-    color: #8b5cf6;
-  }
-}
-
-.body--dark {
-  .price-value {
-    filter: brightness(1.3);
-  }
 }
 
 // Modern Table
@@ -483,12 +275,6 @@
     height: 300px;
   }
 
-  .price-card {
-    .price-value {
-      font-size: 2rem;
-    }
-  }
-
   .action-buttons {
     flex-direction: column;
 
@@ -500,15 +286,16 @@
 </style>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, computed } from 'vue';
+import { ref, watch, nextTick, computed, onMounted } from 'vue';
 import { api } from 'boot/axios';
 import FooterSection from 'src/components/FooterSection.vue';
 import HeroSection from 'src/components/HeroSection.vue';
 import NavSection from 'src/components/NavSection.vue';
+import PriceSummary from 'src/components/PriceSummary.vue';
 import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
 import { useChartServices } from 'src/scripts/ChartScript';
 
-// Reactive state variables - all start empty
+// Reactive state variables - initialized with saved values or defaults
 const selectedArea = ref<string | null>(null);
 const selectedCity = ref<string | null>(null);
 const date = ref<string>('');
@@ -517,37 +304,51 @@ const endHour = ref<number | null>(null);
 const prices = ref<Price[]>([]);
 const isTaxIncluded = ref(false);
 
+// Flag to track if we're currently restoring from storage
+const isRestoringFilters = ref(false);
+
+// Filter state key for localStorage
+const HISTORY_FILTERS_KEY = 'historyPageFilters';
+
+// Function to save filter state to localStorage
+function saveFiltersToStorage() {
+  const filters = {
+    selectedArea: selectedArea.value,
+    selectedCity: selectedCity.value,
+    date: date.value,
+    startHour: startHour.value,
+    endHour: endHour.value,
+  };
+  localStorage.setItem(HISTORY_FILTERS_KEY, JSON.stringify(filters));
+}
+
+// Function to restore filter state from localStorage
+function restoreFiltersFromStorage() {
+  isRestoringFilters.value = true;
+  const stored = localStorage.getItem(HISTORY_FILTERS_KEY);
+  if (stored) {
+    try {
+      const filters = JSON.parse(stored);
+      selectedArea.value = filters.selectedArea || null;
+      selectedCity.value = filters.selectedCity || null;
+      date.value = filters.date || '';
+      startHour.value = filters.startHour || null;
+      endHour.value = filters.endHour || null;
+    } catch (err) {
+      console.error('Error restoring filters:', err);
+    }
+  }
+  isRestoringFilters.value = false;
+}
+
 // Use table services with a computed ref that provides a default value
 const selectedAreaForServices = computed(() => selectedArea.value || 'NO1');
 const {
   areaOptions,
   columns,
   filteredCityOptions,
-  getMinPrice,
-  getMaxPrice,
-  getAvgPrice,
-  getPriceDifference,
-  getMinPriceTime,
-  getMaxPriceTime,
 } = useTableServices(selectedAreaForServices);
 
-// Function to get current price based on current hour
-function getCurrentPrice(prices: Price[]): number {
-  if (!prices.length) return 0;
-
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentTime = `${currentHour.toString().padStart(2, '0')}:00`;
-
-  // Find price for current hour
-  const currentPriceEntry = prices.find((price) => {
-    if (!price.time_start) return false;
-    const priceHour = price.time_start.slice(11, 16); // Extract HH:MM from time_start
-    return priceHour === currentTime;
-  });
-
-  return currentPriceEntry ? currentPriceEntry.NOK_per_kWh : 0;
-}
 
 // Use chart services
 const { chartCanvas, createChart } = useChartServices();
@@ -630,7 +431,28 @@ async function fetchPrices() {
 
 // Watch for changes in selectedArea to reset city selection
 watch(selectedArea, () => {
-  selectedCity.value = null;
+  // Only reset city if user manually changed area (not during restore)
+  if (!isRestoringFilters.value) {
+    selectedCity.value = null;
+  }
+  saveFiltersToStorage();
+});
+
+// Watch all filter changes and save to localStorage
+watch(selectedCity, () => saveFiltersToStorage());
+watch(date, () => saveFiltersToStorage());
+watch(startHour, () => saveFiltersToStorage());
+watch(endHour, () => saveFiltersToStorage());
+
+// Restore filters on component mount
+onMounted(async () => {
+  restoreFiltersFromStorage();
+
+  // Auto-fetch if required filters are restored
+  if (selectedArea.value && date.value) {
+    await nextTick();
+    void fetchPrices();
+  }
 });
 
 // No auto-fetch on mount - user must manually fetch prices
@@ -649,10 +471,13 @@ function getDisplayCity(): string {
 
 // Function to clear all filters and reset to defaults
 function clearFilters() {
+  selectedArea.value = null;
   selectedCity.value = null;
+  date.value = '';
   startHour.value = null;
   endHour.value = null;
   prices.value = [];
+  localStorage.removeItem(HISTORY_FILTERS_KEY);
   // Don't auto-fetch after clearing filters
 }
 
