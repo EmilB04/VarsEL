@@ -286,7 +286,7 @@
 </style>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, computed } from 'vue';
+import { ref, watch, nextTick, computed, onMounted } from 'vue';
 import { api } from 'boot/axios';
 import FooterSection from 'src/components/FooterSection.vue';
 import HeroSection from 'src/components/HeroSection.vue';
@@ -295,7 +295,7 @@ import PriceSummary from 'src/components/PriceSummary.vue';
 import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
 import { useChartServices } from 'src/scripts/ChartScript';
 
-// Reactive state variables - all start empty
+// Reactive state variables - initialized with saved values or defaults
 const selectedArea = ref<string | null>(null);
 const selectedCity = ref<string | null>(null);
 const date = ref<string>('');
@@ -303,6 +303,43 @@ const startHour = ref<number | null>(null);
 const endHour = ref<number | null>(null);
 const prices = ref<Price[]>([]);
 const isTaxIncluded = ref(false);
+
+// Flag to track if we're currently restoring from storage
+const isRestoringFilters = ref(false);
+
+// Filter state key for localStorage
+const HISTORY_FILTERS_KEY = 'historyPageFilters';
+
+// Function to save filter state to localStorage
+function saveFiltersToStorage() {
+  const filters = {
+    selectedArea: selectedArea.value,
+    selectedCity: selectedCity.value,
+    date: date.value,
+    startHour: startHour.value,
+    endHour: endHour.value,
+  };
+  localStorage.setItem(HISTORY_FILTERS_KEY, JSON.stringify(filters));
+}
+
+// Function to restore filter state from localStorage
+function restoreFiltersFromStorage() {
+  isRestoringFilters.value = true;
+  const stored = localStorage.getItem(HISTORY_FILTERS_KEY);
+  if (stored) {
+    try {
+      const filters = JSON.parse(stored);
+      selectedArea.value = filters.selectedArea || null;
+      selectedCity.value = filters.selectedCity || null;
+      date.value = filters.date || '';
+      startHour.value = filters.startHour || null;
+      endHour.value = filters.endHour || null;
+    } catch (err) {
+      console.error('Error restoring filters:', err);
+    }
+  }
+  isRestoringFilters.value = false;
+}
 
 // Use table services with a computed ref that provides a default value
 const selectedAreaForServices = computed(() => selectedArea.value || 'NO1');
@@ -394,7 +431,28 @@ async function fetchPrices() {
 
 // Watch for changes in selectedArea to reset city selection
 watch(selectedArea, () => {
-  selectedCity.value = null;
+  // Only reset city if user manually changed area (not during restore)
+  if (!isRestoringFilters.value) {
+    selectedCity.value = null;
+  }
+  saveFiltersToStorage();
+});
+
+// Watch all filter changes and save to localStorage
+watch(selectedCity, () => saveFiltersToStorage());
+watch(date, () => saveFiltersToStorage());
+watch(startHour, () => saveFiltersToStorage());
+watch(endHour, () => saveFiltersToStorage());
+
+// Restore filters on component mount
+onMounted(async () => {
+  restoreFiltersFromStorage();
+
+  // Auto-fetch if required filters are restored
+  if (selectedArea.value && date.value) {
+    await nextTick();
+    void fetchPrices();
+  }
 });
 
 // No auto-fetch on mount - user must manually fetch prices
@@ -413,10 +471,13 @@ function getDisplayCity(): string {
 
 // Function to clear all filters and reset to defaults
 function clearFilters() {
+  selectedArea.value = null;
   selectedCity.value = null;
+  date.value = '';
   startHour.value = null;
   endHour.value = null;
   prices.value = [];
+  localStorage.removeItem(HISTORY_FILTERS_KEY);
   // Don't auto-fetch after clearing filters
 }
 
