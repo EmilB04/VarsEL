@@ -8,6 +8,7 @@
       <HeroSection
         title="Smarte prisvarsler"
         description="Få beskjed når strømmen er billig eller når prisen endrer seg"
+        class="q-py-xl"
       />
 
       <div class="row q-gutter-xl justify-center q-mb-xl">
@@ -196,7 +197,7 @@
         </div>
       </div>
 
-      <div class="active-alerts-section">
+      <div class="active-alerts-section q-mt-xl">
         <h2 class="text-h5 q-mb-lg text-center">
           <q-icon name="notifications" class="q-mr-sm" />
           Aktive varsler
@@ -304,7 +305,7 @@
 
         <div
           v-if="savedPriceAlerts.length === 0 && savedCheapestAlerts.length === 0"
-          class="no-alerts-message"
+          class="no-alerts-message q-mx-auto q-mt-xl text-center"
         >
           <q-card class="glass-card text-center">
             <q-card-section class="q-pa-xl">
@@ -328,12 +329,6 @@
 <style lang="scss" scoped>
 :deep(.hero-section) {
   text-align: center;
-  padding: 2rem 0;
-
-  .text-h4 {
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-  }
 }
 
 .alert-setup-card {
@@ -356,12 +351,12 @@
     flex-shrink: 0;
 
     &.primary-icon {
-      background: #00d9c0;
+      background: $primary;
       color: white;
     }
 
     &.secondary-icon {
-      background: #6366f1;
+      background: $secondary;
       color: white;
     }
   }
@@ -376,13 +371,7 @@
   }
 }
 
-.toggle-wrapper {
-  padding: 0.5rem 0;
-}
-
 .active-alerts-section {
-  margin-top: 4rem;
-
   h2 {
     display: flex;
     align-items: center;
@@ -409,12 +398,11 @@
     .alert-item {
       padding: 1rem;
       border-radius: 12px;
-      margin-bottom: 0.5rem;
       background: rgba(0, 0, 0, 0.02);
       transition: all 0.2s ease;
 
       &:hover {
-        background: rgba(0, 217, 192, 0.08);
+        background: rgba($primary, 0.08);
       }
 
       .alert-location {
@@ -422,7 +410,6 @@
         align-items: center;
         font-weight: 600;
         font-size: 1rem;
-        margin-bottom: 0.25rem;
       }
 
       .alert-details {
@@ -444,29 +431,18 @@
     background: rgba(255, 255, 255, 0.05);
 
     &:hover {
-      background: rgba(0, 217, 192, 0.1);
+      background: rgba($primary, 0.1);
     }
   }
 }
 
 .no-alerts-message {
-  max-width: 600px;
-  margin: 2rem auto 0;
-
   .q-icon {
     opacity: 0.3;
   }
 }
 
 @media (max-width: 768px) {
-  :deep(.hero-section) {
-    padding: 1rem 0;
-
-    .text-h4 {
-      font-size: 1.75rem;
-    }
-  }
-
   .alert-setup-card .card-header {
     flex-direction: column;
     text-align: center;

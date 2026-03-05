@@ -1,6 +1,6 @@
 <template>
   <div class="switch-container" :class="{ 'switch-active': isTaxIncluded }">
-    <div class="switch-content">
+    <div class="switch-content q-mb-md">
       <div class="switch-options">
         <div
           class="switch-option"
@@ -69,7 +69,6 @@ onMounted(() => {
   background: rgba(0, 0, 0, 0.05);
   border-radius: 16px;
   padding: 0.5rem;
-  margin-bottom: 1rem;
 }
 
 .body--dark .switch-content {
@@ -114,9 +113,9 @@ onMounted(() => {
   }
 
   &.active {
-    background: #6366F1;
+    background: $secondary;
     color: white;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba($secondary, 0.3);
 
     .q-icon,
     .option-label {
@@ -139,8 +138,8 @@ onMounted(() => {
 }
 
 .refresh-note {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba($warning, 0.1);
+  border: 1px solid rgba($warning, 0.3);
 
   :deep(.q-banner__content) {
     padding: 0.5rem;
@@ -148,6 +147,6 @@ onMounted(() => {
 }
 
 .body--dark .refresh-note {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba($warning, 0.15);
 }
 </style>

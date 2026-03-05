@@ -1,6 +1,6 @@
 <template>
   <div class="switch-container" :class="{ 'switch-active': isDark }">
-    <div class="switch-content">
+    <div class="switch-content q-mb-md">
       <div class="switch-options">
         <div
           class="switch-option"
@@ -82,7 +82,6 @@ function setLight() {
   background: rgba(0, 0, 0, 0.05);
   border-radius: 16px;
   padding: 0.5rem;
-  margin-bottom: 1rem;
 }
 
 .body--dark .switch-content {
@@ -127,9 +126,9 @@ function setLight() {
   }
 
   &.active {
-    background: #00D9C0;
+    background: $primary;
     color: white;
-    box-shadow: 0 4px 12px rgba(0, 217, 192, 0.3);
+    box-shadow: 0 4px 12px rgba($primary, 0.3);
 
     .q-icon,
     .option-label {

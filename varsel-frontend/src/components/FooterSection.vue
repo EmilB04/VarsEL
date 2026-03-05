@@ -66,7 +66,7 @@
     opacity: 0.8;
 
     strong {
-      background: linear-gradient(135deg, #00D9C0, #6366F1);
+      background: linear-gradient(135deg, $primary, $secondary);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;

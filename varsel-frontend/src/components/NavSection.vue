@@ -102,7 +102,7 @@
   }
 
   &:hover {
-    background: rgba(0, 217, 192, 0.1);
+    background: rgba($primary, 0.1);
 
     .nav-icon {
       opacity: 1;
@@ -112,7 +112,7 @@
   &.router-link-active {
     background-color: $primary;
     color: white;
-    box-shadow: 0 4px 12px rgba(0, 217, 192, 0.3);
+    box-shadow: 0 4px 12px rgba($primary, 0.3);
 
     .nav-icon {
       opacity: 1;
