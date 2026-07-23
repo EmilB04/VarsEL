@@ -4,24 +4,23 @@
       <NavSection />
     </header>
     <main>
-      <HeroSection title="Prishistorikk" description="Utforsk og analyser tidligere strømpriser" class="q-py-xl" />
+      <HeroSection :title="t('history.heroTitle')" :description="t('history.heroDescription')" class="q-py-xl" />
 
       <q-form @submit.prevent="fetchPrices">
         <div class="selector-container glass-card q-pa-lg q-mb-lg">
           <h3 class="text-h6 q-mb-md">
             <q-icon name="location_on" class="q-mr-sm" />
-            Velg område
+            {{ t('history.selectAreaSection') }}
           </h3>
           <div class="row q-gutter-md">
             <q-select
               v-model="selectedArea"
               :options="areaOptions"
-              label="Område"
+              :label="t('history.area')"
               class="col-12 col-md"
               emit-value
               map-options
               filled
-              standout
             >
               <template v-slot:prepend>
                 <q-icon name="map" />
@@ -31,13 +30,12 @@
             <q-select
               v-model="selectedCity"
               :options="filteredCityOptions"
-              label="By (valgfritt)"
+              :label="t('history.selectCity')"
               class="col-12 col-md"
               emit-value
               map-options
               :disable="!selectedArea"
               filled
-              standout
             >
               <template v-slot:prepend>
                 <q-icon name="apartment" />
@@ -49,20 +47,32 @@
         <div class="selector-container glass-card q-pa-lg q-mb-lg">
           <h3 class="text-h6 q-mb-md">
             <q-icon name="event" class="q-mr-sm" />
-            Velg dato
+            {{ t('history.selectDateSection') }}
           </h3>
           <div class="row q-gutter-md items-end">
             <q-input
-              v-model="date"
-              label="Dato"
-              type="date"
-              :max="maxAllowedDate"
-              class="col-12 col-md"
+              :model-value="formattedDate"
+              :label="t('history.date')"
+              class="col-12 col-md date-display-input"
               filled
-              standout
+              readonly
+              @click="datePopupRef?.show()"
             >
               <template v-slot:prepend>
-                <q-icon name="calendar_today" />
+                <q-icon name="calendar_today" class="cursor-pointer">
+                  <q-popup-proxy ref="datePopupRef" cover transition-show="scale" transition-hide="scale">
+                    <q-date
+                      v-model="date"
+                      mask="YYYY-MM-DD"
+                      :options="isDateSelectable"
+                      :locale="dateLocale"
+                      today-btn
+                      flat
+                      color="primary"
+                      @update:model-value="onCalendarPick"
+                    />
+                  </q-popup-proxy>
+                </q-icon>
               </template>
             </q-input>
 
@@ -70,18 +80,32 @@
               <q-btn
                 flat
                 round
+                size="lg"
                 icon="chevron_left"
                 color="primary"
                 @click="goToPreviousDay"
                 :disable="!date"
                 class="date-nav-btn"
               >
-                <q-tooltip>Forrige dag</q-tooltip>
+                <q-tooltip>{{ t('history.previousDay') }}</q-tooltip>
               </q-btn>
 
               <q-btn
                 flat
                 round
+                size="lg"
+                icon="today"
+                color="primary"
+                @click="goToToday"
+                class="date-nav-btn"
+              >
+                <q-tooltip>{{ t('history.today') }}</q-tooltip>
+              </q-btn>
+
+              <q-btn
+                flat
+                round
+                size="lg"
                 icon="chevron_right"
                 color="primary"
                 @click="goToNextDay"
@@ -89,7 +113,7 @@
                 class="date-nav-btn"
               >
                 <q-tooltip>{{
-                  isNextDayDisabled ? 'Kan bare se en dag frem' : 'Neste dag'
+                  isNextDayDisabled ? t('history.nextDayDisabled') : t('history.nextDay')
                 }}</q-tooltip>
               </q-btn>
             </div>
@@ -99,24 +123,18 @@
         <div class="selector-container glass-card q-pa-lg q-mb-lg">
           <h3 class="text-h6 q-mb-md">
             <q-icon name="schedule" class="q-mr-sm" />
-            Tidsfilter (valgfritt)
+            {{ t('history.timeFilterSection') }}
           </h3>
           <div class="row q-gutter-md">
             <q-select
               v-model="startHour"
-              :options="
-                [...Array(25).keys()].map((h) => ({
-                  label: `${h.toString().padStart(2, '0')}:00`,
-                  value: h,
-                }))
-              "
-              label="Fra klokkeslett"
+              :options="hourOptions"
+              :label="t('history.startHour')"
               class="col-12 col-md"
               emit-value
               map-options
               clearable
               filled
-              standout
             >
               <template v-slot:prepend>
                 <q-icon name="access_time" />
@@ -125,19 +143,13 @@
 
             <q-select
               v-model="endHour"
-              :options="
-                [...Array(25).keys()].map((h) => ({
-                  label: `${h.toString().padStart(2, '0')}:00`,
-                  value: h,
-                }))
-              "
-              label="Til klokkeslett"
+              :options="hourOptions"
+              :label="t('history.endHour')"
               class="col-12 col-md"
               emit-value
               map-options
               clearable
               filled
-              standout
             >
               <template v-slot:prepend>
                 <q-icon name="schedule" />
@@ -148,18 +160,19 @@
 
         <div class="action-buttons q-mb-xl">
           <q-btn
-            label="Hent priser"
+            :label="t('history.fetchButton')"
             type="submit"
             color="primary"
             size="lg"
             :disable="!selectedArea || !date"
+            :loading="isLoading"
             icon="search"
             unelevated
             no-caps
           />
           <q-btn
             v-if="hasActiveFilters"
-            label="Fjern filtre"
+            :label="t('history.clearFilters')"
             type="button"
             color="negative"
             size="lg"
@@ -174,15 +187,45 @@
       <div v-if="prices.length" class="q-mt-lg">
         <h2 class="text-h5 q-mb-lg">
           <q-icon name="trending_up" size="sm" class="q-mr-sm" />
-          Prisutvikling i {{ getDisplayCity() }}
+          {{ t('history.chartHeading', { city: getDisplayCity() }) }}
         </h2>
 
         <div class="chart-container q-mb-xl">
           <canvas ref="chartCanvas" style="display: block; width: 100%; height: 100%"></canvas>
         </div>
 
-        <PriceSummary :prices="prices" />
+        <PriceSummary :prices="prices" @highlight="setHighlight" />
       </div>
+
+      <PriceLoadingSkeleton v-if="isLoading" />
+
+      <q-banner v-if="loadingTakingLong" class="glass-card q-mt-lg q-pa-lg" type="info" rounded>
+        <template v-slot:avatar>
+          <q-icon name="info" color="info" size="lg" />
+        </template>
+        <div class="text-body1"><strong>{{ t('common.loadingTakingLongTitle') }}</strong></div>
+        <div class="text-body2 q-mt-sm">
+          <i18n-t keypath="common.loadingTakingLongDescription" tag="span" scope="global">
+            <template #countdown><strong>{{ formatCountdown(loadingCountdownSeconds) }}</strong></template>
+          </i18n-t>
+        </div>
+      </q-banner>
+
+      <q-banner v-if="hasError" class="error-banner glass-card q-mt-lg q-pa-lg" rounded>
+        <template v-slot:avatar>
+          <q-icon name="warning" color="warning" size="lg" />
+        </template>
+        <div class="text-body1 q-mb-sm"><strong>{{ t('common.errorTitle') }}</strong></div>
+        <div class="text-body2 q-mb-md">
+          {{ t('common.errorDescription') }}
+        </div>
+        <a href="https://varsel-hari.onrender.com/api/prices/" target="_blank" class="text-primary">
+          https://varsel-hari.onrender.com/api/prices/
+        </a>
+        <div class="q-mt-md">
+          <q-btn :label="t('common.retry')" color="primary" @click="fetchPrices" unelevated rounded />
+        </div>
+      </q-banner>
 
       <q-table
         class="modern-table q-mt-xl"
@@ -195,7 +238,7 @@
         <template v-slot:top>
           <div class="text-h6">
             <q-icon name="table_chart" class="q-mr-sm" />
-            Detaljert prisoversikt
+            {{ t('history.tableHeading') }}
           </div>
         </template>
       </q-table>
@@ -225,11 +268,21 @@
   gap: 0.5rem;
 
   .date-nav-btn {
-    background: rgba($primary, 0.1);
+    background: color-mix(in srgb, var(--q-primary) 10%, transparent);
+    min-width: 48px;
+    min-height: 48px;
 
     &:hover {
-      background: rgba($primary, 0.2);
+      background: color-mix(in srgb, var(--q-primary) 20%, transparent);
     }
+  }
+}
+
+.date-display-input {
+  cursor: pointer;
+
+  :deep(.q-field__control) {
+    cursor: pointer;
   }
 }
 
@@ -252,13 +305,13 @@
   overflow: hidden;
 
   :deep(thead tr th) {
-    background: linear-gradient(135deg, rgba(0, 217, 192, 0.1), rgba(99, 102, 241, 0.1));
+    background: linear-gradient(135deg, color-mix(in srgb, var(--q-primary) 10%, transparent), rgba($secondary, 0.1));
     font-weight: 700;
     font-size: 0.875rem;
   }
 
   :deep(tbody tr:hover) {
-    background: rgba(0, 217, 192, 0.05);
+    background: color-mix(in srgb, var(--q-primary) 5%, transparent);
   }
 }
 
@@ -287,13 +340,36 @@
 
 <script setup lang="ts">
 import { ref, watch, nextTick, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { api } from 'boot/axios';
 import FooterSection from 'src/components/FooterSection.vue';
 import HeroSection from 'src/components/HeroSection.vue';
 import NavSection from 'src/components/NavSection.vue';
 import PriceSummary from 'src/components/PriceSummary.vue';
+import PriceLoadingSkeleton from 'src/components/PriceLoadingSkeleton.vue';
 import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
 import { useChartServices } from 'src/scripts/ChartScript';
+import { useBackendRequest, formatCountdown } from 'src/scripts/useBackendRequest';
+import { useTaxMode } from 'src/composables/useTaxMode';
+
+const { t, locale } = useI18n();
+
+// Clock times are language-invariant - shared by both the start/end hour selects
+const hourOptions = computed(() =>
+  [...Array(25).keys()].map((h) => ({ label: `${h.toString().padStart(2, '0')}:00`, value: h })),
+);
+
+// Norwegian day/month names for the q-date popup - Quasar only ships an English default.
+const NO_DATE_LOCALE = {
+  days: ['søndag', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'lørdag'],
+  daysShort: ['sø', 'ma', 'ti', 'on', 'to', 'fr', 'lø'],
+  months: ['januar', 'februar', 'mars', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'desember'],
+  monthsShort: ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'],
+  firstDayOfWeek: 1, // Monday
+};
+const dateLocale = computed(() => (locale.value === 'no-NO' ? NO_DATE_LOCALE : undefined));
+
+const datePopupRef = ref<{ show: () => void; hide: () => void } | null>(null);
 
 // Reactive state variables - initialized with saved values or defaults
 const selectedArea = ref<string | null>(null);
@@ -301,8 +377,18 @@ const selectedCity = ref<string | null>(null);
 const date = ref<string>('');
 const startHour = ref<number | null>(null);
 const endHour = ref<number | null>(null);
-const prices = ref<Price[]>([]);
-const isTaxIncluded = ref(false);
+const { isTaxIncluded } = useTaxMode();
+// Prices as returned by the backend, tax-excluded - the tax multiplier is applied
+// reactively in `prices` below, so toggling "Incl./Excl. VAT" updates instantly.
+const rawPrices = ref<Price[]>([]);
+const prices = computed<Price[]>(() =>
+  rawPrices.value.map((price) => ({
+    ...price,
+    NOK_per_kWh: isTaxIncluded.value ? price.NOK_per_kWh * 1.25 : price.NOK_per_kWh,
+  })),
+);
+
+const { isLoading, hasError, loadingTakingLong, loadingCountdownSeconds, run } = useBackendRequest();
 
 // Flag to track if we're currently restoring from storage
 const isRestoringFilters = ref(false);
@@ -351,7 +437,7 @@ const {
 
 
 // Use chart services
-const { chartCanvas, createChart } = useChartServices();
+const { chartCanvas, createChart, setHighlight } = useChartServices();
 
 // Computed property to check if there are active filters
 const hasActiveFilters = computed(() => {
@@ -377,6 +463,28 @@ const maxAllowedDate = computed(() => {
   return tomorrow.toISOString().slice(0, 10);
 });
 
+// Long, locale-aware display of the selected date in the (readonly) input -
+// the actual value stored/sent to the backend stays the plain ISO `date` ref.
+const formattedDate = computed(() => {
+  if (!date.value) return '';
+  const [year, month, day] = date.value.split('-').map(Number);
+  if (!year || !month || !day) return date.value;
+  return new Intl.DateTimeFormat(locale.value, { dateStyle: 'long' }).format(new Date(year, month - 1, day));
+});
+
+// Keeps the calendar popup from ever offering a date beyond "tomorrow".
+// Quasar always calls `options` with dates in "YYYY/MM/DD" format regardless
+// of the `mask` prop, so normalize to dashes before comparing to maxAllowedDate.
+function isDateSelectable(dateStr: string): boolean {
+  return dateStr.replace(/\//g, '-') <= maxAllowedDate.value;
+}
+
+// Closes the popup as soon as a day is picked, and keeps the same
+// "user must still press Hent priser" behavior the old native picker had.
+function onCalendarPick() {
+  datePopupRef.value?.hide();
+}
+
 async function fetchPrices() {
   // Validate required fields
   if (!selectedArea.value || !date.value) {
@@ -384,10 +492,7 @@ async function fetchPrices() {
     return;
   }
 
-  const storedTaxPreference = localStorage.getItem('isTaxIncluded');
-  isTaxIncluded.value = storedTaxPreference === 'true';
-
-  try {
+  await run(async () => {
     // Use city if chosen, else use area
     const regionParam = selectedCity.value || selectedArea.value;
     const url = `/prices/${regionParam}/${date.value}`;
@@ -404,30 +509,34 @@ async function fetchPrices() {
     // If reponse is string (from Java), parse it
     const json = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
 
-    // Enrich each object with area, city, and selected date
-    const enrichedPrices = json.prices.map((price: Price) => {
-      const adjustedPrice = isTaxIncluded.value
-        ? price.NOK_per_kWh * 1.25 // Apply tax if included
-        : price.NOK_per_kWh;
+    // Validate that the backend returned a prices array
+    if (!json || !Array.isArray(json.prices) || json.prices.length === 0) {
+      console.warn('API returned no price data or invalid format', json);
+      hasError.value = true;
+      rawPrices.value = [];
+      return;
+    }
 
-      return {
-        ...price,
-        NOK_per_kWh: adjustedPrice,
-        area: selectedArea.value,
-        city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
-        date: date.value,
-      };
-    });
-
-    prices.value = enrichedPrices;
+    // Enrich each object with area, city, and selected date (tax-excluded -
+    // `prices` applies the multiplier reactively based on the current setting)
+    rawPrices.value = json.prices.map((price: Price) => ({
+      ...price,
+      area: selectedArea.value,
+      city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
+      date: date.value,
+    }));
 
     // Create chart after data is loaded and DOM is updated
     await nextTick();
     createChart(chartCanvas.value, prices.value);
-  } catch (err) {
-    console.error('Could not fetch prices', err);
-  }
+  });
 }
+
+watch(isTaxIncluded, async () => {
+  if (!rawPrices.value.length) return;
+  await nextTick();
+  createChart(chartCanvas.value, prices.value);
+});
 
 // Watch for changes in selectedArea to reset city selection
 watch(selectedArea, () => {
@@ -476,7 +585,7 @@ function clearFilters() {
   date.value = '';
   startHour.value = null;
   endHour.value = null;
-  prices.value = [];
+  rawPrices.value = [];
   localStorage.removeItem(HISTORY_FILTERS_KEY);
   // Don't auto-fetch after clearing filters
 }
@@ -518,6 +627,15 @@ function goToNextDay() {
     if (selectedArea.value) {
       void fetchPrices();
     }
+  }
+}
+
+// Function to jump straight back to today
+function goToToday() {
+  date.value = new Date().toISOString().slice(0, 10);
+
+  if (selectedArea.value) {
+    void fetchPrices();
   }
 }
 </script>

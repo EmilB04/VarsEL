@@ -6,8 +6,8 @@
 
     <main>
       <HeroSection
-        title="Smarte prisvarsler"
-        description="Få beskjed når strømmen er billig eller når prisen endrer seg"
+        :title="t('notifications.heroTitle')"
+        :description="t('notifications.heroDescription')"
         class="q-py-xl"
       />
 
@@ -20,9 +20,9 @@
                   <q-icon name="notifications_active" size="lg" />
                 </div>
                 <div class="q-mb-lg">
-                  <h3 class="text-h6 q-mb-xs">Prisvarsel</h3>
+                  <h3 class="text-h6 q-mb-xs">{{ t('notifications.priceAlert.title') }}</h3>
                   <p class="text-body2 text-grey-7">
-                    Få varsel når strømprisen når en bestemt verdi
+                    {{ t('notifications.priceAlert.description') }}
                   </p>
                 </div>
               </div>
@@ -31,11 +31,10 @@
                 <q-select
                   v-model="priceAlert.area"
                   :options="areaOptions"
-                  label="Område"
+                  :label="t('notifications.priceAlert.area')"
                   emit-value
                   map-options
                   filled
-                  standout
                   required
                 >
                   <template v-slot:prepend>
@@ -46,12 +45,11 @@
                 <q-select
                   v-model="priceAlert.city"
                   :options="filteredCityOptions"
-                  label="By (valgfritt)"
+                  :label="t('notifications.priceAlert.city')"
                   emit-value
                   map-options
                   clearable
                   filled
-                  standout
                 >
                   <template v-slot:prepend>
                     <q-icon name="apartment" />
@@ -62,10 +60,9 @@
                   v-model.number="priceAlert.targetPrice"
                   type="number"
                   step="0.01"
-                  label="Ønsket pris (kr/kWh)"
+                  :label="t('notifications.priceAlert.targetPrice')"
                   suffix="kr/kWh"
                   filled
-                  standout
                   required
                 >
                   <template v-slot:prepend>
@@ -76,11 +73,10 @@
                 <q-select
                   v-model="priceAlert.condition"
                   :options="conditionOptions"
-                  label="Varsel når prisen er"
+                  :label="t('notifications.priceAlert.condition')"
                   emit-value
                   map-options
                   filled
-                  standout
                   required
                 >
                   <template v-slot:prepend>
@@ -91,14 +87,14 @@
                 <div class="toggle-wrapper">
                   <q-toggle
                     v-model="priceAlert.enabled"
-                    label="Aktiver prisvarsel"
+                    :label="t('notifications.priceAlert.enable')"
                     color="primary"
                     size="lg"
                   />
                 </div>
 
                 <q-btn
-                  label="Lagre prisvarsel"
+                  :label="t('notifications.priceAlert.save')"
                   type="submit"
                   color="primary"
                   icon="save"
@@ -120,9 +116,9 @@
                   <q-icon name="schedule" size="lg" />
                 </div>
                 <div class="q-mb-lg">
-                  <h3 class="text-h6 q-mb-xs">Billigste time-varsel</h3>
+                  <h3 class="text-h6 q-mb-xs">{{ t('notifications.cheapestAlert.title') }}</h3>
                   <p class="text-body2 text-grey-7">
-                    Få varsel når strømmen er billigst i løpet av dagen
+                    {{ t('notifications.cheapestAlert.description') }}
                   </p>
                 </div>
               </div>
@@ -131,11 +127,10 @@
                 <q-select
                   v-model="cheapestAlert.area"
                   :options="areaOptions"
-                  label="Område"
+                  :label="t('notifications.cheapestAlert.area')"
                   emit-value
                   map-options
                   filled
-                  standout
                   required
                 >
                   <template v-slot:prepend>
@@ -146,12 +141,11 @@
                 <q-select
                   v-model="cheapestAlert.city"
                   :options="filteredCheapestCityOptions"
-                  label="By (valgfritt)"
+                  :label="t('notifications.cheapestAlert.city')"
                   emit-value
                   map-options
                   clearable
                   filled
-                  standout
                 >
                   <template v-slot:prepend>
                     <q-icon name="apartment" />
@@ -161,11 +155,10 @@
                 <q-select
                   v-model="cheapestAlert.notificationTime"
                   :options="timeOptions"
-                  label="Tidspunkt for varsel"
+                  :label="t('notifications.cheapestAlert.notificationTime')"
                   emit-value
                   map-options
                   filled
-                  standout
                   required
                 >
                   <template v-slot:prepend>
@@ -176,14 +169,14 @@
                 <div class="toggle-wrapper">
                   <q-toggle
                     v-model="cheapestAlert.enabled"
-                    label="Aktiver billigste time-varsel"
+                    :label="t('notifications.cheapestAlert.enable')"
                     color="primary"
                     size="lg"
                   />
                 </div>
 
                 <q-btn
-                  label="Lagre billigste time-varsel"
+                  :label="t('notifications.cheapestAlert.save')"
                   type="submit"
                   color="secondary"
                   icon="save"
@@ -200,7 +193,7 @@
       <div class="active-alerts-section q-mt-xl">
         <h2 class="text-h5 q-mb-lg text-center">
           <q-icon name="notifications" class="q-mr-sm" />
-          Aktive varsler
+          {{ t('notifications.active.heading') }}
         </h2>
 
         <div class="row q-gutter-lg justify-center">
@@ -209,7 +202,7 @@
               <q-card-section>
                 <div class="card-title q-mb-md">
                   <q-icon name="notifications_active" size="md" color="primary" />
-                  <h3 class="text-h6">Prisvarsler</h3>
+                  <h3 class="text-h6">{{ t('notifications.active.priceAlertsTitle') }}</h3>
                 </div>
                 <q-list class="alerts-list">
                   <q-item
@@ -224,7 +217,7 @@
                       </q-item-label>
                       <q-item-label caption class="alert-details">
                         <q-icon name="trending_flat" size="xs" class="q-mr-xs" />
-                        Varsel når prisen er {{ alert.condition }} {{ alert.targetPrice }} kr/kWh
+                        {{ t('notifications.active.priceAlertDetail', { condition: getConditionLabel(alert.condition), price: alert.targetPrice }) }}
                       </q-item-label>
                     </q-item-section>
                     <q-item-section side class="alert-controls">
@@ -240,10 +233,10 @@
                           round
                           icon="delete"
                           color="negative"
-                          size="sm"
+                          size="md"
                           @click="deletePriceAlert(index)"
                         >
-                          <q-tooltip>Slett varsel</q-tooltip>
+                          <q-tooltip>{{ t('notifications.active.deleteTooltip') }}</q-tooltip>
                         </q-btn>
                       </div>
                     </q-item-section>
@@ -258,7 +251,7 @@
               <q-card-section>
                 <div class="card-title q-mb-md">
                   <q-icon name="schedule" size="md" color="secondary" />
-                  <h3 class="text-h6">Billigste time-varsler</h3>
+                  <h3 class="text-h6">{{ t('notifications.active.cheapestAlertsTitle') }}</h3>
                 </div>
                 <q-list class="alerts-list">
                   <q-item
@@ -273,7 +266,7 @@
                       </q-item-label>
                       <q-item-label caption class="alert-details">
                         <q-icon name="access_time" size="xs" class="q-mr-xs" />
-                        Daglig varsel kl. {{ alert.notificationTime }}
+                        {{ t('notifications.active.cheapestAlertDetail', { time: alert.notificationTime }) }}
                       </q-item-label>
                     </q-item-section>
                     <q-item-section side class="alert-controls">
@@ -289,10 +282,10 @@
                           round
                           icon="delete"
                           color="negative"
-                          size="sm"
+                          size="md"
                           @click="deleteCheapestAlert(index)"
                         >
-                          <q-tooltip>Slett varsel</q-tooltip>
+                          <q-tooltip>{{ t('notifications.active.deleteTooltip') }}</q-tooltip>
                         </q-btn>
                       </div>
                     </q-item-section>
@@ -310,9 +303,9 @@
           <q-card class="glass-card text-center">
             <q-card-section class="q-pa-xl">
               <q-icon name="notifications_off" size="80px" class="text-grey-5 q-mb-md" />
-              <h3 class="text-h5 text-grey-5 q-mb-sm">Ingen aktive varsler</h3>
+              <h3 class="text-h5 text-grey-5 q-mb-sm">{{ t('notifications.active.emptyTitle') }}</h3>
               <p class="text-body2 text-grey-6">
-                Opprett ditt første varsel ovenfor for å komme i gang
+                {{ t('notifications.active.emptyDescription') }}
               </p>
             </q-card-section>
           </q-card>
@@ -351,7 +344,7 @@
     flex-shrink: 0;
 
     &.primary-icon {
-      background: $primary;
+      background: var(--q-primary);
       color: white;
     }
 
@@ -402,7 +395,7 @@
       transition: all 0.2s ease;
 
       &:hover {
-        background: rgba($primary, 0.08);
+        background: color-mix(in srgb, var(--q-primary) 8%, transparent);
       }
 
       .alert-location {
@@ -431,7 +424,7 @@
     background: rgba(255, 255, 255, 0.05);
 
     &:hover {
-      background: rgba($primary, 0.1);
+      background: color-mix(in srgb, var(--q-primary) 10%, transparent);
     }
   }
 }
@@ -468,11 +461,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import FooterSection from 'src/components/FooterSection.vue';
 import HeroSection from 'src/components/HeroSection.vue';
 import NavSection from 'src/components/NavSection.vue';
+import { useAreaOptions } from 'src/scripts/TableScript';
 
 const $q = useQuasar();
+const { t } = useI18n();
 
 // Define interfaces
 interface PriceAlert {
@@ -510,13 +506,7 @@ const savedPriceAlerts = ref<PriceAlert[]>([]);
 const savedCheapestAlerts = ref<CheapestAlert[]>([]);
 
 // Options data
-const areaOptions = [
-  { value: 'NO1', label: 'Øst-Norge' },
-  { value: 'NO2', label: 'Sør-Norge' },
-  { value: 'NO3', label: 'Midt-Norge' },
-  { value: 'NO4', label: 'Nord-Norge' },
-  { value: 'NO5', label: 'Vest-Norge' },
-];
+const areaOptions = useAreaOptions();
 
 const cityOptions = [
   { value: 'Oslo', label: 'Oslo', area: 'NO1' },
@@ -541,11 +531,15 @@ const cityOptions = [
   { value: 'Bergen', label: 'Bergen', area: 'NO5' },
 ];
 
-const conditionOptions = [
-  { label: 'under', value: 'under' },
-  { label: 'over', value: 'over' },
-  { label: 'lik', value: 'equal' },
-];
+const conditionOptions = computed(() => [
+  { label: t('notifications.priceAlert.conditionUnder'), value: 'under' },
+  { label: t('notifications.priceAlert.conditionOver'), value: 'over' },
+  { label: t('notifications.priceAlert.conditionEqual'), value: 'equal' },
+]);
+
+function getConditionLabel(value: string): string {
+  return conditionOptions.value.find((option) => option.value === value)?.label ?? value;
+}
 
 const timeOptions = [
   { label: '01:00', value: '01:00' },
@@ -589,7 +583,7 @@ const savePriceAlert = () => {
   if (!priceAlert.value.area || !priceAlert.value.targetPrice) {
     $q.notify({
       type: 'negative',
-      message: 'Vennligst fyll ut alle påkrevde felt',
+      message: t('notifications.notify.validationError'),
     });
     return;
   }
@@ -608,8 +602,8 @@ const savePriceAlert = () => {
 
   $q.notify({
     type: 'positive',
-    message: 'Prisvarsel lagret!',
-    caption: 'Du vil få varsel når betingelsene oppfylles',
+    message: t('notifications.notify.priceAlertSaved'),
+    caption: t('notifications.notify.priceAlertSavedCaption'),
   });
 };
 
@@ -617,7 +611,7 @@ const saveCheapestAlert = () => {
   if (!cheapestAlert.value.area || !cheapestAlert.value.notificationTime) {
     $q.notify({
       type: 'negative',
-      message: 'Vennligst fyll ut alle påkrevde felt',
+      message: t('notifications.notify.validationError'),
     });
     return;
   }
@@ -635,8 +629,8 @@ const saveCheapestAlert = () => {
 
   $q.notify({
     type: 'positive',
-    message: 'Billigste time-varsel lagret!',
-    caption: 'Du vil få daglig varsel om billigste time',
+    message: t('notifications.notify.cheapestAlertSaved'),
+    caption: t('notifications.notify.cheapestAlertSavedCaption'),
   });
 };
 
@@ -647,7 +641,7 @@ const updatePriceAlert = (index: number) => {
   savePriceAlertsToStorage();
   $q.notify({
     type: 'info',
-    message: alert.enabled ? 'Prisvarsel aktivert' : 'Prisvarsel deaktivert',
+    message: alert.enabled ? t('notifications.notify.priceAlertEnabled') : t('notifications.notify.priceAlertDisabled'),
   });
 };
 
@@ -658,28 +652,28 @@ const updateCheapestAlert = (index: number) => {
   saveCheapestAlertsToStorage();
   $q.notify({
     type: 'info',
-    message: alert.enabled ? 'Billigste time-varsel aktivert' : 'Billigste time-varsel deaktivert',
+    message: alert.enabled ? t('notifications.notify.cheapestAlertEnabled') : t('notifications.notify.cheapestAlertDisabled'),
   });
 };
 
 const deletePriceAlert = (index: number) => {
-  if (confirm('Er du sikker på at du vil slette dette prisvarselet?')) {
+  if (confirm(t('notifications.notify.confirmDeletePriceAlert'))) {
     savedPriceAlerts.value.splice(index, 1);
     savePriceAlertsToStorage();
     $q.notify({
       type: 'positive',
-      message: 'Prisvarsel slettet',
+      message: t('notifications.notify.priceAlertDeleted'),
     });
   }
 };
 
 const deleteCheapestAlert = (index: number) => {
-  if (confirm('Er du sikker på at du vil slette dette varselet?')) {
+  if (confirm(t('notifications.notify.confirmDeleteCheapestAlert'))) {
     savedCheapestAlerts.value.splice(index, 1);
     saveCheapestAlertsToStorage();
     $q.notify({
       type: 'positive',
-      message: 'Billigste time-varsel slettet',
+      message: t('notifications.notify.cheapestAlertDeleted'),
     });
   }
 };
@@ -689,7 +683,7 @@ const getDisplayLocation = (area: string, city?: string) => {
     return city;
   }
 
-  const areaOption = areaOptions.find((option) => option.value === area);
+  const areaOption = areaOptions.value.find((option) => option.value === area);
   return areaOption ? areaOption.label : area;
 };
 

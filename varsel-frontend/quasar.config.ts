@@ -6,11 +6,6 @@ import { fileURLToPath } from 'node:url';
 
 export default defineConfig((ctx) => {
   return {
-    quasar: {
-      config: {
-        dark: 'false',
-      },
-    },
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
 

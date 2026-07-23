@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -15,6 +17,20 @@ import emilb04.varsel.Components.JsonFormatter;
 import emilb04.varsel.ElectricityRegions.ElectricityRegion;
 
 public class ElectricityFetcher {
+
+    // Raw upstream responses rarely change once published, so a short in-memory
+    // cache keyed by region+date avoids re-hitting hvakosterstrommen.no on
+    // every request for the same day (e.g. switching cities within an area).
+    private static final long CACHE_TTL_MILLIS = 10 * 60 * 1000; // 10 minutes
+
+    private record CacheEntry(String content, long fetchedAtMillis) {
+        boolean isExpired() {
+            return Instant.now().toEpochMilli() - fetchedAtMillis > CACHE_TTL_MILLIS;
+        }
+    }
+
+    private static final ConcurrentHashMap<String, CacheEntry> rawResponseCache = new ConcurrentHashMap<>();
+
     /**
      * Henter strømpriser fra hvakosterstrommen.no sitt API for valgt region og
      * dato.
@@ -63,6 +79,18 @@ public class ElectricityFetcher {
         return new JsonFormatter().format(region, content);
     }
 
+    private static String fetchRawContentCached(ElectricityRegion.Region region, String date) throws IOException {
+        String cacheKey = region.name() + ":" + date;
+        CacheEntry cached = rawResponseCache.get(cacheKey);
+        if (cached != null && !cached.isExpired()) {
+            return cached.content();
+        }
+
+        String content = makeApiRequest(constructUrl(region, date));
+        rawResponseCache.put(cacheKey, new CacheEntry(content, Instant.now().toEpochMilli()));
+        return content;
+    }
+
     /**
      * Henter strømpriser for en hel dag i valgt region.
      * 
@@ -72,8 +100,7 @@ public class ElectricityFetcher {
      * @throws IOException ved nettverksfeil
      */
     public static String fetchPricesFromDay(ElectricityRegion.Region region, String date) throws IOException {
-        String urlString = constructUrl(region, date);
-        String content = makeApiRequest(urlString);
+        String content = fetchRawContentCached(region, date);
         return formatApiResponse(region, content);
     }
 
@@ -107,8 +134,7 @@ public class ElectricityFetcher {
         }
 
         // Hent rådata
-        String urlString = constructUrl(region, date);
-        String rawContent = makeApiRequest(urlString);
+        String rawContent = fetchRawContentCached(region, date);
         JSONArray rawPrices = new JSONArray(rawContent);
 
         // Filtrer mellom start og end
