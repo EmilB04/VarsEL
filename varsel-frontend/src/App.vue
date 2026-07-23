@@ -3,28 +3,34 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { Dark } from 'quasar'
+import { onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { api } from 'boot/axios'
+import { useTheme, initTheme } from 'src/composables/useTheme'
+import { useAccent } from 'src/composables/useAccent'
+import { LANGUAGE_KEY } from 'boot/i18n'
 
-// Initialize theme on app load
+// Both composables are module-level singletons - importing/calling them here
+// registers their reactive state/watchers as early as possible on load.
+useTheme()
+useAccent()
+
+const { locale } = useI18n()
+watch(locale, (value) => {
+  localStorage.setItem(LANGUAGE_KEY, value)
+})
+
 onMounted(() => {
-  // Check for old 'colorMode' key and migrate to 'theme'
-  const oldColorMode = localStorage.getItem('colorMode')
-  if (oldColorMode) {
-    localStorage.setItem('theme', oldColorMode)
-    localStorage.removeItem('colorMode')
-  }
+  // Apply the stored/system theme now that Quasar is guaranteed to be fully
+  // installed - doing this at module-eval time (before app.use(Quasar, ...))
+  // gets silently overwritten once Quasar's own install touches body classes.
+  initTheme()
 
-  const storedTheme = localStorage.getItem('theme')
-  if (storedTheme === 'dark') {
-    Dark.set(true)
-  } else if (storedTheme === 'light') {
-    Dark.set(false)
-  } else {
-    // If no preference, check system preference
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-    Dark.set(prefersDark)
-    localStorage.setItem('theme', prefersDark ? 'dark' : 'light')
-  }
+  // Fire-and-forget: wake up the backend as early as possible so a Render
+  // cold start happens while the user is still looking at the page, not
+  // after they've picked a region and are waiting on real data.
+  void api.get('/health').catch(() => {
+    // Ignored - the real price request will surface any lasting error.
+  });
 })
 </script>

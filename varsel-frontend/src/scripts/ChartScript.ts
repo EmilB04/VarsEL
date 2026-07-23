@@ -1,4 +1,6 @@
-import { ref, onUnmounted } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
+import { useAccent } from 'src/composables/useAccent'
+import { useTheme } from 'src/composables/useTheme'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -6,9 +8,7 @@ import {
   PointElement,
   LineElement,
   LineController,
-  Title,
   Tooltip,
-  Legend,
   Filler
 } from 'chart.js'
 import annotationPlugin from 'chartjs-plugin-annotation'
@@ -21,23 +21,58 @@ ChartJS.register(
   PointElement,
   LineElement,
   LineController,
-  Title,
   Tooltip,
-  Legend,
   Filler,
   annotationPlugin
 )
+
+// Brand palette - keep in sync with src/css/quasar.variables.scss ($warning),
+// matches PriceSummary's "average" card exactly.
+const COLOR_WARNING = '#F59E0B' // average marker
+
+// Reads the live --q-primary CSS var (set by useAccent.ts) so the chart's
+// line/fill color follows the user's chosen accent, not a fixed brand color.
+function getPrimaryColor(): string {
+  if (typeof document === 'undefined') return '#00D9C0'
+  const value = getComputedStyle(document.documentElement).getPropertyValue('--q-primary').trim()
+  return value || '#00D9C0'
+}
+
+function hexToRgbTuple(hex: string): string {
+  const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!match?.[1] || !match[2] || !match[3]) return '0, 217, 192';
+  return `${parseInt(match[1], 16)}, ${parseInt(match[2], 16)}, ${parseInt(match[3], 16)}`;
+}
+
+const COLOR_POSITIVE = '#10B981'  // lowest price (matches PriceSummary card)
+const COLOR_NEGATIVE = '#EF4444'  // highest price (matches PriceSummary card)
+const COLOR_INFO = '#3B82F6'      // current time (matches PriceSummary card)
+const COLOR_ACCENT = '#EC4899'    // difference (matches PriceSummary card)
+const FONT_FAMILY = 'Roboto, -apple-system, BlinkMacSystemFont, sans-serif'
+
+const AXIS_LABEL_COLOR = 'rgba(148, 163, 184, 0.9)' // slate-400, reads on light + dark
+const GRID_LINE_COLOR = 'rgba(148, 163, 184, 0.15)'
+
+// Matches the PriceSummary card keys - clicking a card highlights the
+// corresponding point (or line, for "average") on the chart.
+export type HighlightKey = 'lowest' | 'highest' | 'current' | 'average' | 'difference'
 
 // Composable for chart functionality
 export function useChartServices() {
   const chartCanvas = ref<HTMLCanvasElement | null>(null)
   let chartInstance: ChartJS | null = null
+  let lastCanvasEl: HTMLCanvasElement | null = null
+  let lastPrices: Price[] = []
+  let highlightKey: HighlightKey | null = null
 
   // Function to create the price chart. Accept an explicit canvas element
   function createChart(canvasEl: HTMLCanvasElement | null, prices: Price[]) {
     if (!canvasEl || prices.length === 0) {
       return;
     }
+
+    lastCanvasEl = canvasEl;
+    lastPrices = prices;
 
     // Destroy existing chart if it exists
     if (chartInstance) {
@@ -70,6 +105,33 @@ export function useChartServices() {
     const currentTime = `${currentHour.toString().padStart(2, '0')}:00`;
     const currentTimeIndex = labels.indexOf(currentTime);
 
+    // Only min/max/now get a visible marker - everything else stays hidden
+    // so the line itself reads as a clean, uninterrupted curve. Whichever one
+    // matches the currently selected PriceSummary card (if any) is drawn larger
+    // with a thicker ring so it reads as clearly emphasized.
+    const isPointHighlighted = (index: number): boolean => {
+      if (highlightKey === 'lowest') return index === minIndex;
+      if (highlightKey === 'highest') return index === maxIndex;
+      if (highlightKey === 'current') return index === currentTimeIndex;
+      if (highlightKey === 'difference') return index === minIndex || index === maxIndex;
+      return false;
+    };
+
+    const primaryColor = getPrimaryColor();
+    const primaryRgb = hexToRgbTuple(primaryColor);
+    const pointRadius = data.map((_, index) => {
+      if (isPointHighlighted(index)) return 12;
+      if (index === minIndex || index === maxIndex || index === currentTimeIndex) return 6;
+      return 0;
+    });
+    const pointBorderWidth = data.map((_, index) => (isPointHighlighted(index) ? 4 : 2));
+    const pointColor = data.map((_, index) => {
+      if (index === minIndex) return COLOR_POSITIVE;
+      if (index === maxIndex) return COLOR_NEGATIVE;
+      if (index === currentTimeIndex) return COLOR_INFO;
+      return primaryColor;
+    });
+
     try {
       chartInstance = new ChartJS(ctx, {
         type: 'line',
@@ -78,45 +140,46 @@ export function useChartServices() {
           datasets: [{
             label: 'Pris (kr/kWh)',
             data: data,
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            tension: 0.1,
+            borderColor: primaryColor,
+            backgroundColor: (context) => {
+              const { ctx: gradientCtx, chartArea } = context.chart;
+              if (!chartArea) return `rgba(${primaryRgb}, 0.15)`;
+              const gradient = gradientCtx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+              gradient.addColorStop(0, `rgba(${primaryRgb}, 0.35)`);
+              gradient.addColorStop(1, `rgba(${primaryRgb}, 0)`);
+              return gradient;
+            },
+            borderWidth: 3,
+            cubicInterpolationMode: 'monotone',
+            tension: 0.4,
             fill: true,
-            pointBackgroundColor: data.map((price, index) => {
-              if (index === minIndex) return 'green';
-              if (index === maxIndex) return 'red';
-              if (index === currentTimeIndex) return 'blue';
-              return 'rgb(75, 192, 192)';
-            }),
-            pointBorderColor: data.map((price, index) => {
-              if (index === minIndex) return 'darkgreen';
-              if (index === maxIndex) return 'darkred';
-              if (index === currentTimeIndex) return 'darkblue';
-              return 'rgb(75, 192, 192)';
-            }),
-            pointRadius: data.map((price, index) => {
-              if (index === minIndex || index === maxIndex) return 8;
-              if (index === currentTimeIndex) return 10;
-              return 4;
-            }),
-            pointBorderWidth: data.map((price, index) => {
-              if (index === currentTimeIndex) return 3;
-              return 1;
-            })
+            pointBackgroundColor: pointColor,
+            pointBorderColor: 'rgba(255, 255, 255, 0.9)',
+            pointBorderWidth,
+            pointRadius,
+            pointHoverRadius: 7,
+            pointHoverBorderWidth: 2,
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
           plugins: {
-            title: {
-              display: true,
-              text: 'Strømpriser gjennom dagen'
-            },
-            legend: {
-              display: true
-            },
             tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.92)', // slate-900 glass
+              titleColor: '#ffffff',
+              bodyColor: '#e2e8f0',
+              borderColor: 'rgba(255, 255, 255, 0.08)',
+              borderWidth: 1,
+              padding: 12,
+              cornerRadius: 12,
+              displayColors: false,
+              titleFont: { family: FONT_FAMILY, size: 13, weight: 600 },
+              bodyFont: { family: FONT_FAMILY, size: 13 },
               callbacks: {
                 title: function(context) { // Custom tooltip to show time range for each hour
                   const hourLabel = context[0]?.label;
@@ -153,16 +216,18 @@ export function useChartServices() {
                   type: 'line',
                   yMin: avgPrice,
                   yMax: avgPrice,
-                  borderColor: 'orange',
-                  borderWidth: 2,
-                  borderDash: [5, 5],
+                  borderColor: COLOR_WARNING,
+                  borderWidth: highlightKey === 'average' ? 3 : 1.5,
+                  borderDash: highlightKey === 'average' ? [] : [6, 4],
                   label: {
-                    content: `Gjennomsnitt: ${avgPrice.toFixed(2)} kr/kWh`,
+                    content: `Snitt: ${avgPrice.toFixed(2)} kr/kWh`,
                     display: true,
                     position: 'end',
-                    backgroundColor: 'orange',
+                    backgroundColor: COLOR_WARNING,
                     color: 'white',
-                    padding: 4
+                    font: { family: FONT_FAMILY, size: highlightKey === 'average' ? 13 : 11, weight: 600 },
+                    padding: { x: 8, y: 4 },
+                    borderRadius: 6,
                   }
                 },
                 ...(currentTimeIndex !== -1 ? {
@@ -170,16 +235,43 @@ export function useChartServices() {
                     type: 'line',
                     xMin: currentTimeIndex,
                     xMax: currentTimeIndex,
-                    borderColor: 'blue',
-                    borderWidth: 2,
-                    borderDash: [3, 3],
+                    borderColor: COLOR_INFO,
+                    borderWidth: 1.5,
+                    borderDash: [4, 4],
                     label: {
                       content: 'Nå',
                       display: true,
                       position: 'start',
-                      backgroundColor: 'blue',
+                      backgroundColor: COLOR_INFO,
                       color: 'white',
-                      padding: 4
+                      font: { family: FONT_FAMILY, size: 11, weight: 600 },
+                      padding: { x: 8, y: 4 },
+                      borderRadius: 6,
+                    }
+                  }
+                } : {}),
+                // Connects the lowest and highest points with a labeled bracket
+                // when the "Difference" card is selected, so the gap itself is
+                // visible on the chart, not just the two endpoints.
+                ...(highlightKey === 'difference' && minIndex !== -1 && maxIndex !== -1 ? {
+                  differenceLine: {
+                    type: 'line',
+                    xMin: minIndex,
+                    xMax: maxIndex,
+                    yMin: minPrice,
+                    yMax: maxPrice,
+                    borderColor: COLOR_ACCENT,
+                    borderWidth: 2,
+                    borderDash: [4, 4],
+                    label: {
+                      content: `Forskjell: ${(maxPrice - minPrice).toFixed(2)} kr/kWh`,
+                      display: true,
+                      position: 'center',
+                      backgroundColor: COLOR_ACCENT,
+                      color: 'white',
+                      font: { family: FONT_FAMILY, size: 12, weight: 600 },
+                      padding: { x: 8, y: 4 },
+                      borderRadius: 6,
                     }
                   }
                 } : {})
@@ -189,22 +281,50 @@ export function useChartServices() {
           scales: {
             y: {
               beginAtZero: false,
-              title: {
-                display: true,
-                text: 'Pris (kr/kWh)'
-              }
+              border: { display: false },
+              grid: { color: GRID_LINE_COLOR },
+              ticks: {
+                font: { family: FONT_FAMILY, size: 11 },
+                color: AXIS_LABEL_COLOR,
+                callback: (value) => Number(value).toFixed(2),
+              },
             },
             x: {
-              title: {
-                display: true,
-                text: 'Tid'
-              }
+              border: { display: false },
+              grid: { display: false },
+              ticks: {
+                font: { family: FONT_FAMILY, size: 11 },
+                color: AXIS_LABEL_COLOR,
+                maxRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 8,
+              },
             }
           }
         }
       });
     } catch (error) {
       console.error('Error creating chart:', error);
+    }
+  }
+
+  // Repaint the already-rendered chart (no refetch needed) whenever the user
+  // changes the accent color or toggles light/dark, so it never shows a stale color.
+  const { accent } = useAccent();
+  const { currentTheme } = useTheme();
+  watch([accent, currentTheme], () => {
+    if (lastCanvasEl && lastPrices.length) {
+      createChart(lastCanvasEl, lastPrices);
+    }
+  });
+
+  // Called when a PriceSummary card is clicked - re-renders the chart with
+  // that point (or the average line) drawn larger/thicker so it's clearly
+  // highlighted. Passing null clears the highlight.
+  function setHighlight(key: HighlightKey | null) {
+    highlightKey = key;
+    if (lastCanvasEl && lastPrices.length) {
+      createChart(lastCanvasEl, lastPrices);
     }
   }
 
@@ -217,6 +337,7 @@ export function useChartServices() {
 
   return {
     chartCanvas,
-    createChart
+    createChart,
+    setHighlight,
   }
 }

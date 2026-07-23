@@ -1,6 +1,6 @@
 {
   "name": "varsel-app",
-  "version": "2.0.0",
+  "version": "2.2.0",
   "description": "VarsEL - Electricity Price Monitoring Application",
   "author": "Emil Berglund <emil.berglund@live.no>",
   "private": true,
