@@ -1,96 +1,147 @@
+# ⚡ VarsEL
 
-# VarsEL
+> Fetch and display electricity prices, fast and simple.
 
-## Live Demo
-VarsEL can be seen at: [https://varsel.pages.dev/](https://varsel.pages.dev/)
+**[Live Demo →](https://varsel.pages.dev/)**
 
+VarsEL is a private project that fetches and displays electricity prices from an external API. It's built as a two-part app: a **Spring Boot** backend and a **Quasar (Vue.js)** frontend.
 
-VarsEL is a private project designed to fetch and display electricity prices from an API. It consists of a backend service built with Spring Boot and a frontend application developed using Quasar Framework.
+![Java](https://img.shields.io/badge/Java-Backend-orange?logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-Backend-6DB33F?logo=springboot&logoColor=white)
+![Vue.js](https://img.shields.io/badge/Vue.js-Frontend-4FC08D?logo=vuedotjs&logoColor=white)
+![Quasar](https://img.shields.io/badge/Quasar-Framework-1976D2?logo=quasar&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Supported-2496ED?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/license-private-lightgrey)
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+  - [Option 1: Quick Start](#option-1-quick-start-recommended)
+  - [Option 2: Manual Setup](#option-2-manual-setup)
+  - [Option 3: Docker](#option-3-using-docker)
+- [API Reference](#api-reference)
+- [Project Structure](#project-structure)
+- [Tech Stack](#tech-stack)
+- [License](#license)
+
+---
 
 ## Features
-- Fetch electricity prices for different regions and cities.
-- Display prices in a user-friendly table format.
-- Filter prices by date and time range.
+
+- 📍 Fetch electricity prices for different regions and cities
+- 📊 Display prices in a clean, user-friendly table
+- 🕒 Filter prices by date and time range
 
 ## Prerequisites
-- Node.js and npm installed for the frontend.
-- Java and Maven installed for the backend.
-- Docker and Docker Compose installed (for Docker alternative).
 
-## Start Application
+| Requirement | Needed for |
+|---|---|
+| Node.js & npm | Frontend |
+| Java & Maven | Backend |
+| Docker & Docker Compose | Docker option (optional) |
+
+## Getting Started
 
 ### Option 1: Quick Start (Recommended)
-From the project root directory, you can start both frontend and backend with a single command:
+
+Run both services from the project root with a single command:
 
 ```bash
 npm install
 npm run dev
 ```
 
-This will start both services simultaneously:
-- Backend server at `http://localhost:8080`
-- Frontend development server at `http://localhost:9000`
+| Service | URL |
+|---|---|
+| Backend | `http://localhost:8080` |
+| Frontend | `http://localhost:9000` |
 
-#### Available npm scripts:
-- `npm run dev` or `npm start` - Start both frontend and backend
-- `npm run frontend` - Start only the frontend
-- `npm run backend` - Start only the backend
-- `npm run build` - Build both frontend and backend
-- `npm run install:all` - Install dependencies for both projects
-- `npm run test` - Run tests for both projects
-- `npm run clean` - Clean build artifacts for both projects
+**Available scripts:**
+
+| Command | Description |
+|---|---|
+| `npm run dev` / `npm start` | Start both frontend and backend |
+| `npm run frontend` | Start only the frontend |
+| `npm run backend` | Start only the backend |
+| `npm run build` | Build both frontend and backend |
+| `npm run install:all` | Install dependencies for both projects |
+| `npm run test` | Run tests for both projects |
+| `npm run clean` | Clean build artifacts for both projects |
 
 ### Option 2: Manual Setup
-#### Start Frontend
-Navigate to the `varsel-frontend` directory and run the following command:
 
-````bash
-npm install
-````
+**Frontend** — from `varsel-frontend`:
 
 ```bash
+npm install
 quasar dev
 ```
 
-This will start the frontend development server at `http://localhost:9000`.
+Runs at `http://localhost:9000`.
 
-#### Start Backend
-Navigate to the `varsel` directory and run the following command:
-
+**Backend** — from `varsel`:
 
 ```bash
 mvn clean install
-```
-
-```bash
 mvn spring-boot:run
 ```
 
-This will start the backend server at `http://localhost:8080`.
+Runs at `http://localhost:8080`.
 
 ### Option 3: Using Docker
-Navigate to the project root directory and run the following command:
+
+From the project root:
 
 ```bash
 docker-compose up --build
 ```
 
-This will build and start both the backend and frontend services. The backend will be accessible at `http://localhost:8080`, and the frontend will be accessible at `http://localhost:80`.
+| Service | URL |
+|---|---|
+| Backend | `http://localhost:8080` |
+| Frontend | `http://localhost:80` |
 
-## API Endpoints
-- `/prices/{region}/{date}`: Fetch electricity prices for a specific region and date.
-- Optional query parameters:
-  - `startHour`: Filter prices starting from this hour.
-  - `endHour`: Filter prices up to this hour.
+## API Reference
+
+```
+GET /prices/{region}/{date}
+```
+
+Fetch electricity prices for a specific region and date.
+
+**Optional query parameters:**
+
+| Parameter | Description |
+|---|---|
+| `startHour` | Filter prices starting from this hour |
+| `endHour` | Filter prices up to this hour |
+
+**Example:**
+
+```bash
+curl "http://localhost:8080/prices/oslo/2026-07-25?startHour=6&endHour=18"
+```
 
 ## Project Structure
-- **Backend**: Located in the `varsel` directory.
-- **Frontend**: Located in the `varsel-frontend` directory.
 
-## Technologies Used
-- **Backend**: Java, Spring Boot
-- **Frontend**: Vue.js, Quasar Framework
-- **Other**: Docker, Maven, Axios
+```
+VarsEL/
+├── varsel/            # Backend (Spring Boot)
+└── varsel-frontend/   # Frontend (Quasar / Vue.js)
+```
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Java, Spring Boot |
+| Frontend | Vue.js, Quasar Framework |
+| Infra / Tooling | Docker, Maven, Axios |
 
 ## License
+
 This is a private project and not licensed for public use.
