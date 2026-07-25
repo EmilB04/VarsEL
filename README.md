@@ -4,12 +4,6 @@
 ## Live Demo
 VarsEL can be seen at: [https://varsel.pages.dev/](https://varsel.pages.dev/)
 
-> ⚠️ **Note**  
-> If the backend is **not running**, you can manually start it by accessing the server, and giving it a jump start😊:  
-> 👉 [https://varsel-hari.onrender.com/api/prices/](https://varsel-hari.onrender.com/api/prices/)
-
-
-
 
 VarsEL is a private project designed to fetch and display electricity prices from an API. It consists of a backend service built with Spring Boot and a frontend application developed using Quasar Framework.
 
