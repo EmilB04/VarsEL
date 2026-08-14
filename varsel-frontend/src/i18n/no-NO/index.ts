@@ -5,8 +5,6 @@ export default {
     clear: 'Fjern valg',
     noOptions: 'Ingen alternativer tilgjengelig',
     loadingPrices: 'Laster priser...',
-    loadingTakingLongTitle: 'Henter data tar lengre tid enn forventet',
-    loadingTakingLongDescription: 'Backend-tjenesten starter. Vennligst vent {countdown}.',
     errorTitle: 'Kunne ikke laste priser',
     errorDescription: 'Hvis backend-tjenesten ikke kjører, kan du starte den manuelt:',
     priceUnit: 'kr/kWh',
@@ -26,6 +24,12 @@ export default {
       price: 'Pris (kr/kWh)',
       time: 'Tid',
     },
+  },
+
+  backendStatus: {
+    waking: 'Starter backend-tjenesten, omtrent {countdown} igjen',
+    ready: 'Koblet til backend',
+    error: 'Fikk ikke kontakt med backend-tjenesten',
   },
 
   nav: {

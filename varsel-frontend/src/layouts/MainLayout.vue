@@ -3,8 +3,16 @@
     <q-page-container class="main-page-container">
       <router-view />
     </q-page-container>
+
+    <!-- Rendered once for the whole app so the cold-start notice is visible
+         without scrolling on every page. -->
+    <BackendStatusBar />
   </q-layout>
 </template>
+
+<script setup lang="ts">
+import BackendStatusBar from 'src/components/BackendStatusBar.vue';
+</script>
 
 <style scoped>
 /* Clears the fixed bottom tab bar (see NavSection.vue) on mobile so page

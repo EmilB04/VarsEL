@@ -5,8 +5,6 @@ export default {
     clear: 'Clear selection',
     noOptions: 'No options available',
     loadingPrices: 'Loading prices...',
-    loadingTakingLongTitle: 'This is taking longer than expected',
-    loadingTakingLongDescription: 'The backend service is starting up. Please wait {countdown}.',
     errorTitle: 'Could not load prices',
     errorDescription: "If the backend service isn't running, you can start it manually:",
     priceUnit: 'kr/kWh',
@@ -26,6 +24,12 @@ export default {
       price: 'Price (kr/kWh)',
       time: 'Time',
     },
+  },
+
+  backendStatus: {
+    waking: 'Starting the backend service, about {countdown} left',
+    ready: 'Connected to the backend',
+    error: "Couldn't reach the backend service",
   },
 
   nav: {

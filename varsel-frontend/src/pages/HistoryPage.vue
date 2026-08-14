@@ -172,18 +172,6 @@
 
       <PriceLoadingSkeleton v-if="isLoading" />
 
-      <q-banner v-if="loadingTakingLong" class="glass-card q-mt-lg q-pa-lg" type="info" rounded>
-        <template v-slot:avatar>
-          <q-icon name="info" color="info" size="lg" />
-        </template>
-        <div class="text-body1"><strong>{{ t('common.loadingTakingLongTitle') }}</strong></div>
-        <div class="text-body2 q-mt-sm">
-          <i18n-t keypath="common.loadingTakingLongDescription" tag="span" scope="global">
-            <template #countdown><strong>{{ formatCountdown(loadingCountdownSeconds) }}</strong></template>
-          </i18n-t>
-        </div>
-      </q-banner>
-
       <q-banner v-if="hasError" class="error-banner glass-card q-mt-lg q-pa-lg" rounded>
         <template v-slot:avatar>
           <q-icon name="warning" color="warning" size="lg" />
@@ -330,7 +318,7 @@ import PriceSummary from 'src/components/PriceSummary.vue';
 import PriceLoadingSkeleton from 'src/components/PriceLoadingSkeleton.vue';
 import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
 import { useChartServices } from 'src/scripts/ChartScript';
-import { useBackendRequest, formatCountdown } from 'src/scripts/useBackendRequest';
+import { useBackendRequest } from 'src/scripts/useBackendRequest';
 import { addOsloDays, getOsloIsoDate, isoDateIsBefore } from 'src/scripts/osloTime';
 import { useTaxMode } from 'src/composables/useTaxMode';
 
@@ -370,7 +358,7 @@ const prices = computed<Price[]>(() =>
   })),
 );
 
-const { isLoading, hasError, loadingTakingLong, loadingCountdownSeconds, run } = useBackendRequest();
+const { isLoading, hasError, run } = useBackendRequest();
 
 // Flag to track if we're currently restoring from storage
 const isRestoringFilters = ref(false);

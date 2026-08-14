@@ -1,19 +1,20 @@
 import { ref, watch, onUnmounted } from 'vue';
+import { markWaking, markReady, markError } from 'src/composables/useBackendStatus';
 
 // Render's free tier spins the backend down when idle, so a first request
-// after idle can take 30-60s+. This composable drives a consistent
-// loading/"taking longer than expected"/error sequence around any async
-// fetch, shared between pages that hit the backend (IndexPage, HistoryPage).
+// after idle can take 30-60s+. This composable drives the per-page
+// loading/error state around any async fetch, shared between pages that hit
+// the backend (IndexPage, HistoryPage).
+//
+// The cold-start notice itself is no longer rendered per page - it is reported
+// to the app-wide useBackendStatus singleton and shown by BackendStatusBar, so
+// it is visible without scrolling regardless of where the user is on the page.
 export function useBackendRequest() {
   const isLoading = ref(false);
   const hasError = ref(false);
-  const loadingTakingLong = ref(false);
-  const loadingCountdownSeconds = ref(0); // counts down once loading is taking long
   const errorCountdownSeconds = ref(180); // suggested wait time shown on error
 
   let errorCountdownInterval: ReturnType<typeof setInterval> | null = null;
-  let loadingCountdownInterval: ReturnType<typeof setInterval> | null = null;
-  let loadingTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   watch(hasError, (newValue) => {
     if (newValue) {
@@ -32,47 +33,25 @@ export function useBackendRequest() {
     }
   });
 
-  watch(isLoading, (newValue) => {
-    if (newValue) {
-      loadingTakingLong.value = false;
-      if (loadingTimeoutId) clearTimeout(loadingTimeoutId);
-      if (loadingCountdownInterval) clearInterval(loadingCountdownInterval);
-      loadingTimeoutId = setTimeout(() => {
-        loadingTakingLong.value = true;
-        loadingCountdownSeconds.value = 60;
-        if (loadingCountdownInterval) clearInterval(loadingCountdownInterval);
-        loadingCountdownInterval = setInterval(() => {
-          loadingCountdownSeconds.value--;
-          if (loadingCountdownSeconds.value <= 0 && loadingCountdownInterval) {
-            clearInterval(loadingCountdownInterval);
-            loadingCountdownInterval = null;
-          }
-        }, 1000);
-      }, 2000);
-    } else {
-      loadingTakingLong.value = false;
-      if (loadingTimeoutId) clearTimeout(loadingTimeoutId);
-      if (loadingCountdownInterval) clearInterval(loadingCountdownInterval);
-      loadingTimeoutId = null;
-      loadingCountdownInterval = null;
-    }
-  });
-
   onUnmounted(() => {
     if (errorCountdownInterval) clearInterval(errorCountdownInterval);
-    if (loadingCountdownInterval) clearInterval(loadingCountdownInterval);
-    if (loadingTimeoutId) clearTimeout(loadingTimeoutId);
   });
 
-  // Wraps an async fetch with the loading/error lifecycle above.
+  // Wraps an async fetch with the loading/error lifecycle above, reporting
+  // connectivity to the app-wide status bar as it goes.
   async function run(fn: () => Promise<void>) {
     try {
       isLoading.value = true;
       hasError.value = false;
+      markWaking();
       await fn();
+      // `fn` may set hasError itself for a well-formed but unusable response
+      // (e.g. an empty price array), which is not a connectivity problem.
+      markReady();
     } catch (err) {
       console.error('Backend request failed', err);
       hasError.value = true;
+      markError();
     } finally {
       isLoading.value = false;
     }
@@ -81,8 +60,6 @@ export function useBackendRequest() {
   return {
     isLoading,
     hasError,
-    loadingTakingLong,
-    loadingCountdownSeconds,
     errorCountdownSeconds,
     run,
   };
