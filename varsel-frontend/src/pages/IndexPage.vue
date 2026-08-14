@@ -93,7 +93,7 @@
         v-if="prices.length"
         :rows="prices"
         :columns="simplifiedColumns"
-        row-key="time_start"
+        row-key="rowKey"
         flat
         :pagination="{ rowsPerPage: 12 }"
       >
@@ -196,6 +196,7 @@ import PriceLoadingSkeleton from 'src/components/PriceLoadingSkeleton.vue';
 import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
 import { useChartServices } from 'src/scripts/ChartScript';
 import { useBackendRequest, formatCountdown } from 'src/scripts/useBackendRequest';
+import { getOsloIsoDate } from 'src/scripts/osloTime';
 import { useTaxMode } from 'src/composables/useTaxMode';
 
 const { t } = useI18n();
@@ -242,8 +243,10 @@ const localCanvasRef = ref<HTMLCanvasElement | null>(null);
 
 async function fetchTodaysPrices() {
   await run(async () => {
-    // Always use today's date
-    const today = new Date().toISOString().slice(0, 10);
+    // Always use today's date *in Norway*. `toISOString()` is UTC, which is
+    // behind Oslo, so between midnight and 01:00/02:00 local it asks the
+    // backend for yesterday's prices.
+    const today = getOsloIsoDate();
 
     // Use city if chosen, else use area
     const regionParam = selectedCity.value || selectedArea.value;
@@ -271,11 +274,12 @@ async function fetchTodaysPrices() {
 
     // Enrich each object with area, city, and today's date (tax-excluded -
     // `prices` applies the multiplier reactively based on the current setting)
-    rawPrices.value = json.prices.map((price: Price) => ({
+    rawPrices.value = json.prices.map((price: Price, index: number) => ({
       ...price,
       area: selectedArea.value,
       city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
       date: today,
+      rowKey: `${today}-${index}`,
     }));
 
     // Ensure DOM is updated and canvas ref is available

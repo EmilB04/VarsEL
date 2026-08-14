@@ -232,7 +232,7 @@
         v-if="prices.length"
         :rows="prices"
         :columns="columns"
-        row-key="time_start"
+        row-key="rowKey"
         flat
       >
         <template v-slot:top>
@@ -350,6 +350,7 @@ import PriceLoadingSkeleton from 'src/components/PriceLoadingSkeleton.vue';
 import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
 import { useChartServices } from 'src/scripts/ChartScript';
 import { useBackendRequest, formatCountdown } from 'src/scripts/useBackendRequest';
+import { addOsloDays, getOsloIsoDate, isoDateIsBefore } from 'src/scripts/osloTime';
 import { useTaxMode } from 'src/composables/useTaxMode';
 
 const { t, locale } = useI18n();
@@ -444,23 +445,17 @@ const hasActiveFilters = computed(() => {
   return selectedCity.value !== null || startHour.value !== null || endHour.value !== null;
 });
 
+// Computed property for maximum allowed date (tomorrow, Norwegian time).
+// All date arithmetic on this page is calendar arithmetic in Europe/Oslo -
+// `toISOString()` is UTC and lands a day early for Norwegian users during the
+// first hour(s) after midnight, and `setDate()` on a local Date is unreliable
+// across the two DST-transition days.
+const maxAllowedDate = computed(() => addOsloDays(getOsloIsoDate(), 1));
+
 // Computed property to check if next day button should be disabled
 const isNextDayDisabled = computed(() => {
   if (!date.value) return true;
-
-  const currentDate = new Date(date.value);
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate());
-
-  // Disable if current date is already tomorrow or later
-  return currentDate >= tomorrow;
-});
-
-// Computed property for maximum allowed date (tomorrow)
-const maxAllowedDate = computed(() => {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow.toISOString().slice(0, 10);
+  return !isoDateIsBefore(date.value, maxAllowedDate.value);
 });
 
 // Long, locale-aware display of the selected date in the (readonly) input -
@@ -519,11 +514,12 @@ async function fetchPrices() {
 
     // Enrich each object with area, city, and selected date (tax-excluded -
     // `prices` applies the multiplier reactively based on the current setting)
-    rawPrices.value = json.prices.map((price: Price) => ({
+    rawPrices.value = json.prices.map((price: Price, index: number) => ({
       ...price,
       area: selectedArea.value,
       city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
       date: date.value,
+      rowKey: `${date.value}-${index}`,
     }));
 
     // Create chart after data is loaded and DOM is updated
@@ -592,14 +588,8 @@ function clearFilters() {
 
 // Function to go to previous day
 function goToPreviousDay() {
-  if (!date.value) {
-    // If no date selected, use today
-    date.value = new Date().toISOString().slice(0, 10);
-  }
-
-  const currentDate = new Date(date.value);
-  currentDate.setDate(currentDate.getDate() - 1);
-  date.value = currentDate.toISOString().slice(0, 10);
+  const from = date.value || getOsloIsoDate();
+  date.value = addOsloDays(from, -1);
 
   // Auto-fetch when using navigation buttons if area is selected
   if (selectedArea.value) {
@@ -609,30 +599,24 @@ function goToPreviousDay() {
 
 // Function to go to next day
 function goToNextDay() {
-  if (!date.value) {
-    // If no date selected, use today
-    date.value = new Date().toISOString().slice(0, 10);
+  const from = date.value || getOsloIsoDate();
+  const next = addOsloDays(from, 1);
+
+  // Never step past tomorrow - the upstream API has no data beyond it.
+  if (!isoDateIsBefore(next, maxAllowedDate.value) && next !== maxAllowedDate.value) {
+    return;
   }
+  date.value = next;
 
-  const currentDate = new Date(date.value);
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  // Only allow going one day ahead from today
-  if (currentDate < tomorrow) {
-    currentDate.setDate(currentDate.getDate() + 1);
-    date.value = currentDate.toISOString().slice(0, 10);
-
-    // Auto-fetch when using navigation buttons if area is selected
-    if (selectedArea.value) {
-      void fetchPrices();
-    }
+  // Auto-fetch when using navigation buttons if area is selected
+  if (selectedArea.value) {
+    void fetchPrices();
   }
 }
 
 // Function to jump straight back to today
 function goToToday() {
-  date.value = new Date().toISOString().slice(0, 10);
+  date.value = getOsloIsoDate();
 
   if (selectedArea.value) {
     void fetchPrices();
