@@ -170,3 +170,15 @@ export function parseTimeOfDay(value: string): number | null {
   if (hours > 23 || minutes > 59) return null;
   return hours * 60 + minutes;
 }
+
+/**
+ * `{label, value}` options for a time-of-day picker, spanning one full day at
+ * a fixed granularity. `value` is minutes since midnight; `formatMinutesOfDay`
+ * turns that back into the matching `HH:mm` label.
+ */
+export function timeOfDayOptions(stepMinutes = 30): { label: string; value: number }[] {
+  return Array.from({ length: Math.floor(1440 / stepMinutes) }, (_, index) => {
+    const minutes = index * stepMinutes;
+    return { label: formatMinutesOfDay(minutes), value: minutes };
+  });
+}

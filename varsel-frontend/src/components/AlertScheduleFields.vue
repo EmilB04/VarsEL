@@ -65,7 +65,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AppSelect from './AppSelect.vue';
-import { formatMinutesOfDay, type WeekdayIndex } from 'src/scripts/osloTime';
+import { timeOfDayOptions, type WeekdayIndex } from 'src/scripts/osloTime';
 import type { QuietHours } from 'src/scripts/alertStore';
 
 const props = defineProps<{
@@ -94,12 +94,7 @@ const weekdays = computed(() =>
 );
 
 // Half-hour granularity keeps the list short enough to scan.
-const timeOptions = computed(() =>
-  Array.from({ length: 48 }, (_, index) => {
-    const minutes = index * 30;
-    return { label: formatMinutesOfDay(minutes), value: minutes };
-  }),
-);
+const timeOptions = timeOfDayOptions(30);
 
 // An empty selection means "every day", so an all-selected state is normalised
 // back to empty rather than stored as all seven.
