@@ -12,35 +12,22 @@
             <q-icon name="location_on" class="q-mr-sm" />
             {{ t('history.selectAreaSection') }}
           </h3>
-          <div class="row q-gutter-md">
-            <q-select
+          <div class="selector-grid">
+            <AppSelect
               v-model="selectedArea"
               :options="areaOptions"
               :label="t('history.area')"
-              class="col-12 col-md"
-              emit-value
-              map-options
-              filled
-            >
-              <template v-slot:prepend>
-                <q-icon name="map" />
-              </template>
-            </q-select>
+              icon="map"
+            />
 
-            <q-select
+            <AppSelect
               v-model="selectedCity"
               :options="filteredCityOptions"
               :label="t('history.selectCity')"
-              class="col-12 col-md"
-              emit-value
-              map-options
+              icon="apartment"
               :disable="!selectedArea"
-              filled
-            >
-              <template v-slot:prepend>
-                <q-icon name="apartment" />
-              </template>
-            </q-select>
+              clearable
+            />
           </div>
         </div>
 
@@ -125,36 +112,22 @@
             <q-icon name="schedule" class="q-mr-sm" />
             {{ t('history.timeFilterSection') }}
           </h3>
-          <div class="row q-gutter-md">
-            <q-select
+          <div class="selector-grid">
+            <AppSelect
               v-model="startHour"
               :options="hourOptions"
               :label="t('history.startHour')"
-              class="col-12 col-md"
-              emit-value
-              map-options
+              icon="access_time"
               clearable
-              filled
-            >
-              <template v-slot:prepend>
-                <q-icon name="access_time" />
-              </template>
-            </q-select>
+            />
 
-            <q-select
+            <AppSelect
               v-model="endHour"
               :options="hourOptions"
               :label="t('history.endHour')"
-              class="col-12 col-md"
-              emit-value
-              map-options
+              icon="schedule"
               clearable
-              filled
-            >
-              <template v-slot:prepend>
-                <q-icon name="schedule" />
-              </template>
-            </q-select>
+            />
           </div>
         </div>
 
@@ -263,6 +236,13 @@
   }
 }
 
+// Two equal columns collapsing to one on narrow screens - see IndexPage.
+.selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
 .date-nav-buttons {
   display: flex;
   gap: 0.5rem;
@@ -345,6 +325,7 @@ import { api } from 'boot/axios';
 import FooterSection from 'src/components/FooterSection.vue';
 import HeroSection from 'src/components/HeroSection.vue';
 import NavSection from 'src/components/NavSection.vue';
+import AppSelect from 'src/components/AppSelect.vue';
 import PriceSummary from 'src/components/PriceSummary.vue';
 import PriceLoadingSkeleton from 'src/components/PriceLoadingSkeleton.vue';
 import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';

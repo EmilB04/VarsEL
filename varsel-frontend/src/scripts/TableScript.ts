@@ -97,7 +97,7 @@ export function useAreaOptions() {
 }
 
 // Composable for table functionality
-export function useTableServices(selectedArea: { value: string }) {
+export function useTableServices(selectedArea: { value: string | null }) {
   const { t } = useI18n();
 
   const areaOptions = useAreaOptions();

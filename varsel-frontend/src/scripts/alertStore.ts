@@ -119,7 +119,7 @@ function coerceDays(value: unknown): WeekdayIndex[] {
     .filter((day): day is number => typeof day === 'number' && Number.isInteger(day))
     .filter((day) => day >= 0 && day <= 6) as WeekdayIndex[];
   // Deduplicate, and treat "all seven selected" the same as "no restriction".
-  const unique = [...new Set(days)].sort((a, b) => a - b) as WeekdayIndex[];
+  const unique = [...new Set(days)].sort((a, b) => a - b);
   return unique.length === 7 ? [] : unique;
 }
 

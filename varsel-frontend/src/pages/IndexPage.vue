@@ -11,37 +11,24 @@
       />
 
       <div class="selector-container glass-card q-pa-lg q-mb-xl">
-        <div class="row q-gutter-md">
-          <q-select
+        <div class="selector-grid">
+          <AppSelect
             v-model="selectedArea"
             :options="areaOptions"
             :label="t('index.selectArea')"
-            class="col-12 col-md"
-            emit-value
-            map-options
+            icon="location_on"
             @update:model-value="fetchTodaysPrices"
-            filled
-          >
-            <template v-slot:prepend>
-              <q-icon name="location_on" />
-            </template>
-          </q-select>
+          />
 
-          <q-select
+          <AppSelect
             v-model="selectedCity"
             :options="filteredCityOptions"
             :label="t('index.selectCity')"
-            class="col-12 col-md"
-            emit-value
-            map-options
+            icon="apartment"
             :disable="!selectedArea"
+            clearable
             @update:model-value="fetchTodaysPrices"
-            filled
-          >
-            <template v-slot:prepend>
-              <q-icon name="apartment" />
-            </template>
-          </q-select>
+          />
         </div>
       </div>
 
@@ -115,6 +102,15 @@
 
 :deep(.hero-section) {
   text-align: center;
+}
+
+// Two equal columns that collapse to a single column on narrow screens.
+// Replaces the old Quasar `row`/`col-md` pairing so the selects own their
+// width instead of inheriting flex-basis quirks from the grid.
+.selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
 }
 
 .chart-container {
@@ -191,6 +187,7 @@ import { api } from 'boot/axios';
 import FooterSection from 'src/components/FooterSection.vue';
 import HeroSection from 'src/components/HeroSection.vue';
 import NavSection from 'src/components/NavSection.vue';
+import AppSelect from 'src/components/AppSelect.vue';
 import PriceSummary from 'src/components/PriceSummary.vue';
 import PriceLoadingSkeleton from 'src/components/PriceLoadingSkeleton.vue';
 import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
@@ -203,7 +200,7 @@ const { t } = useI18n();
 const { isTaxIncluded } = useTaxMode();
 
 // Reactive state variables - simplified for today only
-const selectedArea = ref('NO1');
+const selectedArea = ref<string | null>('NO1');
 const selectedCity = ref<string | null>(null);
 // Prices as returned by the backend, tax-excluded - the tax multiplier is applied
 // reactively in `prices` below, so toggling "Incl./Excl. VAT" updates instantly.

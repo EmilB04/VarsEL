@@ -2,6 +2,8 @@ export default {
   common: {
     retry: 'Prøv igjen',
     close: 'Lukk',
+    clear: 'Fjern valg',
+    noOptions: 'Ingen alternativer tilgjengelig',
     loadingPrices: 'Laster priser...',
     loadingTakingLongTitle: 'Henter data tar lengre tid enn forventet',
     loadingTakingLongDescription: 'Backend-tjenesten starter. Vennligst vent {countdown}.',

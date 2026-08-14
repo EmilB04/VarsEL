@@ -2,6 +2,8 @@ export default {
   common: {
     retry: 'Try again',
     close: 'Close',
+    clear: 'Clear selection',
+    noOptions: 'No options available',
     loadingPrices: 'Loading prices...',
     loadingTakingLongTitle: 'This is taking longer than expected',
     loadingTakingLongDescription: 'The backend service is starting up. Please wait {countdown}.',
