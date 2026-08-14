@@ -84,7 +84,7 @@
                   required
                 >
                   <template v-slot:prepend>
-                    <q-icon name="payments" aria-hidden="true" />
+                    <q-icon name="payments" size="20px" aria-hidden="true" />
                   </template>
                 </q-input>
 

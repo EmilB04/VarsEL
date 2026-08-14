@@ -24,6 +24,8 @@ const COLD_START_SECONDS = 60;
 const state = ref<BackendState>('unknown');
 const visible = ref(false);
 const countdownSeconds = ref(COLD_START_SECONDS);
+/** When the backend last answered successfully - surfaced in the footer. */
+const lastSuccessAt = ref<number | null>(null);
 
 let announceTimer: ReturnType<typeof setTimeout> | null = null;
 let dismissTimer: ReturnType<typeof setTimeout> | null = null;
@@ -67,6 +69,7 @@ export function markWaking() {
 /** Call when a backend request succeeds. */
 export function markReady() {
   pendingRequests = Math.max(0, pendingRequests - 1);
+  lastSuccessAt.value = Date.now();
   if (pendingRequests > 0) return; // other requests still in flight
 
   const wasVisible = visible.value;
@@ -103,6 +106,7 @@ export function useBackendStatus() {
     state: readonly(state),
     visible: readonly(visible),
     countdownSeconds: readonly(countdownSeconds),
+    lastSuccessAt: readonly(lastSuccessAt),
     isWaking: computed(() => state.value === 'waking'),
     markWaking,
     markReady,

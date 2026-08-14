@@ -43,9 +43,18 @@ export default {
 
   footer: {
     tagline: 'Strømpriser i sanntid',
-    github: 'GitHub',
-    madeBy: 'Designet og utviklet av',
+    linksLabel: 'Bunntekst',
+    github: 'Se kildekoden på GitHub',
+    madeBy: 'Designet og utviklet av {author}',
     dataSourceAlt: 'Strømpriser levert av Hva koster strømmen.no',
+    version: 'v{version}',
+    status: {
+      connected: 'Tilkoblet',
+      connecting: 'Kobler til …',
+      offline: 'Frakoblet',
+      unknown: 'Sjekker …',
+      lastUpdated: 'Oppdatert {time}',
+    },
   },
 
   settingsMenu: {

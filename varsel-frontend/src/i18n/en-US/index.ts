@@ -43,9 +43,18 @@ export default {
 
   footer: {
     tagline: 'Real-time electricity prices',
-    github: 'GitHub',
-    madeBy: 'Designed and built by',
+    linksLabel: 'Footer',
+    github: 'View source on GitHub',
+    madeBy: 'Designed and built by {author}',
     dataSourceAlt: 'Electricity prices provided by Hva koster strømmen.no',
+    version: 'v{version}',
+    status: {
+      connected: 'Connected',
+      connecting: 'Connecting…',
+      offline: 'Offline',
+      unknown: 'Checking…',
+      lastUpdated: 'Updated {time}',
+    },
   },
 
   settingsMenu: {
