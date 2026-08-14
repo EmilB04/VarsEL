@@ -162,7 +162,7 @@
                   required
                 >
                   <template v-slot:prepend>
-                    <q-icon name="access_time" />
+                    <q-icon name="schedule" />
                   </template>
                 </q-select>
 
@@ -212,7 +212,7 @@
                   >
                     <q-item-section>
                       <q-item-label class="alert-location">
-                        <q-icon name="place" size="xs" class="q-mr-xs" />
+                        <q-icon name="location_on" size="xs" class="q-mr-xs" />
                         {{ getDisplayLocation(alert.area, alert.city) }}
                       </q-item-label>
                       <q-item-label caption class="alert-details">
@@ -261,11 +261,11 @@
                   >
                     <q-item-section>
                       <q-item-label class="alert-location">
-                        <q-icon name="place" size="xs" class="q-mr-xs" />
+                        <q-icon name="location_on" size="xs" class="q-mr-xs" />
                         {{ getDisplayLocation(alert.area, alert.city) }}
                       </q-item-label>
                       <q-item-label caption class="alert-details">
-                        <q-icon name="access_time" size="xs" class="q-mr-xs" />
+                        <q-icon name="schedule" size="xs" class="q-mr-xs" />
                         {{ t('notifications.active.cheapestAlertDetail', { time: alert.notificationTime }) }}
                       </q-item-label>
                     </q-item-section>

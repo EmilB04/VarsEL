@@ -79,7 +79,7 @@
             <div class="price-unit q-mb-sm">{{ t('common.priceUnit') }}</div>
             <div class="price-label q-mb-sm">{{ t('priceSummary.current') }}</div>
             <div class="price-time q-gutter-xs">
-              <q-icon name="access_time" size="xs" />
+              <q-icon name="schedule" size="xs" />
               {{ t('priceSummary.now', { hour: new Date().getHours() }) }}
             </div>
           </q-card-section>
@@ -101,7 +101,7 @@
         >
           <q-card-section>
             <div class="card-icon q-mb-lg">
-              <q-icon name="insights" size="lg" />
+              <q-icon name="monitoring" size="lg" />
             </div>
             <div class="price-value q-mb-xs">{{ getAvgPrice(prices).toFixed(2) }}</div>
             <div class="price-unit q-mb-sm">{{ t('common.priceUnit') }}</div>

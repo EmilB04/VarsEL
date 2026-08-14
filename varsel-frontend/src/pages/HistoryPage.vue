@@ -117,7 +117,7 @@
               v-model="startHour"
               :options="hourOptions"
               :label="t('history.startHour')"
-              icon="access_time"
+              icon="schedule"
               clearable
             />
 
@@ -150,7 +150,7 @@
             color="negative"
             size="lg"
             @click="clearFilters"
-            icon="clear"
+            icon="close"
             outline
             no-caps
           />

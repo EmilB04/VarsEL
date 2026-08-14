@@ -40,7 +40,7 @@
         <q-icon name="close" size="16px" aria-hidden="true" />
       </span>
 
-      <q-icon name="expand_more" class="select-arrow" aria-hidden="true" />
+      <q-icon name="keyboard_arrow_down" class="select-arrow" aria-hidden="true" />
     </button>
 
     <!-- Teleported to <body> so no ancestor's overflow, stacking context or

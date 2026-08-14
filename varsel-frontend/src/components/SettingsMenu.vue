@@ -154,7 +154,7 @@ function setLocale(code: 'no-NO' | 'en-US') {
 
 const themeOptions = computed<{ value: Theme; label: string; icon: string }[]>(() => [
   { value: 'light', label: t('settingsMenu.appearance.light'), icon: 'light_mode' },
-  { value: 'system', label: t('settingsMenu.appearance.system'), icon: 'settings_suggest' },
+  { value: 'system', label: t('settingsMenu.appearance.system'), icon: 'contrast' },
   { value: 'dark', label: t('settingsMenu.appearance.dark'), icon: 'dark_mode' },
 ]);
 

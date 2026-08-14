@@ -20,7 +20,7 @@
         <q-spinner v-if="state === 'waking'" size="18px" class="status-icon" aria-hidden="true" />
         <q-icon
           v-else
-          :name="state === 'error' ? 'error_outline' : 'check_circle'"
+          :name="state === 'error' ? 'error' : 'check_circle'"
           size="18px"
           class="status-icon"
           aria-hidden="true"
