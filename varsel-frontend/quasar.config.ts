@@ -27,8 +27,11 @@ export default defineConfig((ctx) => {
       // 'line-awesome',
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
 
-      'roboto-font', // optional, you are not bound to it
-      'material-icons', // optional, you are not bound to it
+      'roboto-font',
+      // Material Symbols is the current generation of the Material icon set:
+      // a single variable font with a consistent optical size and stroke
+      // weight, replacing the older (and visually heavier) material-icons.
+      'material-symbols-outlined',
     ],
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
@@ -107,7 +110,9 @@ export default defineConfig((ctx) => {
     framework: {
       config: {},
 
-      // iconSet: 'material-icons', // Quasar icon set
+      // Keeps Quasar's own internal icons (arrows, close buttons, sort
+      // indicators) in the same set as the ones used in app markup.
+      iconSet: 'material-symbols-outlined',
       // lang: 'en-US', // Quasar language pack
 
       // For special cases outside of where the auto-import strategy can have an impact

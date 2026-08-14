@@ -9,44 +9,31 @@
       <q-form @submit.prevent="fetchPrices">
         <div class="selector-container glass-card q-pa-lg q-mb-lg">
           <h3 class="text-h6 q-mb-md">
-            <q-icon name="location_on" class="q-mr-sm" />
+            <q-icon name="sym_o_location_on" class="q-mr-sm" />
             {{ t('history.selectAreaSection') }}
           </h3>
-          <div class="row q-gutter-md">
-            <q-select
+          <div class="selector-grid">
+            <AppSelect
               v-model="selectedArea"
               :options="areaOptions"
               :label="t('history.area')"
-              class="col-12 col-md"
-              emit-value
-              map-options
-              filled
-            >
-              <template v-slot:prepend>
-                <q-icon name="map" />
-              </template>
-            </q-select>
+              icon="sym_o_map"
+            />
 
-            <q-select
+            <AppSelect
               v-model="selectedCity"
               :options="filteredCityOptions"
               :label="t('history.selectCity')"
-              class="col-12 col-md"
-              emit-value
-              map-options
+              icon="sym_o_apartment"
               :disable="!selectedArea"
-              filled
-            >
-              <template v-slot:prepend>
-                <q-icon name="apartment" />
-              </template>
-            </q-select>
+              clearable
+            />
           </div>
         </div>
 
         <div class="selector-container glass-card q-pa-lg q-mb-lg">
           <h3 class="text-h6 q-mb-md">
-            <q-icon name="event" class="q-mr-sm" />
+            <q-icon name="sym_o_event" class="q-mr-sm" />
             {{ t('history.selectDateSection') }}
           </h3>
           <div class="row q-gutter-md items-end">
@@ -59,7 +46,7 @@
               @click="datePopupRef?.show()"
             >
               <template v-slot:prepend>
-                <q-icon name="calendar_today" class="cursor-pointer">
+                <q-icon name="sym_o_calendar_today" class="cursor-pointer">
                   <q-popup-proxy ref="datePopupRef" cover transition-show="scale" transition-hide="scale">
                     <q-date
                       v-model="date"
@@ -81,7 +68,7 @@
                 flat
                 round
                 size="lg"
-                icon="chevron_left"
+                icon="sym_o_chevron_left"
                 color="primary"
                 @click="goToPreviousDay"
                 :disable="!date"
@@ -94,7 +81,7 @@
                 flat
                 round
                 size="lg"
-                icon="today"
+                icon="sym_o_today"
                 color="primary"
                 @click="goToToday"
                 class="date-nav-btn"
@@ -106,7 +93,7 @@
                 flat
                 round
                 size="lg"
-                icon="chevron_right"
+                icon="sym_o_chevron_right"
                 color="primary"
                 @click="goToNextDay"
                 :disable="isNextDayDisabled || !date"
@@ -122,39 +109,25 @@
 
         <div class="selector-container glass-card q-pa-lg q-mb-lg">
           <h3 class="text-h6 q-mb-md">
-            <q-icon name="schedule" class="q-mr-sm" />
+            <q-icon name="sym_o_schedule" class="q-mr-sm" />
             {{ t('history.timeFilterSection') }}
           </h3>
-          <div class="row q-gutter-md">
-            <q-select
+          <div class="selector-grid">
+            <AppSelect
               v-model="startHour"
               :options="hourOptions"
               :label="t('history.startHour')"
-              class="col-12 col-md"
-              emit-value
-              map-options
+              icon="sym_o_schedule"
               clearable
-              filled
-            >
-              <template v-slot:prepend>
-                <q-icon name="access_time" />
-              </template>
-            </q-select>
+            />
 
-            <q-select
+            <AppSelect
               v-model="endHour"
               :options="hourOptions"
               :label="t('history.endHour')"
-              class="col-12 col-md"
-              emit-value
-              map-options
+              icon="sym_o_schedule"
               clearable
-              filled
-            >
-              <template v-slot:prepend>
-                <q-icon name="schedule" />
-              </template>
-            </q-select>
+            />
           </div>
         </div>
 
@@ -166,7 +139,7 @@
             size="lg"
             :disable="!selectedArea || !date"
             :loading="isLoading"
-            icon="search"
+            icon="sym_o_search"
             unelevated
             no-caps
           />
@@ -177,7 +150,7 @@
             color="negative"
             size="lg"
             @click="clearFilters"
-            icon="clear"
+            icon="sym_o_close"
             outline
             no-caps
           />
@@ -186,7 +159,7 @@
 
       <div v-if="prices.length" class="q-mt-lg">
         <h2 class="text-h5 q-mb-lg">
-          <q-icon name="trending_up" size="sm" class="q-mr-sm" />
+          <q-icon name="sym_o_trending_up" size="sm" class="q-mr-sm" />
           {{ t('history.chartHeading', { city: getDisplayCity() }) }}
         </h2>
 
@@ -199,21 +172,9 @@
 
       <PriceLoadingSkeleton v-if="isLoading" />
 
-      <q-banner v-if="loadingTakingLong" class="glass-card q-mt-lg q-pa-lg" type="info" rounded>
-        <template v-slot:avatar>
-          <q-icon name="info" color="info" size="lg" />
-        </template>
-        <div class="text-body1"><strong>{{ t('common.loadingTakingLongTitle') }}</strong></div>
-        <div class="text-body2 q-mt-sm">
-          <i18n-t keypath="common.loadingTakingLongDescription" tag="span" scope="global">
-            <template #countdown><strong>{{ formatCountdown(loadingCountdownSeconds) }}</strong></template>
-          </i18n-t>
-        </div>
-      </q-banner>
-
       <q-banner v-if="hasError" class="error-banner glass-card q-mt-lg q-pa-lg" rounded>
         <template v-slot:avatar>
-          <q-icon name="warning" color="warning" size="lg" />
+          <q-icon name="sym_o_warning" color="warning" size="lg" />
         </template>
         <div class="text-body1 q-mb-sm"><strong>{{ t('common.errorTitle') }}</strong></div>
         <div class="text-body2 q-mb-md">
@@ -232,12 +193,12 @@
         v-if="prices.length"
         :rows="prices"
         :columns="columns"
-        row-key="time_start"
+        row-key="rowKey"
         flat
       >
         <template v-slot:top>
           <div class="text-h6">
-            <q-icon name="table_chart" class="q-mr-sm" />
+            <q-icon name="sym_o_table_chart" class="q-mr-sm" />
             {{ t('history.tableHeading') }}
           </div>
         </template>
@@ -261,6 +222,13 @@
     align-items: center;
     font-weight: 600;
   }
+}
+
+// Two equal columns collapsing to one on narrow screens - see IndexPage.
+.selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
 }
 
 .date-nav-buttons {
@@ -345,11 +313,13 @@ import { api } from 'boot/axios';
 import FooterSection from 'src/components/FooterSection.vue';
 import HeroSection from 'src/components/HeroSection.vue';
 import NavSection from 'src/components/NavSection.vue';
+import AppSelect from 'src/components/AppSelect.vue';
 import PriceSummary from 'src/components/PriceSummary.vue';
 import PriceLoadingSkeleton from 'src/components/PriceLoadingSkeleton.vue';
 import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
 import { useChartServices } from 'src/scripts/ChartScript';
-import { useBackendRequest, formatCountdown } from 'src/scripts/useBackendRequest';
+import { useBackendRequest } from 'src/scripts/useBackendRequest';
+import { addOsloDays, getOsloIsoDate, isoDateIsBefore } from 'src/scripts/osloTime';
 import { useTaxMode } from 'src/composables/useTaxMode';
 
 const { t, locale } = useI18n();
@@ -388,7 +358,7 @@ const prices = computed<Price[]>(() =>
   })),
 );
 
-const { isLoading, hasError, loadingTakingLong, loadingCountdownSeconds, run } = useBackendRequest();
+const { isLoading, hasError, run } = useBackendRequest();
 
 // Flag to track if we're currently restoring from storage
 const isRestoringFilters = ref(false);
@@ -444,23 +414,17 @@ const hasActiveFilters = computed(() => {
   return selectedCity.value !== null || startHour.value !== null || endHour.value !== null;
 });
 
+// Computed property for maximum allowed date (tomorrow, Norwegian time).
+// All date arithmetic on this page is calendar arithmetic in Europe/Oslo -
+// `toISOString()` is UTC and lands a day early for Norwegian users during the
+// first hour(s) after midnight, and `setDate()` on a local Date is unreliable
+// across the two DST-transition days.
+const maxAllowedDate = computed(() => addOsloDays(getOsloIsoDate(), 1));
+
 // Computed property to check if next day button should be disabled
 const isNextDayDisabled = computed(() => {
   if (!date.value) return true;
-
-  const currentDate = new Date(date.value);
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate());
-
-  // Disable if current date is already tomorrow or later
-  return currentDate >= tomorrow;
-});
-
-// Computed property for maximum allowed date (tomorrow)
-const maxAllowedDate = computed(() => {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return tomorrow.toISOString().slice(0, 10);
+  return !isoDateIsBefore(date.value, maxAllowedDate.value);
 });
 
 // Long, locale-aware display of the selected date in the (readonly) input -
@@ -519,11 +483,12 @@ async function fetchPrices() {
 
     // Enrich each object with area, city, and selected date (tax-excluded -
     // `prices` applies the multiplier reactively based on the current setting)
-    rawPrices.value = json.prices.map((price: Price) => ({
+    rawPrices.value = json.prices.map((price: Price, index: number) => ({
       ...price,
       area: selectedArea.value,
       city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
       date: date.value,
+      rowKey: `${date.value}-${index}`,
     }));
 
     // Create chart after data is loaded and DOM is updated
@@ -592,14 +557,8 @@ function clearFilters() {
 
 // Function to go to previous day
 function goToPreviousDay() {
-  if (!date.value) {
-    // If no date selected, use today
-    date.value = new Date().toISOString().slice(0, 10);
-  }
-
-  const currentDate = new Date(date.value);
-  currentDate.setDate(currentDate.getDate() - 1);
-  date.value = currentDate.toISOString().slice(0, 10);
+  const from = date.value || getOsloIsoDate();
+  date.value = addOsloDays(from, -1);
 
   // Auto-fetch when using navigation buttons if area is selected
   if (selectedArea.value) {
@@ -609,30 +568,24 @@ function goToPreviousDay() {
 
 // Function to go to next day
 function goToNextDay() {
-  if (!date.value) {
-    // If no date selected, use today
-    date.value = new Date().toISOString().slice(0, 10);
+  const from = date.value || getOsloIsoDate();
+  const next = addOsloDays(from, 1);
+
+  // Never step past tomorrow - the upstream API has no data beyond it.
+  if (!isoDateIsBefore(next, maxAllowedDate.value) && next !== maxAllowedDate.value) {
+    return;
   }
+  date.value = next;
 
-  const currentDate = new Date(date.value);
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  // Only allow going one day ahead from today
-  if (currentDate < tomorrow) {
-    currentDate.setDate(currentDate.getDate() + 1);
-    date.value = currentDate.toISOString().slice(0, 10);
-
-    // Auto-fetch when using navigation buttons if area is selected
-    if (selectedArea.value) {
-      void fetchPrices();
-    }
+  // Auto-fetch when using navigation buttons if area is selected
+  if (selectedArea.value) {
+    void fetchPrices();
   }
 }
 
 // Function to jump straight back to today
 function goToToday() {
-  date.value = new Date().toISOString().slice(0, 10);
+  date.value = getOsloIsoDate();
 
   if (selectedArea.value) {
     void fetchPrices();

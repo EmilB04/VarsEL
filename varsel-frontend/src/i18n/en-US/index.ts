@@ -2,9 +2,9 @@ export default {
   common: {
     retry: 'Try again',
     close: 'Close',
+    clear: 'Clear selection',
+    noOptions: 'No options available',
     loadingPrices: 'Loading prices...',
-    loadingTakingLongTitle: 'This is taking longer than expected',
-    loadingTakingLongDescription: 'The backend service is starting up. Please wait {countdown}.',
     errorTitle: 'Could not load prices',
     errorDescription: "If the backend service isn't running, you can start it manually:",
     priceUnit: 'kr/kWh',
@@ -26,6 +26,12 @@ export default {
     },
   },
 
+  backendStatus: {
+    waking: 'Starting the backend service, about {countdown} left',
+    ready: 'Connected to the backend',
+    error: "Couldn't reach the backend service",
+  },
+
   nav: {
     logo: 'VarsEL',
     today: 'Today',
@@ -37,9 +43,18 @@ export default {
 
   footer: {
     tagline: 'Real-time electricity prices',
-    github: 'GitHub',
-    madeBy: 'Designed and built by',
+    linksLabel: 'Footer',
+    github: 'View source on GitHub',
+    madeBy: 'Designed and built by {author}',
     dataSourceAlt: 'Electricity prices provided by Hva koster strømmen.no',
+    version: 'v{version}',
+    status: {
+      connected: 'Connected',
+      connecting: 'Connecting…',
+      offline: 'Offline',
+      unknown: 'Checking…',
+      lastUpdated: 'Updated {time}',
+    },
   },
 
   settingsMenu: {
@@ -143,6 +158,8 @@ export default {
       deleteTooltip: 'Delete alert',
       emptyTitle: 'No active alerts',
       emptyDescription: 'Create your first alert above to get started',
+      scheduleEveryDay: 'Every day',
+      quietSummary: 'Quiet {from}–{to}',
     },
     notify: {
       validationError: 'Please fill in all required fields',
@@ -158,6 +175,49 @@ export default {
       cheapestAlertDeleted: 'Cheapest hour alert deleted',
       confirmDeletePriceAlert: 'Are you sure you want to delete this price alert?',
       confirmDeleteCheapestAlert: 'Are you sure you want to delete this alert?',
+    },
+    schedule: {
+      daysLabel: 'Active days',
+      everyDay: 'Every day',
+      selectedDays: '{count} days selected',
+      quietTitle: 'Quiet hours',
+      quietEnable: 'Enable quiet hours',
+      quietFrom: 'From',
+      quietTo: 'To',
+      quietDescription: 'No notifications are sent during this window - they are still recorded as suppressed.',
+    },
+    weekdays: {
+      sun: 'Sunday',
+      mon: 'Monday',
+      tue: 'Tuesday',
+      wed: 'Wednesday',
+      thu: 'Thursday',
+      fri: 'Friday',
+      sat: 'Saturday',
+    },
+    weekdaysShort: {
+      sun: 'Sun',
+      mon: 'Mon',
+      tue: 'Tue',
+      wed: 'Wed',
+      thu: 'Thu',
+      fri: 'Fri',
+      sat: 'Sat',
+    },
+    engine: {
+      permissionGranted: 'Browser notifications are enabled',
+      permissionDefault: "Enable browser notifications so alerts still reach you when this tab isn't focused",
+      permissionDenied: 'Browser notifications are blocked. Alerts still show below, but only while this tab is open.',
+      permissionUnsupported: "This browser doesn't support notifications. Alerts still show below while this tab is open.",
+      enableButton: 'Enable notifications',
+      degraded: "Couldn't reach the price backend - alert checks are retrying automatically.",
+    },
+    recent: {
+      heading: 'Recent alert activity',
+      empty: 'Nothing delivered yet. Checks run automatically while this tab is open.',
+      outcomeDelivered: 'Delivered',
+      outcomeSuppressed: 'Suppressed (quiet hours)',
+      outcomeMissed: 'Missed',
     },
   },
 

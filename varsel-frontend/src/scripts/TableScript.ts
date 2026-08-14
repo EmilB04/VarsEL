@@ -46,6 +46,10 @@ export interface Price {
   area: string;
   city: string;
   date: string;
+  // Stable per-row identity. `time_start` cannot be used as a table row key:
+  // on the October DST transition Norway has 25 hours and the 02:00 slot
+  // occurs twice, so two rows would collide on the same key.
+  rowKey: string;
 }
 
 // Helper functions for price statistics
@@ -93,7 +97,7 @@ export function useAreaOptions() {
 }
 
 // Composable for table functionality
-export function useTableServices(selectedArea: { value: string }) {
+export function useTableServices(selectedArea: { value: string | null }) {
   const { t } = useI18n();
 
   const areaOptions = useAreaOptions();

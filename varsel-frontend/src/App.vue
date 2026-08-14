@@ -8,6 +8,8 @@ import { useI18n } from 'vue-i18n'
 import { api } from 'boot/axios'
 import { useTheme, initTheme } from 'src/composables/useTheme'
 import { useAccent } from 'src/composables/useAccent'
+import { markWaking, markReady } from 'src/composables/useBackendStatus'
+import { startAlertEngine } from 'src/composables/useAlertEngine'
 import { LANGUAGE_KEY } from 'boot/i18n'
 
 // Both composables are module-level singletons - importing/calling them here
@@ -28,9 +30,16 @@ onMounted(() => {
 
   // Fire-and-forget: wake up the backend as early as possible so a Render
   // cold start happens while the user is still looking at the page, not
-  // after they've picked a region and are waiting on real data.
-  void api.get('/health').catch(() => {
-    // Ignored - the real price request will surface any lasting error.
+  // after they've picked a region and are waiting on real data. Reported to
+  // the status bar so a slow wake-up is visible without scrolling.
+  markWaking();
+  api.get('/health').then(markReady, () => {
+    // Not treated as a hard error - the real price request will surface any
+    // lasting problem with a retry affordance.
+    markReady();
   });
+
+  // Evaluate saved price alerts for as long as the app is open.
+  startAlertEngine();
 })
 </script>
