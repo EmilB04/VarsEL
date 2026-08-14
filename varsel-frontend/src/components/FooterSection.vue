@@ -4,7 +4,7 @@
       <div class="footer-top">
         <div class="footer-brand">
           <span class="brand-mark" aria-hidden="true">
-            <q-icon name="bolt" size="18px" aria-hidden="true" />
+            <q-icon name="sym_o_bolt" size="18px" aria-hidden="true" />
           </span>
           <div class="brand-copy">
             <p class="brand-name">VarsEL</p>

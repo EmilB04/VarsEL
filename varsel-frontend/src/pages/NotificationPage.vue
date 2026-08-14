@@ -23,7 +23,7 @@
           <div class="engine-copy">
             <p class="engine-message">{{ permissionMessage }}</p>
             <p v-if="isDegraded" class="engine-degraded">
-              <q-icon name="cloud_off" size="16px" aria-hidden="true" />
+              <q-icon name="sym_o_cloud_off" size="16px" aria-hidden="true" />
               {{ t('notifications.engine.degraded') }}
             </p>
           </div>
@@ -31,7 +31,7 @@
           <q-btn
             v-if="permission === 'default'"
             :label="t('notifications.engine.enableButton')"
-            icon="notifications_active"
+            icon="sym_o_notifications_active"
             color="primary"
             unelevated
             no-caps
@@ -47,7 +47,7 @@
             <q-card-section>
               <div class="card-header q-mb-md">
                 <div class="icon-wrapper primary-icon">
-                  <q-icon name="notifications_active" size="28px" aria-hidden="true" />
+                  <q-icon name="sym_o_notifications_active" size="28px" aria-hidden="true" />
                 </div>
                 <div class="q-mb-lg">
                   <h3 class="text-h6 q-mb-xs">{{ t('notifications.priceAlert.title') }}</h3>
@@ -62,14 +62,14 @@
                   v-model="priceForm.area"
                   :options="areaOptions"
                   :label="t('notifications.priceAlert.area')"
-                  icon="location_on"
+                  icon="sym_o_location_on"
                 />
 
                 <AppSelect
                   v-model="priceForm.city"
                   :options="priceCityOptions"
                   :label="t('notifications.priceAlert.city')"
-                  icon="apartment"
+                  icon="sym_o_apartment"
                   :disable="!priceForm.area"
                   clearable
                 />
@@ -84,7 +84,7 @@
                   required
                 >
                   <template v-slot:prepend>
-                    <q-icon name="payments" size="20px" aria-hidden="true" />
+                    <q-icon name="sym_o_payments" size="20px" aria-hidden="true" />
                   </template>
                 </q-input>
 
@@ -92,7 +92,7 @@
                   v-model="priceForm.condition"
                   :options="conditionOptions"
                   :label="t('notifications.priceAlert.condition')"
-                  icon="compare_arrows"
+                  icon="sym_o_compare_arrows"
                 />
 
                 <AlertScheduleFields v-model:days="priceForm.days" v-model:quietHours="priceForm.quietHours" />
@@ -110,7 +110,7 @@
                   :label="t('notifications.priceAlert.save')"
                   type="submit"
                   color="primary"
-                  icon="save"
+                  icon="sym_o_save"
                   class="half-width"
                   unelevated
                   size="md"
@@ -126,7 +126,7 @@
             <q-card-section>
               <div class="card-header q-mb-md">
                 <div class="icon-wrapper secondary-icon">
-                  <q-icon name="schedule" size="28px" aria-hidden="true" />
+                  <q-icon name="sym_o_schedule" size="28px" aria-hidden="true" />
                 </div>
                 <div class="q-mb-lg">
                   <h3 class="text-h6 q-mb-xs">{{ t('notifications.cheapestAlert.title') }}</h3>
@@ -141,14 +141,14 @@
                   v-model="cheapestForm.area"
                   :options="areaOptions"
                   :label="t('notifications.cheapestAlert.area')"
-                  icon="location_on"
+                  icon="sym_o_location_on"
                 />
 
                 <AppSelect
                   v-model="cheapestForm.city"
                   :options="cheapestCityOptions"
                   :label="t('notifications.cheapestAlert.city')"
-                  icon="apartment"
+                  icon="sym_o_apartment"
                   :disable="!cheapestForm.area"
                   clearable
                 />
@@ -157,7 +157,7 @@
                   v-model="cheapestForm.notificationTime"
                   :options="notificationTimeOptions"
                   :label="t('notifications.cheapestAlert.notificationTime')"
-                  icon="schedule"
+                  icon="sym_o_schedule"
                 />
 
                 <AlertScheduleFields v-model:days="cheapestForm.days" v-model:quietHours="cheapestForm.quietHours" />
@@ -175,7 +175,7 @@
                   :label="t('notifications.cheapestAlert.save')"
                   type="submit"
                   color="secondary"
-                  icon="save"
+                  icon="sym_o_save"
                   class="half-width"
                   size="md"
                   no-caps
@@ -188,7 +188,7 @@
 
       <div class="active-alerts-section q-mt-xl">
         <h2 class="text-h5 q-mb-lg text-center">
-          <q-icon name="notifications" size="sm" class="q-mr-sm" aria-hidden="true" />
+          <q-icon name="sym_o_notifications" size="sm" class="q-mr-sm" aria-hidden="true" />
           {{ t('notifications.active.heading') }}
         </h2>
 
@@ -197,22 +197,22 @@
             <q-card class="active-alerts-card glass-card">
               <q-card-section>
                 <div class="card-title q-mb-md">
-                  <q-icon name="notifications_active" size="sm" color="primary" aria-hidden="true" />
+                  <q-icon name="sym_o_notifications_active" size="sm" color="primary" aria-hidden="true" />
                   <h3 class="text-h6">{{ t('notifications.active.priceAlertsTitle') }}</h3>
                 </div>
                 <q-list class="alerts-list">
                   <q-item v-for="alert in priceAlerts" :key="alert.id" class="alert-item">
                     <q-item-section>
                       <q-item-label class="alert-location">
-                        <q-icon name="location_on" size="16px" class="q-mr-xs" aria-hidden="true" />
+                        <q-icon name="sym_o_location_on" size="16px" class="q-mr-xs" aria-hidden="true" />
                         {{ getDisplayLocation(alert) }}
                       </q-item-label>
                       <q-item-label caption class="alert-details">
-                        <q-icon name="trending_flat" size="16px" class="q-mr-xs" aria-hidden="true" />
+                        <q-icon name="sym_o_trending_flat" size="16px" class="q-mr-xs" aria-hidden="true" />
                         {{ t('notifications.active.priceAlertDetail', { condition: getConditionLabel(alert.condition), price: alert.targetPrice }) }}
                       </q-item-label>
                       <q-item-label caption class="alert-schedule">
-                        <q-icon name="calendar_month" size="16px" class="q-mr-xs" aria-hidden="true" />
+                        <q-icon name="sym_o_calendar_month" size="16px" class="q-mr-xs" aria-hidden="true" />
                         {{ scheduleSummary(alert) }}
                       </q-item-label>
                     </q-item-section>
@@ -227,7 +227,7 @@
                         <q-btn
                           flat
                           round
-                          icon="delete"
+                          icon="sym_o_delete"
                           color="negative"
                           size="md"
                           :aria-label="t('notifications.active.deleteTooltip')"
@@ -247,22 +247,22 @@
             <q-card class="active-alerts-card glass-card">
               <q-card-section>
                 <div class="card-title q-mb-md">
-                  <q-icon name="schedule" size="sm" color="secondary" aria-hidden="true" />
+                  <q-icon name="sym_o_schedule" size="sm" color="secondary" aria-hidden="true" />
                   <h3 class="text-h6">{{ t('notifications.active.cheapestAlertsTitle') }}</h3>
                 </div>
                 <q-list class="alerts-list">
                   <q-item v-for="alert in cheapestAlerts" :key="alert.id" class="alert-item">
                     <q-item-section>
                       <q-item-label class="alert-location">
-                        <q-icon name="location_on" size="16px" class="q-mr-xs" aria-hidden="true" />
+                        <q-icon name="sym_o_location_on" size="16px" class="q-mr-xs" aria-hidden="true" />
                         {{ getDisplayLocation(alert) }}
                       </q-item-label>
                       <q-item-label caption class="alert-details">
-                        <q-icon name="schedule" size="16px" class="q-mr-xs" aria-hidden="true" />
+                        <q-icon name="sym_o_schedule" size="16px" class="q-mr-xs" aria-hidden="true" />
                         {{ t('notifications.active.cheapestAlertDetail', { time: alert.notificationTime }) }}
                       </q-item-label>
                       <q-item-label caption class="alert-schedule">
-                        <q-icon name="calendar_month" size="16px" class="q-mr-xs" aria-hidden="true" />
+                        <q-icon name="sym_o_calendar_month" size="16px" class="q-mr-xs" aria-hidden="true" />
                         {{ scheduleSummary(alert) }}
                       </q-item-label>
                     </q-item-section>
@@ -277,7 +277,7 @@
                         <q-btn
                           flat
                           round
-                          icon="delete"
+                          icon="sym_o_delete"
                           color="negative"
                           size="md"
                           :aria-label="t('notifications.active.deleteTooltip')"
@@ -301,7 +301,7 @@
           <q-card class="glass-card text-center">
             <q-card-section class="q-pa-xl">
               <div class="empty-badge q-mb-md">
-                <q-icon name="notifications_off" size="32px" aria-hidden="true" />
+                <q-icon name="sym_o_notifications_off" size="32px" aria-hidden="true" />
               </div>
               <h3 class="text-h5 text-grey-5 q-mb-sm">{{ t('notifications.active.emptyTitle') }}</h3>
               <p class="text-body2 text-grey-6">
@@ -314,13 +314,13 @@
 
       <div class="recent-section q-mt-xl">
         <h2 class="text-h5 q-mb-lg text-center">
-          <q-icon name="history" size="sm" class="q-mr-sm" aria-hidden="true" />
+          <q-icon name="sym_o_history" size="sm" class="q-mr-sm" aria-hidden="true" />
           {{ t('notifications.recent.heading') }}
         </h2>
 
         <q-card class="recent-card glass-card q-mx-auto">
           <q-card-section v-if="recentDeliveries.length === 0" class="recent-empty">
-            <q-icon name="notifications_none" size="28px" aria-hidden="true" />
+            <q-icon name="sym_o_notifications" size="28px" aria-hidden="true" />
             <p>{{ t('notifications.recent.empty') }}</p>
           </q-card-section>
 
@@ -848,10 +848,10 @@ const permissionMessage = computed(() => {
 
 const permissionIcon = computed(() =>
   permission.value === 'granted'
-    ? 'notifications_active'
+    ? 'sym_o_notifications_active'
     : permission.value === 'denied' || permission.value === 'unsupported'
-      ? 'notifications_off'
-      : 'notifications',
+      ? 'sym_o_notifications_off'
+      : 'sym_o_notifications',
 );
 
 const permissionTone = computed(() => (permission.value === 'granted' ? 'positive' : permission.value === 'default' ? 'primary' : 'muted'));
@@ -870,11 +870,11 @@ async function enableNotifications() {
 function outcomeIcon(outcome: DeliveryOutcome): string {
   switch (outcome) {
     case 'delivered':
-      return 'check_circle';
+      return 'sym_o_check_circle';
     case 'suppressed':
-      return 'bedtime';
+      return 'sym_o_bedtime';
     case 'missed':
-      return 'event_busy';
+      return 'sym_o_event_busy';
   }
 }
 

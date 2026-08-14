@@ -2,7 +2,7 @@
   <div class="schedule-fields">
     <fieldset class="field-group">
       <legend class="field-legend">
-        <q-icon name="calendar_month" size="16px" aria-hidden="true" />
+        <q-icon name="sym_o_calendar_month" size="16px" aria-hidden="true" />
         {{ t('notifications.schedule.daysLabel') }}
       </legend>
 
@@ -27,7 +27,7 @@
 
     <fieldset class="field-group">
       <legend class="field-legend">
-        <q-icon name="bedtime" size="16px" aria-hidden="true" />
+        <q-icon name="sym_o_bedtime" size="16px" aria-hidden="true" />
         {{ t('notifications.schedule.quietTitle') }}
       </legend>
 
@@ -44,14 +44,14 @@
           :model-value="quietHours.startMinute"
           :options="timeOptions"
           :label="t('notifications.schedule.quietFrom')"
-          icon="bedtime"
+          icon="sym_o_bedtime"
           @update:model-value="(value) => setQuietBound('startMinute', value)"
         />
         <AppSelect
           :model-value="quietHours.endMinute"
           :options="timeOptions"
           :label="t('notifications.schedule.quietTo')"
-          icon="light_mode"
+          icon="sym_o_light_mode"
           @update:model-value="(value) => setQuietBound('endMinute', value)"
         />
       </div>

@@ -8,7 +8,7 @@
       <HeroSection :title="t('about.heroTitle')" :description="t('about.heroDescription')" class="q-py-xl">
         <template #prepend>
           <div class="hero-badge q-mb-md">
-            <q-icon name="bolt" size="40px" color="primary" />
+            <q-icon name="sym_o_bolt" size="40px" color="primary" />
           </div>
         </template>
       </HeroSection>
@@ -17,7 +17,7 @@
         <q-card class="about-card q-mb-lg">
           <q-card-section>
             <h2 class="text-h5 q-mb-md">
-              <q-icon name="info" size="sm" class="q-mr-sm" />
+              <q-icon name="sym_o_info" size="sm" class="q-mr-sm" />
               {{ t('about.whatIsTitle') }}
             </h2>
             <p class="text-body1 lede">
@@ -27,7 +27,7 @@
         </q-card>
 
         <h2 class="text-h5 q-mb-lg section-heading">
-          <q-icon name="stars" size="sm" class="q-mr-sm" />
+          <q-icon name="sym_o_stars" size="sm" class="q-mr-sm" />
           {{ t('about.featuresTitle') }}
         </h2>
 
@@ -35,7 +35,7 @@
           <q-card class="feature-card">
             <q-card-section>
               <div class="feature-icon feature-icon--primary">
-                <q-icon name="analytics" size="24px" />
+                <q-icon name="sym_o_analytics" size="24px" />
               </div>
               <h3 class="text-h6 q-mt-md q-mb-sm">{{ t('about.monitoring.title') }}</h3>
               <ul class="feature-list">
@@ -47,7 +47,7 @@
           <q-card class="feature-card">
             <q-card-section>
               <div class="feature-icon feature-icon--secondary">
-                <q-icon name="notifications_active" size="24px" />
+                <q-icon name="sym_o_notifications_active" size="24px" />
               </div>
               <h3 class="text-h6 q-mt-md q-mb-sm">{{ t('about.alerts.title') }}</h3>
               <ul class="feature-list">
@@ -59,7 +59,7 @@
           <q-card class="feature-card">
             <q-card-section>
               <div class="feature-icon feature-icon--accent">
-                <q-icon name="tune" size="24px" />
+                <q-icon name="sym_o_tune" size="24px" />
               </div>
               <h3 class="text-h6 q-mt-md q-mb-sm">{{ t('about.tools.title') }}</h3>
               <ul class="feature-list">
@@ -74,13 +74,13 @@
             <q-card class="about-card">
               <q-card-section>
                 <h2 class="text-h5 q-mb-md">
-                  <q-icon name="code" size="sm" class="q-mr-sm" />
+                  <q-icon name="sym_o_code" size="sm" class="q-mr-sm" />
                   {{ t('about.architectureTitle') }}
                 </h2>
 
                 <div class="tech-group q-mb-lg">
                   <h3 class="tech-label">
-                    <q-icon name="web" size="18px" />
+                    <q-icon name="sym_o_web" size="18px" />
                     {{ t('about.frontend') }}
                   </h3>
                   <div class="tech-chips">
@@ -93,7 +93,7 @@
 
                 <div class="tech-group">
                   <h3 class="tech-label">
-                    <q-icon name="dns" size="18px" />
+                    <q-icon name="sym_o_dns" size="18px" />
                     {{ t('about.backend') }}
                   </h3>
                   <div class="tech-chips">
@@ -127,7 +127,7 @@
                   {{ t('about.openSourceBody') }}
                 </p>
                 <a href="https://github.com/EmilB04/VarsEL" target="_blank" rel="noopener noreferrer" class="pill-link">
-                  <q-icon name="code" size="16px" />
+                  <q-icon name="sym_o_code" size="16px" />
                   {{ t('about.viewOnGithub') }}
                 </a>
               </q-card-section>
@@ -140,7 +140,7 @@
                   {{ t('about.dataSourcesBody') }}
                 </p>
                 <a href="https://www.hvakosterstrommen.no/" target="_blank" rel="noopener noreferrer" class="pill-link pill-link--outline">
-                  <q-icon name="link" size="16px" />
+                  <q-icon name="sym_o_link" size="16px" />
                   hvakosterstrommen.no
                 </a>
                 <p class="text-caption q-mt-md caption-muted">

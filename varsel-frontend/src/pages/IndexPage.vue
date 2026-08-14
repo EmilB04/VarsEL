@@ -16,7 +16,7 @@
             v-model="selectedArea"
             :options="areaOptions"
             :label="t('index.selectArea')"
-            icon="location_on"
+            icon="sym_o_location_on"
             @update:model-value="fetchTodaysPrices"
           />
 
@@ -24,7 +24,7 @@
             v-model="selectedCity"
             :options="filteredCityOptions"
             :label="t('index.selectCity')"
-            icon="apartment"
+            icon="sym_o_apartment"
             :disable="!selectedArea"
             clearable
             @update:model-value="fetchTodaysPrices"
@@ -34,7 +34,7 @@
 
       <div v-if="prices.length" class="q-mt-lg">
         <h2 class="text-h5 q-mb-lg">
-          <q-icon name="trending_up" size="sm" class="q-mr-sm" />
+          <q-icon name="sym_o_trending_up" size="sm" class="q-mr-sm" />
           {{ t('index.chartHeading', { city: getDisplayCity() }) }}
         </h2>
 
@@ -49,7 +49,7 @@
 
       <q-banner v-if="hasError" class="error-banner glass-card q-mt-lg q-pa-lg" rounded>
         <template v-slot:avatar>
-          <q-icon name="warning" color="warning" size="lg" />
+          <q-icon name="sym_o_warning" color="warning" size="lg" />
         </template>
         <div class="text-body1 q-mb-sm"><strong>{{ t('common.errorTitle') }}</strong></div>
         <div class="text-body2 q-mb-md">
@@ -74,7 +74,7 @@
       >
         <template v-slot:top>
           <div class="text-h6">
-            <q-icon name="table_chart" class="q-mr-sm" />
+            <q-icon name="sym_o_table_chart" class="q-mr-sm" />
             {{ t('index.tableHeading') }}
           </div>
         </template>

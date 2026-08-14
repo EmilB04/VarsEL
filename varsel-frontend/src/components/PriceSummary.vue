@@ -17,13 +17,13 @@
         >
           <q-card-section>
             <div class="card-icon q-mb-lg">
-              <q-icon name="arrow_downward" size="lg" />
+              <q-icon name="sym_o_arrow_downward" size="lg" />
             </div>
             <div class="price-value q-mb-xs">{{ getMinPrice(prices).toFixed(2) }}</div>
             <div class="price-unit q-mb-sm">{{ t('common.priceUnit') }}</div>
             <div class="price-label q-mb-sm">{{ t('priceSummary.lowest') }}</div>
             <div class="price-time q-gutter-xs">
-              <q-icon name="schedule" size="xs" />
+              <q-icon name="sym_o_schedule" size="xs" />
               {{ getMinPriceTime(prices) }}
             </div>
           </q-card-section>
@@ -45,13 +45,13 @@
         >
           <q-card-section>
             <div class="card-icon q-mb-lg">
-              <q-icon name="arrow_upward" size="lg" />
+              <q-icon name="sym_o_arrow_upward" size="lg" />
             </div>
             <div class="price-value q-mb-xs">{{ getMaxPrice(prices).toFixed(2) }}</div>
             <div class="price-unit q-mb-sm">{{ t('common.priceUnit') }}</div>
             <div class="price-label q-mb-sm">{{ t('priceSummary.highest') }}</div>
             <div class="price-time q-gutter-xs">
-              <q-icon name="schedule" size="xs" />
+              <q-icon name="sym_o_schedule" size="xs" />
               {{ getMaxPriceTime(prices) }}
             </div>
           </q-card-section>
@@ -73,13 +73,13 @@
         >
           <q-card-section>
             <div class="card-icon q-mb-lg">
-              <q-icon name="schedule" size="lg" />
+              <q-icon name="sym_o_schedule" size="lg" />
             </div>
             <div class="price-value q-mb-xs">{{ getCurrentPrice(prices).toFixed(2) }}</div>
             <div class="price-unit q-mb-sm">{{ t('common.priceUnit') }}</div>
             <div class="price-label q-mb-sm">{{ t('priceSummary.current') }}</div>
             <div class="price-time q-gutter-xs">
-              <q-icon name="schedule" size="xs" />
+              <q-icon name="sym_o_schedule" size="xs" />
               {{ t('priceSummary.now', { hour: new Date().getHours() }) }}
             </div>
           </q-card-section>
@@ -101,13 +101,13 @@
         >
           <q-card-section>
             <div class="card-icon q-mb-lg">
-              <q-icon name="monitoring" size="lg" />
+              <q-icon name="sym_o_monitoring" size="lg" />
             </div>
             <div class="price-value q-mb-xs">{{ getAvgPrice(prices).toFixed(2) }}</div>
             <div class="price-unit q-mb-sm">{{ t('common.priceUnit') }}</div>
             <div class="price-label q-mb-sm">{{ t('priceSummary.average') }}</div>
             <div class="price-time q-gutter-xs">
-              <q-icon name="hourglass_empty" size="xs" />
+              <q-icon name="sym_o_hourglass_empty" size="xs" />
               {{ t('priceSummary.hours', { count: prices.length }) }}
             </div>
           </q-card-section>
@@ -129,13 +129,13 @@
         >
           <q-card-section>
             <div class="card-icon q-mb-lg">
-              <q-icon name="trending_flat" size="lg" />
+              <q-icon name="sym_o_trending_flat" size="lg" />
             </div>
             <div class="price-value q-mb-xs">{{ getPriceDifference(prices).toFixed(2) }}</div>
             <div class="price-unit q-mb-sm">{{ t('common.priceUnit') }}</div>
             <div class="price-label q-mb-sm">{{ t('priceSummary.difference') }}</div>
             <div class="price-time q-gutter-xs">
-              <q-icon name="compare_arrows" size="xs" />
+              <q-icon name="sym_o_compare_arrows" size="xs" />
               {{ t('priceSummary.highLow') }}
             </div>
           </q-card-section>

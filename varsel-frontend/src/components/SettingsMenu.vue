@@ -9,7 +9,7 @@
       :aria-label="t('nav.settings')"
       @click="open = !open"
     >
-      <q-icon name="settings" class="gear-icon" />
+      <q-icon name="sym_o_settings" class="gear-icon" />
       <span v-if="variant === 'bottom'" class="gear-label">{{ t('nav.settings') }}</span>
     </button>
 
@@ -22,13 +22,13 @@
       <div class="panel-header">
         <span class="panel-title">{{ t('nav.settings') }}</span>
         <button type="button" class="panel-close" :aria-label="t('common.close')" @click="open = false">
-          <q-icon name="close" size="16px" />
+          <q-icon name="sym_o_close" size="16px" />
         </button>
       </div>
 
       <section class="menu-section">
         <h3 class="menu-heading">
-          <q-icon name="language" size="14px" />
+          <q-icon name="sym_o_language" size="14px" />
           {{ t('settingsMenu.language.section') }}
         </h3>
         <div class="option-list">
@@ -50,7 +50,7 @@
 
       <section class="menu-section menu-section--bordered">
         <h3 class="menu-heading">
-          <q-icon name="palette" size="14px" />
+          <q-icon name="sym_o_palette" size="14px" />
           {{ t('settingsMenu.appearance.section') }}
         </h3>
         <div class="segmented">
@@ -71,7 +71,7 @@
 
       <section class="menu-section menu-section--bordered">
         <h3 class="menu-heading">
-          <q-icon name="colorize" size="14px" />
+          <q-icon name="sym_o_colorize" size="14px" />
           {{ t('settingsMenu.accent.section') }}
         </h3>
         <div class="swatch-row" role="listbox" :aria-label="t('settingsMenu.accent.section')">
@@ -93,7 +93,7 @@
 
       <section class="menu-section menu-section--bordered">
         <h3 class="menu-heading">
-          <q-icon name="receipt_long" size="14px" />
+          <q-icon name="sym_o_receipt_long" size="14px" />
           {{ t('settingsMenu.tax.section') }}
         </h3>
         <div class="segmented">
@@ -104,7 +104,7 @@
             :class="{ 'segmented-btn--selected': !isTaxIncluded }"
             @click="setTaxIncluded(false)"
           >
-            <q-icon name="money_off" size="16px" />
+            <q-icon name="sym_o_money_off" size="16px" />
             {{ t('settingsMenu.tax.excluded') }}
           </button>
           <button
@@ -114,7 +114,7 @@
             :class="{ 'segmented-btn--selected': isTaxIncluded }"
             @click="setTaxIncluded(true)"
           >
-            <q-icon name="receipt_long" size="16px" />
+            <q-icon name="sym_o_receipt_long" size="16px" />
             {{ t('settingsMenu.tax.included') }}
           </button>
         </div>
@@ -153,9 +153,9 @@ function setLocale(code: 'no-NO' | 'en-US') {
 }
 
 const themeOptions = computed<{ value: Theme; label: string; icon: string }[]>(() => [
-  { value: 'light', label: t('settingsMenu.appearance.light'), icon: 'light_mode' },
-  { value: 'system', label: t('settingsMenu.appearance.system'), icon: 'contrast' },
-  { value: 'dark', label: t('settingsMenu.appearance.dark'), icon: 'dark_mode' },
+  { value: 'light', label: t('settingsMenu.appearance.light'), icon: 'sym_o_light_mode' },
+  { value: 'system', label: t('settingsMenu.appearance.system'), icon: 'sym_o_contrast' },
+  { value: 'dark', label: t('settingsMenu.appearance.dark'), icon: 'sym_o_dark_mode' },
 ]);
 
 const accentKeys = Object.keys(ACCENT_PRESETS) as AccentColor[];

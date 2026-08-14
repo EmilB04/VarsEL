@@ -37,10 +37,10 @@
         @click.stop="clear"
         @keydown.enter.stop.prevent="clear"
       >
-        <q-icon name="close" size="16px" aria-hidden="true" />
+        <q-icon name="sym_o_close" size="16px" aria-hidden="true" />
       </span>
 
-      <q-icon name="keyboard_arrow_down" class="select-arrow" aria-hidden="true" />
+      <q-icon name="sym_o_keyboard_arrow_down" class="select-arrow" aria-hidden="true" />
     </button>
 
     <!-- Teleported to <body> so no ancestor's overflow, stacking context or
@@ -74,7 +74,7 @@
           @pointermove="activeIndex = index"
         >
           <span class="select-option-label">{{ option.label }}</span>
-          <q-icon v-if="isSelected(option)" name="check" size="18px" aria-hidden="true" />
+          <q-icon v-if="isSelected(option)" name="sym_o_check" size="18px" aria-hidden="true" />
         </div>
       </div>
     </Teleport>

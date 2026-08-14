@@ -20,7 +20,7 @@
         <q-spinner v-if="state === 'waking'" size="18px" class="status-icon" aria-hidden="true" />
         <q-icon
           v-else
-          :name="state === 'error' ? 'error' : 'check_circle'"
+          :name="state === 'error' ? 'sym_o_error' : 'sym_o_check_circle'"
           size="18px"
           class="status-icon"
           aria-hidden="true"
@@ -29,7 +29,7 @@
         <span class="status-text">{{ message }}</span>
 
         <button type="button" class="status-close" :aria-label="t('common.close')" @click="dismiss">
-          <q-icon name="close" size="16px" aria-hidden="true" />
+          <q-icon name="sym_o_close" size="16px" aria-hidden="true" />
         </button>
       </div>
     </div>

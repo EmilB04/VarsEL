@@ -9,7 +9,7 @@
       <q-form @submit.prevent="fetchPrices">
         <div class="selector-container glass-card q-pa-lg q-mb-lg">
           <h3 class="text-h6 q-mb-md">
-            <q-icon name="location_on" class="q-mr-sm" />
+            <q-icon name="sym_o_location_on" class="q-mr-sm" />
             {{ t('history.selectAreaSection') }}
           </h3>
           <div class="selector-grid">
@@ -17,14 +17,14 @@
               v-model="selectedArea"
               :options="areaOptions"
               :label="t('history.area')"
-              icon="map"
+              icon="sym_o_map"
             />
 
             <AppSelect
               v-model="selectedCity"
               :options="filteredCityOptions"
               :label="t('history.selectCity')"
-              icon="apartment"
+              icon="sym_o_apartment"
               :disable="!selectedArea"
               clearable
             />
@@ -33,7 +33,7 @@
 
         <div class="selector-container glass-card q-pa-lg q-mb-lg">
           <h3 class="text-h6 q-mb-md">
-            <q-icon name="event" class="q-mr-sm" />
+            <q-icon name="sym_o_event" class="q-mr-sm" />
             {{ t('history.selectDateSection') }}
           </h3>
           <div class="row q-gutter-md items-end">
@@ -46,7 +46,7 @@
               @click="datePopupRef?.show()"
             >
               <template v-slot:prepend>
-                <q-icon name="calendar_today" class="cursor-pointer">
+                <q-icon name="sym_o_calendar_today" class="cursor-pointer">
                   <q-popup-proxy ref="datePopupRef" cover transition-show="scale" transition-hide="scale">
                     <q-date
                       v-model="date"
@@ -68,7 +68,7 @@
                 flat
                 round
                 size="lg"
-                icon="chevron_left"
+                icon="sym_o_chevron_left"
                 color="primary"
                 @click="goToPreviousDay"
                 :disable="!date"
@@ -81,7 +81,7 @@
                 flat
                 round
                 size="lg"
-                icon="today"
+                icon="sym_o_today"
                 color="primary"
                 @click="goToToday"
                 class="date-nav-btn"
@@ -93,7 +93,7 @@
                 flat
                 round
                 size="lg"
-                icon="chevron_right"
+                icon="sym_o_chevron_right"
                 color="primary"
                 @click="goToNextDay"
                 :disable="isNextDayDisabled || !date"
@@ -109,7 +109,7 @@
 
         <div class="selector-container glass-card q-pa-lg q-mb-lg">
           <h3 class="text-h6 q-mb-md">
-            <q-icon name="schedule" class="q-mr-sm" />
+            <q-icon name="sym_o_schedule" class="q-mr-sm" />
             {{ t('history.timeFilterSection') }}
           </h3>
           <div class="selector-grid">
@@ -117,7 +117,7 @@
               v-model="startHour"
               :options="hourOptions"
               :label="t('history.startHour')"
-              icon="schedule"
+              icon="sym_o_schedule"
               clearable
             />
 
@@ -125,7 +125,7 @@
               v-model="endHour"
               :options="hourOptions"
               :label="t('history.endHour')"
-              icon="schedule"
+              icon="sym_o_schedule"
               clearable
             />
           </div>
@@ -139,7 +139,7 @@
             size="lg"
             :disable="!selectedArea || !date"
             :loading="isLoading"
-            icon="search"
+            icon="sym_o_search"
             unelevated
             no-caps
           />
@@ -150,7 +150,7 @@
             color="negative"
             size="lg"
             @click="clearFilters"
-            icon="close"
+            icon="sym_o_close"
             outline
             no-caps
           />
@@ -159,7 +159,7 @@
 
       <div v-if="prices.length" class="q-mt-lg">
         <h2 class="text-h5 q-mb-lg">
-          <q-icon name="trending_up" size="sm" class="q-mr-sm" />
+          <q-icon name="sym_o_trending_up" size="sm" class="q-mr-sm" />
           {{ t('history.chartHeading', { city: getDisplayCity() }) }}
         </h2>
 
@@ -174,7 +174,7 @@
 
       <q-banner v-if="hasError" class="error-banner glass-card q-mt-lg q-pa-lg" rounded>
         <template v-slot:avatar>
-          <q-icon name="warning" color="warning" size="lg" />
+          <q-icon name="sym_o_warning" color="warning" size="lg" />
         </template>
         <div class="text-body1 q-mb-sm"><strong>{{ t('common.errorTitle') }}</strong></div>
         <div class="text-body2 q-mb-md">
@@ -198,7 +198,7 @@
       >
         <template v-slot:top>
           <div class="text-h6">
-            <q-icon name="table_chart" class="q-mr-sm" />
+            <q-icon name="sym_o_table_chart" class="q-mr-sm" />
             {{ t('history.tableHeading') }}
           </div>
         </template>
