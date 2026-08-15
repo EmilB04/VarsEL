@@ -11,43 +11,30 @@
       />
 
       <div class="selector-container glass-card q-pa-lg q-mb-xl">
-        <div class="row q-gutter-md">
-          <q-select
+        <div class="selector-grid">
+          <AppSelect
             v-model="selectedArea"
             :options="areaOptions"
             :label="t('index.selectArea')"
-            class="col-12 col-md"
-            emit-value
-            map-options
+            icon="sym_o_location_on"
             @update:model-value="fetchTodaysPrices"
-            filled
-          >
-            <template v-slot:prepend>
-              <q-icon name="location_on" />
-            </template>
-          </q-select>
+          />
 
-          <q-select
+          <AppSelect
             v-model="selectedCity"
             :options="filteredCityOptions"
             :label="t('index.selectCity')"
-            class="col-12 col-md"
-            emit-value
-            map-options
+            icon="sym_o_apartment"
             :disable="!selectedArea"
+            clearable
             @update:model-value="fetchTodaysPrices"
-            filled
-          >
-            <template v-slot:prepend>
-              <q-icon name="apartment" />
-            </template>
-          </q-select>
+          />
         </div>
       </div>
 
       <div v-if="prices.length" class="q-mt-lg">
         <h2 class="text-h5 q-mb-lg">
-          <q-icon name="trending_up" size="sm" class="q-mr-sm" />
+          <q-icon name="sym_o_trending_up" size="sm" class="q-mr-sm" />
           {{ t('index.chartHeading', { city: getDisplayCity() }) }}
         </h2>
 
@@ -60,21 +47,9 @@
 
       <PriceLoadingSkeleton v-if="isLoading" />
 
-      <q-banner v-if="loadingTakingLong" class="glass-card q-mt-lg q-pa-lg" type="info" rounded>
-        <template v-slot:avatar>
-          <q-icon name="info" color="info" size="lg" />
-        </template>
-        <div class="text-body1"><strong>{{ t('common.loadingTakingLongTitle') }}</strong></div>
-        <div class="text-body2 q-mt-sm">
-          <i18n-t keypath="common.loadingTakingLongDescription" tag="span" scope="global">
-            <template #countdown><strong>{{ formatCountdown(loadingCountdownSeconds) }}</strong></template>
-          </i18n-t>
-        </div>
-      </q-banner>
-
       <q-banner v-if="hasError" class="error-banner glass-card q-mt-lg q-pa-lg" rounded>
         <template v-slot:avatar>
-          <q-icon name="warning" color="warning" size="lg" />
+          <q-icon name="sym_o_warning" color="warning" size="lg" />
         </template>
         <div class="text-body1 q-mb-sm"><strong>{{ t('common.errorTitle') }}</strong></div>
         <div class="text-body2 q-mb-md">
@@ -93,13 +68,13 @@
         v-if="prices.length"
         :rows="prices"
         :columns="simplifiedColumns"
-        row-key="time_start"
+        row-key="rowKey"
         flat
         :pagination="{ rowsPerPage: 12 }"
       >
         <template v-slot:top>
           <div class="text-h6">
-            <q-icon name="table_chart" class="q-mr-sm" />
+            <q-icon name="sym_o_table_chart" class="q-mr-sm" />
             {{ t('index.tableHeading') }}
           </div>
         </template>
@@ -115,6 +90,15 @@
 
 :deep(.hero-section) {
   text-align: center;
+}
+
+// Two equal columns that collapse to a single column on narrow screens.
+// Replaces the old Quasar `row`/`col-md` pairing so the selects own their
+// width instead of inheriting flex-basis quirks from the grid.
+.selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
 }
 
 .chart-container {
@@ -191,18 +175,20 @@ import { api } from 'boot/axios';
 import FooterSection from 'src/components/FooterSection.vue';
 import HeroSection from 'src/components/HeroSection.vue';
 import NavSection from 'src/components/NavSection.vue';
+import AppSelect from 'src/components/AppSelect.vue';
 import PriceSummary from 'src/components/PriceSummary.vue';
 import PriceLoadingSkeleton from 'src/components/PriceLoadingSkeleton.vue';
 import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
 import { useChartServices } from 'src/scripts/ChartScript';
-import { useBackendRequest, formatCountdown } from 'src/scripts/useBackendRequest';
+import { useBackendRequest } from 'src/scripts/useBackendRequest';
+import { getOsloIsoDate } from 'src/scripts/osloTime';
 import { useTaxMode } from 'src/composables/useTaxMode';
 
 const { t } = useI18n();
 const { isTaxIncluded } = useTaxMode();
 
 // Reactive state variables - simplified for today only
-const selectedArea = ref('NO1');
+const selectedArea = ref<string | null>('NO1');
 const selectedCity = ref<string | null>(null);
 // Prices as returned by the backend, tax-excluded - the tax multiplier is applied
 // reactively in `prices` below, so toggling "Incl./Excl. VAT" updates instantly.
@@ -214,13 +200,7 @@ const prices = computed<Price[]>(() =>
   })),
 );
 
-const {
-  isLoading,
-  hasError,
-  loadingTakingLong,
-  loadingCountdownSeconds,
-  run,
-} = useBackendRequest();
+const { isLoading, hasError, run } = useBackendRequest();
 
 // Use table services
 const {
@@ -242,8 +222,10 @@ const localCanvasRef = ref<HTMLCanvasElement | null>(null);
 
 async function fetchTodaysPrices() {
   await run(async () => {
-    // Always use today's date
-    const today = new Date().toISOString().slice(0, 10);
+    // Always use today's date *in Norway*. `toISOString()` is UTC, which is
+    // behind Oslo, so between midnight and 01:00/02:00 local it asks the
+    // backend for yesterday's prices.
+    const today = getOsloIsoDate();
 
     // Use city if chosen, else use area
     const regionParam = selectedCity.value || selectedArea.value;
@@ -271,11 +253,12 @@ async function fetchTodaysPrices() {
 
     // Enrich each object with area, city, and today's date (tax-excluded -
     // `prices` applies the multiplier reactively based on the current setting)
-    rawPrices.value = json.prices.map((price: Price) => ({
+    rawPrices.value = json.prices.map((price: Price, index: number) => ({
       ...price,
       area: selectedArea.value,
       city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
       date: today,
+      rowKey: `${today}-${index}`,
     }));
 
     // Ensure DOM is updated and canvas ref is available

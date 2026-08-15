@@ -36,10 +36,10 @@ import SettingsMenu from './SettingsMenu.vue';
 const { t } = useI18n();
 
 const navItems = computed(() => [
-  { to: '/', icon: 'schedule', label: t('nav.today') },
-  { to: '/history', icon: 'history', label: t('nav.history') },
-  { to: '/notifications', icon: 'notifications', label: t('nav.notifications') },
-  { to: '/about', icon: 'info', label: t('nav.about') },
+  { to: '/', icon: 'sym_o_schedule', label: t('nav.today') },
+  { to: '/history', icon: 'sym_o_history', label: t('nav.history') },
+  { to: '/notifications', icon: 'sym_o_notifications', label: t('nav.notifications') },
+  { to: '/about', icon: 'sym_o_info', label: t('nav.about') },
 ]);
 </script>
 

@@ -2,9 +2,9 @@ export default {
   common: {
     retry: 'Prøv igjen',
     close: 'Lukk',
+    clear: 'Fjern valg',
+    noOptions: 'Ingen alternativer tilgjengelig',
     loadingPrices: 'Laster priser...',
-    loadingTakingLongTitle: 'Henter data tar lengre tid enn forventet',
-    loadingTakingLongDescription: 'Backend-tjenesten starter. Vennligst vent {countdown}.',
     errorTitle: 'Kunne ikke laste priser',
     errorDescription: 'Hvis backend-tjenesten ikke kjører, kan du starte den manuelt:',
     priceUnit: 'kr/kWh',
@@ -26,6 +26,12 @@ export default {
     },
   },
 
+  backendStatus: {
+    waking: 'Starter backend-tjenesten, omtrent {countdown} igjen',
+    ready: 'Koblet til backend',
+    error: 'Fikk ikke kontakt med backend-tjenesten',
+  },
+
   nav: {
     logo: 'VarsEL',
     today: 'I dag',
@@ -37,9 +43,18 @@ export default {
 
   footer: {
     tagline: 'Strømpriser i sanntid',
-    github: 'GitHub',
-    madeBy: 'Designet og utviklet av',
+    linksLabel: 'Bunntekst',
+    github: 'Se kildekoden på GitHub',
+    madeBy: 'Designet og utviklet av {author}',
     dataSourceAlt: 'Strømpriser levert av Hva koster strømmen.no',
+    version: 'v{version}',
+    status: {
+      connected: 'Tilkoblet',
+      connecting: 'Kobler til …',
+      offline: 'Frakoblet',
+      unknown: 'Sjekker …',
+      lastUpdated: 'Oppdatert {time}',
+    },
   },
 
   settingsMenu: {
@@ -143,6 +158,8 @@ export default {
       deleteTooltip: 'Slett varsel',
       emptyTitle: 'Ingen aktive varsler',
       emptyDescription: 'Opprett ditt første varsel ovenfor for å komme i gang',
+      scheduleEveryDay: 'Hver dag',
+      quietSummary: 'Stille {from}–{to}',
     },
     notify: {
       validationError: 'Vennligst fyll ut alle påkrevde felt',
@@ -158,6 +175,49 @@ export default {
       cheapestAlertDeleted: 'Billigste time-varsel slettet',
       confirmDeletePriceAlert: 'Er du sikker på at du vil slette dette prisvarselet?',
       confirmDeleteCheapestAlert: 'Er du sikker på at du vil slette dette varselet?',
+    },
+    schedule: {
+      daysLabel: 'Aktive dager',
+      everyDay: 'Hver dag',
+      selectedDays: '{count} dager valgt',
+      quietTitle: 'Stille timer',
+      quietEnable: 'Aktiver stille timer',
+      quietFrom: 'Fra',
+      quietTo: 'Til',
+      quietDescription: 'Det sendes ingen varsler i dette tidsrommet - de registreres likevel som undertrykt.',
+    },
+    weekdays: {
+      sun: 'Søndag',
+      mon: 'Mandag',
+      tue: 'Tirsdag',
+      wed: 'Onsdag',
+      thu: 'Torsdag',
+      fri: 'Fredag',
+      sat: 'Lørdag',
+    },
+    weekdaysShort: {
+      sun: 'Søn',
+      mon: 'Man',
+      tue: 'Tir',
+      wed: 'Ons',
+      thu: 'Tor',
+      fri: 'Fre',
+      sat: 'Lør',
+    },
+    engine: {
+      permissionGranted: 'Nettleservarsler er aktivert',
+      permissionDefault: 'Aktiver nettleservarsler slik at du får beskjed selv når denne fanen ikke er aktiv',
+      permissionDenied: 'Nettleservarsler er blokkert. Varsler vises fortsatt nedenfor, men kun mens denne fanen er åpen.',
+      permissionUnsupported: 'Denne nettleseren støtter ikke varsler. Varsler vises fortsatt nedenfor mens denne fanen er åpen.',
+      enableButton: 'Aktiver varsler',
+      degraded: 'Fikk ikke kontakt med prisbackend - varselsjekker prøver på nytt automatisk.',
+    },
+    recent: {
+      heading: 'Nylig varselaktivitet',
+      empty: 'Ingenting levert ennå. Sjekker kjører automatisk mens denne fanen er åpen.',
+      outcomeDelivered: 'Levert',
+      outcomeSuppressed: 'Undertrykt (stille timer)',
+      outcomeMissed: 'Ikke fanget opp',
     },
   },
 
