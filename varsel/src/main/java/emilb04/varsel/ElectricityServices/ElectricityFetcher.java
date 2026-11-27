@@ -1,139 +1,107 @@
 package emilb04.varsel.ElectricityServices;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import emilb04.varsel.Components.DTFormatter;
 import emilb04.varsel.Components.JsonFormatter;
 import emilb04.varsel.ElectricityRegions.ElectricityRegion;
 
 public class ElectricityFetcher {
 
-    // Raw upstream responses rarely change once published, so a short in-memory
-    // cache keyed by region+date avoids re-hitting hvakosterstrommen.no on
-    // every request for the same day (e.g. switching cities within an area).
-    private static final long CACHE_TTL_MILLIS = 10 * 60 * 1000; // 10 minutes
-
-    // Upper bound on distinct region+date keys kept in memory. Without this the
-    // map grows by one entry per (region, date) pair forever, since expired
-    // entries were previously only skipped on read and never removed.
+    private static final Duration CACHE_TTL = Duration.ofMinutes(10);
     private static final int CACHE_MAX_ENTRIES = 256;
+    private static final HttpClient HTTP = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(4))
+            .build();
 
-    // Never let a slow or hanging upstream tie up a request thread indefinitely.
-    private static final int CONNECT_TIMEOUT_MILLIS = 5_000;
-    private static final int READ_TIMEOUT_MILLIS = 10_000;
-
-    private record CacheEntry(String content, long fetchedAtMillis) {
-        boolean isExpired() {
-            return Instant.now().toEpochMilli() - fetchedAtMillis > CACHE_TTL_MILLIS;
+    private record CacheEntry(String content, long fetchedAtNanos) {
+        boolean isFresh() {
+            return System.nanoTime() - fetchedAtNanos < CACHE_TTL.toNanos();
         }
     }
 
-    private static final ConcurrentHashMap<String, CacheEntry> rawResponseCache = new ConcurrentHashMap<>();
+    // Lock only for cache reads and writes. Unrelated areas can load in parallel.
+    private static final LinkedHashMap<String, CacheEntry> rawResponseCache =
+            new LinkedHashMap<>(32, 0.75f, true);
+    private static final ConcurrentHashMap<String, FutureTask<String>> inFlight = new ConcurrentHashMap<>();
 
-    /**
-     * Henter strømpriser fra hvakosterstrommen.no sitt API for valgt region og
-     * dato.
-     * 
-     * @param region Strømregion (NO1-NO5)
-     * @param date   Dato (yyyy-MM-dd)
-     * @return JSON-respons med priser
-     * @throws IOException ved nettverksfeil
-     */
-    private static String constructUrl(ElectricityRegion.Region region, String date) {
-        return String.format(
-                "https://www.hvakosterstrommen.no/api/v1/prices/%d/%02d-%02d_%s.json",
-                DTFormatter.getYear(date),
-                DTFormatter.getMonthValue(date),
-                DTFormatter.getDayOfMonth(date),
-                region.getRegionNumber());
-    }
-
-    private static String makeApiRequest(String urlString) throws IOException {
-        URL url = URI.create(urlString).toURL();
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        try {
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
-            connection.setReadTimeout(READ_TIMEOUT_MILLIS);
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new IOException("Failed to fetch data: HTTP error code " + responseCode);
-            }
-
-            StringBuilder content = new StringBuilder();
-            try (Scanner scanner = new Scanner(connection.getInputStream(), StandardCharsets.UTF_8)) {
-                while (scanner.hasNextLine()) {
-                    content.append(scanner.nextLine());
-                }
-            }
-
-            String body = content.toString().trim();
-            if (body.isEmpty()) {
-                throw new IOException("No data received from the API.");
-            }
-            // The upstream price endpoint always answers with a JSON array. Anything
-            // else (an error object, an HTML error page) is treated as a failure.
-            // Previously this was a `contains("error")` substring scan over the whole
-            // payload, which could reject a perfectly valid response.
-            if (body.charAt(0) != '[') {
-                throw new IOException("Unexpected API response shape (expected a JSON array).");
-            }
-            return body;
-        } finally {
-            // Always release the connection, including on the error paths above.
-            connection.disconnect();
+    private static String loadDay(String area, LocalDate date) throws IOException, InterruptedException {
+        URI uri = URI.create("https://www.hvakosterstrommen.no/api/v1/prices/%d/%02d-%02d_%s.json"
+                .formatted(date.getYear(), date.getMonthValue(), date.getDayOfMonth(), area));
+        HttpRequest request = HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(12)).GET().build();
+        HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new IOException("Price provider returned HTTP " + response.statusCode());
         }
-    }
-
-    /**
-     * Drops expired entries, and - if the cache is still at its ceiling - the
-     * oldest remaining ones. Called before every insert so the map cannot grow
-     * without bound over a long-running process.
-     */
-    private static void evictStaleCacheEntries() {
-        rawResponseCache.values().removeIf(CacheEntry::isExpired);
-
-        while (rawResponseCache.size() >= CACHE_MAX_ENTRIES) {
-            String oldestKey = rawResponseCache.entrySet().stream()
-                    .min(Comparator.comparingLong(entry -> entry.getValue().fetchedAtMillis()))
-                    .map(Map.Entry::getKey)
-                    .orElse(null);
-            if (oldestKey == null) {
-                break;
-            }
-            rawResponseCache.remove(oldestKey);
+        String body = response.body().strip();
+        if (!body.startsWith("[")) {
+            throw new IOException("Price provider returned an unexpected response");
         }
+        return body;
     }
 
-    private static String formatApiResponse(ElectricityRegion.Region region, String content) {
-        return new JsonFormatter().format(region, content);
+    private static String cachedDay(String key) {
+        synchronized (rawResponseCache) {
+            CacheEntry cached = rawResponseCache.get(key);
+            return cached != null && cached.isFresh() ? cached.content() : null;
+        }
     }
 
     private static String fetchRawContentCached(ElectricityRegion.Region region, String date) throws IOException {
-        String cacheKey = region.name() + ":" + date;
-        CacheEntry cached = rawResponseCache.get(cacheKey);
-        if (cached != null && !cached.isExpired()) {
-            return cached.content();
+        String area = region.getRegionNumber();
+        String key = area + ":" + date;
+        String cached = cachedDay(key);
+        if (cached != null) {
+            return cached;
         }
 
-        String content = makeApiRequest(constructUrl(region, date));
-        evictStaleCacheEntries();
-        rawResponseCache.put(cacheKey, new CacheEntry(content, Instant.now().toEpochMilli()));
-        return content;
+        // City aliases share the same upstream prices. The response formatter
+        // still receives the original region so the API keeps its city metadata.
+        FutureTask<String> newRequest = new FutureTask<>(() -> {
+            String latest = cachedDay(key);
+            if (latest != null) {
+                return latest;
+            }
+            String body = loadDay(area, LocalDate.parse(date));
+            if (!new JSONArray(body).isEmpty()) {
+                synchronized (rawResponseCache) {
+                    rawResponseCache.put(key, new CacheEntry(body, System.nanoTime()));
+                    if (rawResponseCache.size() > CACHE_MAX_ENTRIES) {
+                        rawResponseCache.pollFirstEntry();
+                    }
+                }
+            }
+            return body;
+        });
+        FutureTask<String> activeRequest = inFlight.putIfAbsent(key, newRequest);
+        try {
+            if (activeRequest == null) {
+                newRequest.run();
+            }
+            return (activeRequest == null ? newRequest : activeRequest).get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Price request interrupted", e);
+        } catch (ExecutionException e) {
+            throw new IOException("Could not load prices", e.getCause());
+        } finally {
+            if (activeRequest == null) {
+                inFlight.remove(key, newRequest);
+            }
+        }
     }
 
     /**
@@ -146,7 +114,7 @@ public class ElectricityFetcher {
      */
     public static String fetchPricesFromDay(ElectricityRegion.Region region, String date) throws IOException {
         String content = fetchRawContentCached(region, date);
-        return formatApiResponse(region, content);
+        return new JsonFormatter().format(region, content);
     }
 
     /**
@@ -178,6 +146,10 @@ public class ElectricityFetcher {
         // Valider at tallene er fornuftige
         if (startHour < 0 || startHour > 23 || endHour < 1 || endHour > 24 || startHour >= endHour) {
             throw new IllegalArgumentException("Ugyldige timer: " + startHour + " til " + endHour);
+        }
+
+        if (startHour == 0 && endHour == 24) {
+            return fetchPricesFromDay(region, date);
         }
 
         // Hent rådata
