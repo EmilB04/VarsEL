@@ -1,594 +1,647 @@
 <template>
-  <q-page class="q-pa-md">
-    <header>
-      <NavSection />
-    </header>
+  <q-page class="app-page history-page">
     <main>
-      <HeroSection :title="t('history.heroTitle')" :description="t('history.heroDescription')" class="q-py-xl" />
+      <HeroSection :title="t('history.heroTitle')" :description="t('history.heroDescription')" />
 
-      <q-form @submit.prevent="fetchPrices">
-        <div class="selector-container glass-card q-pa-lg q-mb-lg">
-          <h3 class="text-h6 q-mb-md">
-            <q-icon name="sym_o_location_on" class="q-mr-sm" />
-            {{ t('history.selectAreaSection') }}
-          </h3>
-          <div class="selector-grid">
-            <AppSelect
-              v-model="selectedArea"
-              :options="areaOptions"
-              :label="t('history.area')"
-              icon="sym_o_map"
-            />
-
-            <AppSelect
-              v-model="selectedCity"
-              :options="filteredCityOptions"
-              :label="t('history.selectCity')"
-              icon="sym_o_apartment"
-              :disable="!selectedArea"
-              clearable
-            />
-          </div>
-        </div>
-
-        <div class="selector-container glass-card q-pa-lg q-mb-lg">
-          <h3 class="text-h6 q-mb-md">
-            <q-icon name="sym_o_event" class="q-mr-sm" />
-            {{ t('history.selectDateSection') }}
-          </h3>
-          <div class="row q-gutter-md items-end">
-            <q-input
-              :model-value="formattedDate"
-              :label="t('history.date')"
-              class="col-12 col-md date-display-input"
-              filled
-              readonly
-              @click="datePopupRef?.show()"
-            >
-              <template v-slot:prepend>
-                <q-icon name="sym_o_calendar_today" class="cursor-pointer">
-                  <q-popup-proxy ref="datePopupRef" cover transition-show="scale" transition-hide="scale">
-                    <q-date
-                      v-model="date"
-                      mask="YYYY-MM-DD"
-                      :options="isDateSelectable"
-                      :locale="dateLocale"
-                      today-btn
-                      flat
-                      color="primary"
-                      @update:model-value="onCalendarPick"
-                    />
-                  </q-popup-proxy>
-                </q-icon>
-              </template>
-            </q-input>
-
-            <div class="date-nav-buttons">
-              <q-btn
-                flat
-                round
-                size="lg"
-                icon="sym_o_chevron_left"
-                color="primary"
-                @click="goToPreviousDay"
-                :disable="!date"
-                class="date-nav-btn"
-              >
-                <q-tooltip>{{ t('history.previousDay') }}</q-tooltip>
-              </q-btn>
-
-              <q-btn
-                flat
-                round
-                size="lg"
-                icon="sym_o_today"
-                color="primary"
-                @click="goToToday"
-                class="date-nav-btn"
-              >
-                <q-tooltip>{{ t('history.today') }}</q-tooltip>
-              </q-btn>
-
-              <q-btn
-                flat
-                round
-                size="lg"
-                icon="sym_o_chevron_right"
-                color="primary"
-                @click="goToNextDay"
-                :disable="isNextDayDisabled || !date"
-                class="date-nav-btn"
-              >
-                <q-tooltip>{{
-                  isNextDayDisabled ? t('history.nextDayDisabled') : t('history.nextDay')
-                }}</q-tooltip>
-              </q-btn>
+      <q-form novalidate class="history-filters" @submit.prevent="fetchPrices">
+        <div class="filter-grid">
+          <section class="filter-group" aria-labelledby="history-area">
+            <h2 id="history-area" class="filter-title">
+              <q-icon name="sym_o_location_on" class="panel-icon" aria-hidden="true" />
+              {{ t('history.selectAreaSection') }}
+            </h2>
+            <div class="filter-fields">
+              <AppSelect
+                v-model="selectedArea"
+                :options="areaOptions"
+                :label="t('history.area')"
+                icon="sym_o_map"
+              />
+              <AppSelect
+                v-model="selectedCity"
+                :options="filteredCityOptions"
+                :label="t('history.selectCity')"
+                icon="sym_o_apartment"
+                :disable="!selectedArea"
+                clearable
+              />
             </div>
-          </div>
+          </section>
+
+          <section class="filter-group" aria-labelledby="history-date">
+            <h2 id="history-date" class="filter-title">
+              <q-icon name="sym_o_event" class="panel-icon" aria-hidden="true" />
+              {{ t('history.selectDateSection') }}
+            </h2>
+            <div class="filter-fields">
+              <button
+                type="button"
+                class="date-trigger"
+                :class="{ 'date-trigger--open': datePickerOpen }"
+                :aria-expanded="datePickerOpen"
+                aria-haspopup="dialog"
+                @click="datePickerOpen = !datePickerOpen"
+              >
+                <q-icon name="sym_o_calendar_today" class="field-icon" aria-hidden="true" />
+                <span class="date-trigger-copy">
+                  <span class="date-label" :class="{ 'date-label--filled': date }">{{
+                    t('history.date')
+                  }}</span>
+                  <strong v-if="date">{{ formattedDate }}</strong>
+                </span>
+                <q-icon name="sym_o_keyboard_arrow_down" size="20px" aria-hidden="true" />
+
+                <q-popup-proxy
+                  v-model="datePickerOpen"
+                  no-parent-event
+                  anchor="bottom left"
+                  self="top left"
+                  :offset="[0, 8]"
+                  transition-show="jump-down"
+                  transition-hide="jump-up"
+                  role="dialog"
+                  :aria-label="t('history.selectDateSection')"
+                >
+                  <div class="history-calendar" @keydown.esc.stop="datePickerOpen = false">
+                    <q-date
+                      :model-value="date || null"
+                      mask="YYYY-MM-DD"
+                      :default-year-month="toCalendarMonth(osloToday)"
+                      :navigation-min-year-month="toCalendarMonth(earliestDate)"
+                      :navigation-max-year-month="toCalendarMonth(maxAllowedDate)"
+                      :options="isDateSelectable"
+                      flat
+                      minimal
+                      color="primary"
+                      @update:model-value="selectCalendarDate"
+                    />
+                    <div class="calendar-actions">
+                      <q-btn
+                        flat
+                        no-caps
+                        color="primary"
+                        :label="t('history.today')"
+                        @click="selectCalendarDate(osloToday)"
+                      />
+                      <q-btn
+                        flat
+                        no-caps
+                        :label="t('common.close')"
+                        @click="datePickerOpen = false"
+                      />
+                    </div>
+                  </div>
+                </q-popup-proxy>
+              </button>
+
+              <div class="date-nav">
+                <q-btn
+                  flat
+                  type="button"
+                  icon="sym_o_chevron_left"
+                  :aria-label="t('history.previousDay')"
+                  :disable="!date || date <= earliestDate"
+                  @click="moveDate(-1)"
+                >
+                  <q-tooltip>{{ t('history.previousDay') }}</q-tooltip>
+                </q-btn>
+                <q-btn
+                  flat
+                  no-caps
+                  type="button"
+                  icon="sym_o_today"
+                  :label="t('history.today')"
+                  @click="applyQuickDate(osloToday)"
+                />
+                <q-btn
+                  flat
+                  type="button"
+                  icon="sym_o_chevron_right"
+                  :aria-label="t('history.nextDay')"
+                  :disable="!date || date >= maxAllowedDate"
+                  @click="moveDate(1)"
+                >
+                  <q-tooltip>{{ t('history.nextDay') }}</q-tooltip>
+                </q-btn>
+              </div>
+            </div>
+          </section>
+
+          <section class="filter-group" aria-labelledby="history-hours">
+            <h2 id="history-hours" class="filter-title">
+              <q-icon name="sym_o_schedule" class="panel-icon" aria-hidden="true" />
+              {{ t('history.timeFilterSection') }}
+            </h2>
+            <div class="filter-fields">
+              <AppSelect
+                v-model="startHour"
+                :options="startHourOptions"
+                :label="t('history.startHour')"
+                icon="sym_o_schedule"
+                clearable
+              />
+              <AppSelect
+                v-model="endHour"
+                :options="endHourOptions"
+                :label="t('history.endHour')"
+                icon="sym_o_schedule"
+                clearable
+              />
+            </div>
+            <p v-if="invalidHours" class="filter-error" role="alert">
+              {{ t('history.invalidHours') }}
+            </p>
+          </section>
         </div>
 
-        <div class="selector-container glass-card q-pa-lg q-mb-lg">
-          <h3 class="text-h6 q-mb-md">
-            <q-icon name="sym_o_schedule" class="q-mr-sm" />
-            {{ t('history.timeFilterSection') }}
-          </h3>
-          <div class="selector-grid">
-            <AppSelect
-              v-model="startHour"
-              :options="hourOptions"
-              :label="t('history.startHour')"
-              icon="sym_o_schedule"
-              clearable
-            />
-
-            <AppSelect
-              v-model="endHour"
-              :options="hourOptions"
-              :label="t('history.endHour')"
-              icon="sym_o_schedule"
-              clearable
-            />
-          </div>
-        </div>
-
-        <div class="action-buttons q-mb-xl">
+        <div class="filter-actions">
+          <q-btn
+            :label="t('history.clearFilters')"
+            type="button"
+            icon="sym_o_restart_alt"
+            :disable="!hasActiveFilters"
+            flat
+            no-caps
+            @click="clearFilters"
+          />
           <q-btn
             :label="t('history.fetchButton')"
             type="submit"
             color="primary"
-            size="lg"
-            :disable="!selectedArea || !date"
+            :disable="!canFetch"
             :loading="isLoading"
             icon="sym_o_search"
             unelevated
             no-caps
           />
-          <q-btn
-            v-if="hasActiveFilters"
-            :label="t('history.clearFilters')"
-            type="button"
-            color="negative"
-            size="lg"
-            @click="clearFilters"
-            icon="sym_o_close"
-            outline
-            no-caps
-          />
         </div>
       </q-form>
 
-      <div v-if="prices.length" class="q-mt-lg">
-        <h2 class="text-h5 q-mb-lg">
-          <q-icon name="sym_o_trending_up" size="sm" class="q-mr-sm" />
-          {{ t('history.chartHeading', { city: getDisplayCity() }) }}
-        </h2>
-
-        <div class="chart-container q-mb-xl">
-          <canvas ref="chartCanvas" style="display: block; width: 100%; height: 100%"></canvas>
-        </div>
-
+      <div v-if="prices.length" class="history-results">
+        <section class="history-chart">
+          <h2 class="chart-heading">
+            <q-icon name="sym_o_show_chart" class="panel-icon" aria-hidden="true" />
+            {{ t('history.chartHeading', { city: resultCity }) }}
+            <span class="chart-unit">{{ t('common.priceUnit') }}</span>
+          </h2>
+          <p class="history-result-date">{{ displayDate(prices[0]?.date ?? '') }}</p>
+          <div class="chart-container">
+            <canvas
+              ref="chartCanvas"
+              role="img"
+              :aria-label="t('history.chartHeading', { city: resultCity })"
+            ></canvas>
+          </div>
+        </section>
         <PriceSummary :prices="prices" @highlight="setHighlight" />
       </div>
 
-      <PriceLoadingSkeleton v-if="isLoading" />
+      <div v-else-if="!isLoading && !hasError && !noPrices" class="history-empty">
+        <q-icon name="sym_o_history" size="24px" class="panel-icon" aria-hidden="true" />
+        <p>{{ t('history.empty') }}</p>
+      </div>
 
-      <q-banner v-if="hasError" class="error-banner glass-card q-mt-lg q-pa-lg" rounded>
+      <PriceLoadingSkeleton v-if="isLoading && !prices.length" />
+
+      <q-banner
+        v-if="hasError || noPrices"
+        class="error-banner glass-card q-mt-lg q-pa-lg"
+        role="status"
+        rounded
+      >
         <template v-slot:avatar>
           <q-icon name="sym_o_warning" color="warning" size="lg" />
         </template>
-        <div class="text-body1 q-mb-sm"><strong>{{ t('common.errorTitle') }}</strong></div>
-        <div class="text-body2 q-mb-md">
+        <div class="text-body1 q-mb-sm">
+          <strong>{{ t(noPrices ? 'common.noPrices' : 'common.errorTitle') }}</strong>
+        </div>
+        <div v-if="hasError" class="text-body2 q-mb-md">
           {{ t('common.errorDescription') }}
         </div>
-        <a href="https://varsel-hari.onrender.com/api/prices/" target="_blank" class="text-primary">
-          https://varsel-hari.onrender.com/api/prices/
-        </a>
         <div class="q-mt-md">
-          <q-btn :label="t('common.retry')" color="primary" @click="fetchPrices" unelevated rounded />
+          <q-btn
+            :label="t('common.retry')"
+            color="primary"
+            :disable="!canFetch"
+            @click="fetchPrices"
+            unelevated
+            no-caps
+          />
         </div>
       </q-banner>
 
       <q-table
-        class="modern-table q-mt-xl"
+        class="price-table q-mt-xl"
         v-if="prices.length"
         :rows="prices"
         :columns="columns"
+        :visible-columns="$q.screen.lt.sm ? mobileColumns : undefined"
+        :pagination="{ rowsPerPage: 12 }"
         row-key="rowKey"
         flat
       >
         <template v-slot:top>
-          <div class="text-h6">
-            <q-icon name="sym_o_table_chart" class="q-mr-sm" />
+          <h2 class="table-heading">
+            <q-icon name="sym_o_table_chart" class="panel-icon" aria-hidden="true" />
             {{ t('history.tableHeading') }}
-          </div>
+          </h2>
         </template>
       </q-table>
     </main>
   </q-page>
-  <footer class="text-center q-mt-xl q-pb-lg">
-    <FooterSection />
-  </footer>
 </template>
 
 <style lang="scss" scoped>
-
-:deep(.hero-section) {
-  text-align: center;
+.history-filters,
+.history-chart {
+  border: 1px solid var(--border);
+  border-radius: var(--panel-radius);
+  background: var(--surface-card);
+  box-shadow: var(--panel-shadow);
 }
 
-.selector-container {
-  h3 {
-    display: flex;
-    align-items: center;
-    font-weight: 600;
-  }
-}
-
-// Two equal columns collapsing to one on narrow screens - see IndexPage.
-.selector-grid {
+.filter-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-
-.date-nav-buttons {
+.filter-group {
+  min-width: 0;
+  padding: clamp(12px, 2vw, 20px);
+}
+.filter-group + .filter-group {
+  border-inline-start: 1px solid var(--border);
+}
+.filter-title {
   display: flex;
-  gap: 0.5rem;
-
-  .date-nav-btn {
-    background: color-mix(in srgb, var(--q-primary) 10%, transparent);
-    min-width: 48px;
-    min-height: 48px;
-
-    &:hover {
-      background: color-mix(in srgb, var(--q-primary) 20%, transparent);
-    }
-  }
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 0.98rem;
+  font-weight: 650;
+  line-height: 1.3;
 }
-
-.date-display-input {
-  cursor: pointer;
-
-  :deep(.q-field__control) {
-    cursor: pointer;
-  }
+.filter-fields {
+  display: grid;
+  gap: 8px;
 }
-
-.action-buttons {
+.filter-error {
+  margin: 10px 0 0;
+  color: var(--danger-ink);
+  font-size: 0.85rem;
+}
+.filter-actions {
   display: flex;
-  gap: 1rem;
-  justify-content: center;
   flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px clamp(12px, 2vw, 20px);
+  border-top: 1px solid var(--border);
+}
+.filter-actions :deep(.q-btn) {
+  min-height: 44px;
 }
 
-.chart-container {
-  position: relative;
-  height: 450px;
+.date-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
+  min-height: 56px;
+  padding: 8px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+  color: var(--text-subtle);
+  text-align: start;
+  font: inherit;
+}
+.date-trigger:hover {
+  border-color: var(--border-hover);
+}
+.date-trigger--open {
+  border-color: var(--q-primary);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.date-trigger-copy {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.date-label {
+  font-size: 0.94rem;
+}
+.date-label--filled {
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+.date-trigger strong {
+  color: var(--app-ink);
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+.date-nav {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  min-height: 56px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+}
+.date-nav :deep(.q-btn) {
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--text-subtle);
+}
+.date-nav :deep(.q-btn:not(.disabled):hover) {
+  color: var(--q-primary);
+}
+.history-calendar {
+  width: min(19rem, calc(100vw - 52px));
+  border-radius: var(--panel-radius);
+  background: var(--surface-card);
+  color: var(--app-ink);
+}
+.history-calendar :deep(.q-date) {
+  width: 100%;
+  min-width: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.calendar-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--border);
 }
 
-// Modern Table
-.modern-table {
-  border-radius: 16px;
-  overflow: hidden;
-
-  :deep(thead tr th) {
-    background: linear-gradient(135deg, color-mix(in srgb, var(--q-primary) 10%, transparent), rgba($secondary, 0.1));
-    font-weight: 700;
-    font-size: 0.875rem;
-  }
-
-  :deep(tbody tr:hover) {
-    background: color-mix(in srgb, var(--q-primary) 5%, transparent);
-  }
+.history-results {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+.history-chart {
+  min-width: 0;
+  padding: clamp(12px, 2.2vw, 24px);
+}
+.history-chart h2 {
+  margin: 0;
+}
+.history-result-date {
+  margin: 6px 0 14px;
+  color: var(--text-subtle);
+}
+.history-chart .chart-container {
+  position: relative;
+  height: clamp(245px, 31vw, 380px);
+}
+.history-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: clamp(12px, 2vw, 20px);
+  border: 1px dashed var(--border-hover);
+  border-radius: var(--panel-radius);
+  color: var(--text-subtle);
+}
+.history-empty p,
+.table-heading {
+  margin: 0;
 }
 
-@media (max-width: 768px) {
-  :deep(.hero-section) {
-    padding: 1rem 0;
-
-    .text-h4 {
-      font-size: 1.75rem;
-    }
+@media (max-width: 780px) {
+  .filter-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
-
-  .chart-container {
-    height: 300px;
+  .filter-group + .filter-group {
+    border-inline-start: 0;
+    border-top: 1px solid var(--border);
   }
-
-  .action-buttons {
-    flex-direction: column;
-
-    .q-btn {
-      width: 100%;
-    }
+}
+@media (max-width: 520px) {
+  .filter-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .filter-actions :deep(.q-btn) {
+    width: 100%;
+    padding-inline: 6px;
   }
 }
 </style>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, computed, onMounted } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { api } from 'boot/axios';
-import FooterSection from 'src/components/FooterSection.vue';
-import HeroSection from 'src/components/HeroSection.vue';
-import NavSection from 'src/components/NavSection.vue';
 import AppSelect from 'src/components/AppSelect.vue';
-import PriceSummary from 'src/components/PriceSummary.vue';
+import HeroSection from 'src/components/HeroSection.vue';
 import PriceLoadingSkeleton from 'src/components/PriceLoadingSkeleton.vue';
-import { useTableServices, type Price, baseCities } from 'src/scripts/TableScript';
-import { useChartServices } from 'src/scripts/ChartScript';
-import { useBackendRequest } from 'src/scripts/useBackendRequest';
-import { addOsloDays, getOsloIsoDate, isoDateIsBefore } from 'src/scripts/osloTime';
+import PriceSummary from 'src/components/PriceSummary.vue';
 import { useTaxMode } from 'src/composables/useTaxMode';
+import { useChartServices } from 'src/scripts/ChartScript';
+import {
+  AREA_CODES,
+  baseCities,
+  useTableServices,
+  type AreaCode,
+  type Price,
+} from 'src/scripts/TableScript';
+import { addOsloDays, getOsloIsoDate, parseIsoDate } from 'src/scripts/osloTime';
+import { getPriceDay } from 'src/scripts/priceData';
+import { useBackendRequest } from 'src/scripts/useBackendRequest';
+import { useOsloClock } from 'src/scripts/useOsloClock';
 
 const { t, locale } = useI18n();
+const now = useOsloClock();
+const osloToday = computed(() => getOsloIsoDate(now.value));
+const maxAllowedDate = computed(() => addOsloDays(osloToday.value, 1));
+const earliestDate = '2021-01-01';
+const historyFiltersKey = 'historyPageFilters';
+const mobileColumns = ['time_start', 'time_end', 'NOK_per_kWh'];
 
-// Clock times are language-invariant - shared by both the start/end hour selects
-const hourOptions = computed(() =>
-  [...Array(25).keys()].map((h) => ({ label: `${h.toString().padStart(2, '0')}:00`, value: h })),
-);
-
-// Norwegian day/month names for the q-date popup - Quasar only ships an English default.
-const NO_DATE_LOCALE = {
-  days: ['søndag', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'lørdag'],
-  daysShort: ['sø', 'ma', 'ti', 'on', 'to', 'fr', 'lø'],
-  months: ['januar', 'februar', 'mars', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'desember'],
-  monthsShort: ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'],
-  firstDayOfWeek: 1, // Monday
-};
-const dateLocale = computed(() => (locale.value === 'no-NO' ? NO_DATE_LOCALE : undefined));
-
-const datePopupRef = ref<{ show: () => void; hide: () => void } | null>(null);
-
-// Reactive state variables - initialized with saved values or defaults
 const selectedArea = ref<string | null>(null);
 const selectedCity = ref<string | null>(null);
-const date = ref<string>('');
+const date = ref('');
 const startHour = ref<number | null>(null);
 const endHour = ref<number | null>(null);
-const { isTaxIncluded } = useTaxMode();
-// Prices as returned by the backend, tax-excluded - the tax multiplier is applied
-// reactively in `prices` below, so toggling "Incl./Excl. VAT" updates instantly.
+const datePickerOpen = ref(false);
+const noPrices = ref(false);
 const rawPrices = ref<Price[]>([]);
-const prices = computed<Price[]>(() =>
+let restoringFilters = false;
+
+const { areaOptions, columns, filteredCityOptions } = useTableServices(selectedArea);
+const { isLoading, hasError, reset, run } = useBackendRequest();
+const { chartCanvas, createChart, setHighlight } = useChartServices();
+const { isTaxIncluded } = useTaxMode();
+const prices = computed(() =>
   rawPrices.value.map((price) => ({
     ...price,
     NOK_per_kWh: isTaxIncluded.value ? price.NOK_per_kWh * 1.25 : price.NOK_per_kWh,
   })),
 );
+const resultCity = computed(() => rawPrices.value[0]?.city ?? '');
+const formattedDate = computed(() => displayDate(date.value));
+const invalidHours = computed(() => (startHour.value ?? 0) >= (endHour.value ?? 24));
+const canFetch = computed(
+  () => !!selectedArea.value && isDateSelectable(date.value) && !invalidHours.value,
+);
+const hasActiveFilters = computed(
+  () =>
+    Boolean(selectedArea.value || selectedCity.value || date.value) ||
+    startHour.value !== null ||
+    endHour.value !== null,
+);
 
-const { isLoading, hasError, run } = useBackendRequest();
+const hourOptions = Array.from({ length: 25 }, (_, hour) => ({
+  label: `${String(hour).padStart(2, '0')}:00`,
+  value: hour,
+}));
+const startHourOptions = computed(() =>
+  hourOptions
+    .slice(0, 24)
+    .filter(({ value }) => value < (endHour.value ?? 24) || value === startHour.value),
+);
+const endHourOptions = computed(() =>
+  hourOptions
+    .slice(1)
+    .filter(({ value }) => value > (startHour.value ?? 0) || value === endHour.value),
+);
 
-// Flag to track if we're currently restoring from storage
-const isRestoringFilters = ref(false);
-
-// Filter state key for localStorage
-const HISTORY_FILTERS_KEY = 'historyPageFilters';
-
-// Function to save filter state to localStorage
-function saveFiltersToStorage() {
-  const filters = {
-    selectedArea: selectedArea.value,
-    selectedCity: selectedCity.value,
-    date: date.value,
-    startHour: startHour.value,
-    endHour: endHour.value,
-  };
-  localStorage.setItem(HISTORY_FILTERS_KEY, JSON.stringify(filters));
+function displayDate(day: string) {
+  if (!parseIsoDate(day)) return day;
+  return new Intl.DateTimeFormat(locale.value, { dateStyle: 'long', timeZone: 'UTC' }).format(
+    new Date(`${day}T00:00:00Z`),
+  );
 }
 
-// Function to restore filter state from localStorage
-function restoreFiltersFromStorage() {
-  isRestoringFilters.value = true;
-  const stored = localStorage.getItem(HISTORY_FILTERS_KEY);
-  if (stored) {
-    try {
-      const filters = JSON.parse(stored);
-      selectedArea.value = filters.selectedArea || null;
-      selectedCity.value = filters.selectedCity || null;
-      date.value = filters.date || '';
-      startHour.value = filters.startHour || null;
-      endHour.value = filters.endHour || null;
-    } catch (err) {
-      console.error('Error restoring filters:', err);
-    }
-  }
-  isRestoringFilters.value = false;
+function toCalendarMonth(day: string) {
+  return day.slice(0, 7).replace('-', '/');
 }
 
-// Use table services with a computed ref that provides a default value
-const selectedAreaForServices = computed(() => selectedArea.value || 'NO1');
-const {
-  areaOptions,
-  columns,
-  filteredCityOptions,
-} = useTableServices(selectedAreaForServices);
-
-
-// Use chart services
-const { chartCanvas, createChart, setHighlight } = useChartServices();
-
-// Computed property to check if there are active filters
-const hasActiveFilters = computed(() => {
-  return selectedCity.value !== null || startHour.value !== null || endHour.value !== null;
-});
-
-// Computed property for maximum allowed date (tomorrow, Norwegian time).
-// All date arithmetic on this page is calendar arithmetic in Europe/Oslo -
-// `toISOString()` is UTC and lands a day early for Norwegian users during the
-// first hour(s) after midnight, and `setDate()` on a local Date is unreliable
-// across the two DST-transition days.
-const maxAllowedDate = computed(() => addOsloDays(getOsloIsoDate(), 1));
-
-// Computed property to check if next day button should be disabled
-const isNextDayDisabled = computed(() => {
-  if (!date.value) return true;
-  return !isoDateIsBefore(date.value, maxAllowedDate.value);
-});
-
-// Long, locale-aware display of the selected date in the (readonly) input -
-// the actual value stored/sent to the backend stays the plain ISO `date` ref.
-const formattedDate = computed(() => {
-  if (!date.value) return '';
-  const [year, month, day] = date.value.split('-').map(Number);
-  if (!year || !month || !day) return date.value;
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: 'long' }).format(new Date(year, month - 1, day));
-});
-
-// Keeps the calendar popup from ever offering a date beyond "tomorrow".
-// Quasar always calls `options` with dates in "YYYY/MM/DD" format regardless
-// of the `mask` prop, so normalize to dashes before comparing to maxAllowedDate.
-function isDateSelectable(dateStr: string): boolean {
-  return dateStr.replace(/\//g, '-') <= maxAllowedDate.value;
+function isDateSelectable(input: string) {
+  const day = input.replaceAll('/', '-');
+  return !!parseIsoDate(day) && day >= earliestDate && day <= maxAllowedDate.value;
 }
 
-// Closes the popup as soon as a day is picked, and keeps the same
-// "user must still press Hent priser" behavior the old native picker had.
-function onCalendarPick() {
-  datePopupRef.value?.hide();
+function selectCalendarDate(day: string | null) {
+  if (!day || !isDateSelectable(day)) return;
+  date.value = day.replaceAll('/', '-');
+  datePickerOpen.value = false;
+}
+
+function applyQuickDate(day: string) {
+  if (!isDateSelectable(day)) return;
+  date.value = day;
+  void fetchPrices();
+}
+
+function moveDate(offset: number) {
+  if (date.value) applyQuickDate(addOsloDays(date.value, offset));
 }
 
 async function fetchPrices() {
-  // Validate required fields
-  if (!selectedArea.value || !date.value) {
-    console.error('Area and date are required');
-    return;
-  }
+  const area = selectedArea.value;
+  const day = date.value;
+  if (!area || !canFetch.value) return;
+  const city =
+    filteredCityOptions.value.find(({ value }) => value === selectedCity.value)?.label ??
+    baseCities[area as AreaCode];
+  const start = startHour.value ?? 0;
+  const end = endHour.value ?? 24;
 
-  await run(async () => {
-    // Use city if chosen, else use area
-    const regionParam = selectedCity.value || selectedArea.value;
-    const url = `/prices/${regionParam}/${date.value}`;
-
-    // Build query parames dynamically with standard values
-    const params: Record<string, number> = {
-      startHour: startHour.value ?? 0, // Standard 0 if null
-      endHour: endHour.value ?? 24, // Standard 24 if null
-    };
-
-    // Send GET-call to backend
-    const response = await api.get(url, { params });
-
-    // If reponse is string (from Java), parse it
-    const json = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
-
-    // Validate that the backend returned a prices array
-    if (!json || !Array.isArray(json.prices) || json.prices.length === 0) {
-      console.warn('API returned no price data or invalid format', json);
-      hasError.value = true;
-      rawPrices.value = [];
-      return;
-    }
-
-    // Enrich each object with area, city, and selected date (tax-excluded -
-    // `prices` applies the multiplier reactively based on the current setting)
-    rawPrices.value = json.prices.map((price: Price, index: number) => ({
-      ...price,
-      area: selectedArea.value,
-      city: selectedCity.value || baseCities[selectedArea.value as keyof typeof baseCities],
-      date: date.value,
-      rowKey: `${date.value}-${index}`,
-    }));
-
-    // Create chart after data is loaded and DOM is updated
-    await nextTick();
-    createChart(chartCanvas.value, prices.value);
-  });
+  noPrices.value = false;
+  rawPrices.value = [];
+  await run(
+    () => getPriceDay(area, day),
+    (pricesForDay) => {
+      rawPrices.value = pricesForDay.flatMap((price, index) => {
+        const hour = Number(price.time_start.slice(11, 13));
+        return hour >= start && hour < end
+          ? [{ ...price, area, city, date: day, rowKey: `${day}-${index}` }]
+          : [];
+      });
+      noPrices.value = !rawPrices.value.length;
+    },
+  );
 }
 
-watch(isTaxIncluded, async () => {
-  if (!rawPrices.value.length) return;
-  await nextTick();
-  createChart(chartCanvas.value, prices.value);
-});
-
-// Watch for changes in selectedArea to reset city selection
-watch(selectedArea, () => {
-  // Only reset city if user manually changed area (not during restore)
-  if (!isRestoringFilters.value) {
-    selectedCity.value = null;
-  }
-  saveFiltersToStorage();
-});
-
-// Watch all filter changes and save to localStorage
-watch(selectedCity, () => saveFiltersToStorage());
-watch(date, () => saveFiltersToStorage());
-watch(startHour, () => saveFiltersToStorage());
-watch(endHour, () => saveFiltersToStorage());
-
-// Restore filters on component mount
-onMounted(async () => {
-  restoreFiltersFromStorage();
-
-  // Auto-fetch if required filters are restored
-  if (selectedArea.value && date.value) {
-    await nextTick();
-    void fetchPrices();
-  }
-});
-
-// No auto-fetch on mount - user must manually fetch prices
-
-// Function to get the display city name
-function getDisplayCity(): string {
-  if (selectedCity.value) {
-    // Find the selected city in cityOptions to get its label
-    const cityOption = filteredCityOptions.value.find((city) => city.value === selectedCity.value);
-    return cityOption ? cityOption.label : selectedCity.value;
-  } else {
-    // Return the default city for the selected area
-    return baseCities[selectedArea.value as keyof typeof baseCities];
-  }
-}
-
-// Function to clear all filters and reset to defaults
 function clearFilters() {
+  reset();
   selectedArea.value = null;
   selectedCity.value = null;
   date.value = '';
   startHour.value = null;
   endHour.value = null;
   rawPrices.value = [];
-  localStorage.removeItem(HISTORY_FILTERS_KEY);
-  // Don't auto-fetch after clearing filters
+  noPrices.value = false;
 }
 
-// Function to go to previous day
-function goToPreviousDay() {
-  const from = date.value || getOsloIsoDate();
-  date.value = addOsloDays(from, -1);
-
-  // Auto-fetch when using navigation buttons if area is selected
-  if (selectedArea.value) {
-    void fetchPrices();
+function restoreFilters() {
+  const stored = localStorage.getItem(historyFiltersKey);
+  if (!stored) return;
+  restoringFilters = true;
+  try {
+    const values = JSON.parse(stored) as {
+      selectedArea?: unknown;
+      selectedCity?: unknown;
+      date?: unknown;
+      startHour?: unknown;
+      endHour?: unknown;
+    } | null;
+    if (!values) return;
+    selectedArea.value = AREA_CODES.find((area) => area === values.selectedArea) ?? null;
+    selectedCity.value =
+      filteredCityOptions.value.find(({ value }) => value === values.selectedCity)?.value ?? null;
+    date.value =
+      typeof values.date === 'string' && isDateSelectable(values.date) ? values.date : '';
+    startHour.value =
+      hourOptions.slice(0, 24).find(({ value }) => value === values.startHour)?.value ?? null;
+    endHour.value =
+      hourOptions.slice(1).find(({ value }) => value === values.endHour)?.value ?? null;
+  } catch {
+    localStorage.removeItem(historyFiltersKey);
+  } finally {
+    restoringFilters = false;
   }
 }
 
-// Function to go to next day
-function goToNextDay() {
-  const from = date.value || getOsloIsoDate();
-  const next = addOsloDays(from, 1);
+watch(
+  selectedArea,
+  () => {
+    if (!restoringFilters) selectedCity.value = null;
+  },
+  { flush: 'sync' },
+);
 
-  // Never step past tomorrow - the upstream API has no data beyond it.
-  if (!isoDateIsBefore(next, maxAllowedDate.value) && next !== maxAllowedDate.value) {
+watch([selectedArea, selectedCity, date, startHour, endHour], ([area, city, day, start, end]) => {
+  if (!hasActiveFilters.value) {
+    localStorage.removeItem(historyFiltersKey);
     return;
   }
-  date.value = next;
+  localStorage.setItem(
+    historyFiltersKey,
+    JSON.stringify({
+      selectedArea: area,
+      selectedCity: city,
+      date: day,
+      startHour: start,
+      endHour: end,
+    }),
+  );
+});
 
-  // Auto-fetch when using navigation buttons if area is selected
-  if (selectedArea.value) {
-    void fetchPrices();
-  }
-}
+watch(
+  prices,
+  (value) => {
+    if (value.length) createChart(chartCanvas.value, value);
+  },
+  { flush: 'post' },
+);
 
-// Function to jump straight back to today
-function goToToday() {
-  date.value = getOsloIsoDate();
-
-  if (selectedArea.value) {
-    void fetchPrices();
-  }
-}
+onMounted(() => {
+  restoreFilters();
+  void fetchPrices();
+});
 </script>

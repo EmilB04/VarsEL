@@ -21,14 +21,13 @@ interface AccentDefinition {
   dark: string;
 }
 
-// "teal" matches VarsEL's own brand color exactly, so the default look is unchanged.
 export const ACCENT_PRESETS: Record<AccentColor, AccentDefinition> = {
-  teal: { light: '#00D9C0', dark: '#00D9C0' },
+  teal: { light: '#006f64', dark: '#69ded1' },
   indigo: { light: '#6366f1', dark: '#818cf8' },
-  blue: { light: '#2563eb', dark: '#60a5fa' },
+  blue: { light: '#235ec8', dark: '#94baff' },
   sky: { light: '#0284c7', dark: '#38bdf8' },
   cyan: { light: '#0891b2', dark: '#22d3ee' },
-  emerald: { light: '#059669', dark: '#34d399' },
+  emerald: { light: '#14634c', dark: '#83dcb1' },
   lime: { light: '#65a30d', dark: '#a3e635' },
   amber: { light: '#d97706', dark: '#fbbf24' },
   orange: { light: '#ea580c', dark: '#fb923c' },
@@ -38,7 +37,7 @@ export const ACCENT_PRESETS: Record<AccentColor, AccentDefinition> = {
   violet: { light: '#7c3aed', dark: '#a78bfa' },
 };
 
-export const DEFAULT_ACCENT: AccentColor = 'teal';
+export const DEFAULT_ACCENT: AccentColor = 'emerald';
 
 const ACCENT_KEY = 'accent';
 

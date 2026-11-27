@@ -6,7 +6,7 @@ name: Keep backend warm
 
 on:
   schedule:
-    - cron: '*/10 * * * *' # every 10 minutes (GitHub may delay this a few min)
+    - cron: '3-58/5 * * * *' # allow headroom for GitHub scheduling delays
   workflow_dispatch: {}
 
 concurrency:
@@ -22,7 +22,8 @@ jobs:
         run: |
           url="${KEEP_WARM_URL:-https://varsel-hari.onrender.com/api/health}"
           echo "Pinging $url"
-          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 90 --retry 3 --retry-all-errors "$url")
+          code=$(curl --fail --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --connect-timeout 10 --max-time 85 --retry 2 --retry-max-time 175 "$url")
           echo "HTTP $code"
           [ "$code" = "200" ]
         env:

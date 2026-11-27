@@ -34,7 +34,7 @@ public class JsonFormatter {
                 throw new IllegalArgumentException("JSON-strukturen mangler nødvendige felt.");
             }
 
-            return json.toString(4); // Pretty print med 4 mellomrom
+            return json.toString();
         } catch (JSONException e) {
             throw new IllegalArgumentException("Ugyldig JSON-struktur: " + e.getMessage(), e);
         }

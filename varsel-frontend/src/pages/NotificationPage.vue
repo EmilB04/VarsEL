@@ -1,630 +1,512 @@
 <template>
-  <q-page class="q-pa-md">
-    <header>
-      <NavSection />
-    </header>
+  <q-page class="app-page notification-page">
+    <HeroSection
+      :title="t('notifications.heroTitle')"
+      :description="t('notifications.heroDescription')"
+    />
 
-    <main>
-      <HeroSection
-        :title="t('notifications.heroTitle')"
-        :description="t('notifications.heroDescription')"
-        class="q-py-xl"
+    <q-card class="delivery-status">
+      <q-icon
+        :name="permissionIcon"
+        class="panel-icon delivery-icon"
+        :data-tone="permissionTone"
+        aria-hidden="true"
       />
+      <div class="delivery-copy" role="status">
+        <p>{{ permissionMessage }}</p>
+        <p v-if="isDegraded" class="delivery-warning">
+          <q-icon name="sym_o_cloud_off" size="16px" aria-hidden="true" />
+          {{ t('notifications.engine.degraded') }}
+        </p>
+      </div>
+      <q-btn
+        v-if="permission === 'default'"
+        :label="t('notifications.engine.enableButton')"
+        icon="sym_o_notifications_active"
+        color="primary"
+        unelevated
+        no-caps
+        @click="enableNotifications"
+      />
+    </q-card>
 
-      <!-- Delivery only runs while a tab is open, and OS notifications need an
-           explicit user gesture to request - this surfaces both facts instead
-           of silently degrading to the in-app list below. -->
-      <q-card class="engine-card glass-card q-mb-xl">
-        <q-card-section class="engine-row">
-          <div class="engine-icon" :class="`engine-icon--${permissionTone}`">
-            <q-icon :name="permissionIcon" size="22px" aria-hidden="true" />
+    <div class="alert-grid alert-forms">
+      <q-card class="alert-setup-card">
+        <div class="alert-card-heading">
+          <q-icon name="sym_o_notifications_active" class="panel-icon" aria-hidden="true" />
+          <div>
+            <h2 id="price-alert-title">{{ t('notifications.priceAlert.title') }}</h2>
+            <p>{{ t('notifications.priceAlert.description') }}</p>
+          </div>
+        </div>
+
+        <q-form
+          novalidate
+          class="alert-form"
+          aria-labelledby="price-alert-title"
+          @submit="savePriceAlert"
+        >
+          <div class="alert-field-grid">
+            <AppSelect
+              ref="priceAreaRef"
+              v-model="priceForm.area"
+              :options="areaOptions"
+              :label="t('notifications.priceAlert.area')"
+              :error="priceAreaError ? t('notifications.validation.area') : ''"
+              icon="sym_o_location_on"
+            />
+            <AppSelect
+              v-model="priceForm.city"
+              :options="priceCityOptions"
+              :label="t('notifications.priceAlert.city')"
+              icon="sym_o_apartment"
+              :disable="!priceForm.area"
+              clearable
+            />
+            <q-input
+              ref="priceInputRef"
+              v-model="priceForm.targetPrice"
+              inputmode="decimal"
+              :label="t('notifications.priceAlert.targetPrice')"
+              :suffix="t('common.priceUnit')"
+              :error="priceAmountError"
+              :aria-invalid="priceAmountError"
+              v-bind="priceAmountError ? { 'aria-describedby': 'price-threshold-error' } : {}"
+              filled
+              required
+              hide-bottom-space
+            >
+              <template #prepend>
+                <q-icon name="sym_o_payments" class="field-icon" aria-hidden="true" />
+              </template>
+              <template #error>
+                <span id="price-threshold-error" role="alert">{{ t('notifications.validation.price') }}</span>
+              </template>
+            </q-input>
+            <AppSelect
+              v-model="priceForm.condition"
+              :options="conditionOptions"
+              :label="t('notifications.priceAlert.condition')"
+              icon="sym_o_compare_arrows"
+            />
           </div>
 
-          <div class="engine-copy">
-            <p class="engine-message">{{ permissionMessage }}</p>
-            <p v-if="isDegraded" class="engine-degraded">
-              <q-icon name="sym_o_cloud_off" size="16px" aria-hidden="true" />
-              {{ t('notifications.engine.degraded') }}
-            </p>
-          </div>
-
-          <q-btn
-            v-if="permission === 'default'"
-            :label="t('notifications.engine.enableButton')"
-            icon="sym_o_notifications_active"
-            color="primary"
-            unelevated
-            no-caps
-            size="sm"
-            @click="enableNotifications"
+          <AlertScheduleFields
+            v-model:days="priceForm.days"
+            v-model:quiet-hours="priceForm.quietHours"
           />
-        </q-card-section>
+
+          <div class="alert-form-actions">
+            <q-toggle
+              v-model="priceForm.enabled"
+              :label="t('notifications.priceAlert.enable')"
+              color="primary"
+            />
+            <q-btn
+              :label="t('notifications.priceAlert.save')"
+              type="submit"
+              color="primary"
+              icon="sym_o_save"
+              unelevated
+              no-caps
+            />
+          </div>
+        </q-form>
       </q-card>
 
-      <div class="row q-gutter-xl justify-center q-mb-xl">
-        <div class="col-12 col-md-5">
-          <q-card class="alert-setup-card glass-card">
-            <q-card-section>
-              <div class="card-header q-mb-md">
-                <div class="icon-wrapper primary-icon">
-                  <q-icon name="sym_o_notifications_active" size="28px" aria-hidden="true" />
-                </div>
-                <div class="q-mb-lg">
-                  <h3 class="text-h6 q-mb-xs">{{ t('notifications.priceAlert.title') }}</h3>
-                  <p class="text-body2 text-grey-7">
-                    {{ t('notifications.priceAlert.description') }}
-                  </p>
-                </div>
-              </div>
-
-              <q-form @submit="savePriceAlert" class="q-gutter-md">
-                <AppSelect
-                  v-model="priceForm.area"
-                  :options="areaOptions"
-                  :label="t('notifications.priceAlert.area')"
-                  icon="sym_o_location_on"
-                />
-
-                <AppSelect
-                  v-model="priceForm.city"
-                  :options="priceCityOptions"
-                  :label="t('notifications.priceAlert.city')"
-                  icon="sym_o_apartment"
-                  :disable="!priceForm.area"
-                  clearable
-                />
-
-                <q-input
-                  v-model.number="priceForm.targetPrice"
-                  type="number"
-                  step="0.01"
-                  :label="t('notifications.priceAlert.targetPrice')"
-                  suffix="kr/kWh"
-                  filled
-                  required
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="sym_o_payments" size="20px" aria-hidden="true" />
-                  </template>
-                </q-input>
-
-                <AppSelect
-                  v-model="priceForm.condition"
-                  :options="conditionOptions"
-                  :label="t('notifications.priceAlert.condition')"
-                  icon="sym_o_compare_arrows"
-                />
-
-                <AlertScheduleFields v-model:days="priceForm.days" v-model:quietHours="priceForm.quietHours" />
-
-                <div class="toggle-wrapper">
-                  <q-toggle
-                    v-model="priceForm.enabled"
-                    :label="t('notifications.priceAlert.enable')"
-                    color="primary"
-                    size="lg"
-                  />
-                </div>
-
-                <q-btn
-                  :label="t('notifications.priceAlert.save')"
-                  type="submit"
-                  color="primary"
-                  icon="sym_o_save"
-                  class="half-width"
-                  unelevated
-                  size="md"
-                  no-caps
-                />
-              </q-form>
-            </q-card-section>
-          </q-card>
-        </div>
-
-        <div class="col-12 col-md-5">
-          <q-card class="alert-setup-card glass-card">
-            <q-card-section>
-              <div class="card-header q-mb-md">
-                <div class="icon-wrapper secondary-icon">
-                  <q-icon name="sym_o_schedule" size="28px" aria-hidden="true" />
-                </div>
-                <div class="q-mb-lg">
-                  <h3 class="text-h6 q-mb-xs">{{ t('notifications.cheapestAlert.title') }}</h3>
-                  <p class="text-body2 text-grey-7">
-                    {{ t('notifications.cheapestAlert.description') }}
-                  </p>
-                </div>
-              </div>
-
-              <q-form @submit="saveCheapestAlert" class="q-gutter-md">
-                <AppSelect
-                  v-model="cheapestForm.area"
-                  :options="areaOptions"
-                  :label="t('notifications.cheapestAlert.area')"
-                  icon="sym_o_location_on"
-                />
-
-                <AppSelect
-                  v-model="cheapestForm.city"
-                  :options="cheapestCityOptions"
-                  :label="t('notifications.cheapestAlert.city')"
-                  icon="sym_o_apartment"
-                  :disable="!cheapestForm.area"
-                  clearable
-                />
-
-                <AppSelect
-                  v-model="cheapestForm.notificationTime"
-                  :options="notificationTimeOptions"
-                  :label="t('notifications.cheapestAlert.notificationTime')"
-                  icon="sym_o_schedule"
-                />
-
-                <AlertScheduleFields v-model:days="cheapestForm.days" v-model:quietHours="cheapestForm.quietHours" />
-
-                <div class="toggle-wrapper">
-                  <q-toggle
-                    v-model="cheapestForm.enabled"
-                    :label="t('notifications.cheapestAlert.enable')"
-                    color="primary"
-                    size="lg"
-                  />
-                </div>
-
-                <q-btn
-                  :label="t('notifications.cheapestAlert.save')"
-                  type="submit"
-                  color="secondary"
-                  icon="sym_o_save"
-                  class="half-width"
-                  size="md"
-                  no-caps
-                />
-              </q-form>
-            </q-card-section>
-          </q-card>
-        </div>
-      </div>
-
-      <div class="active-alerts-section q-mt-xl">
-        <h2 class="text-h5 q-mb-lg text-center">
-          <q-icon name="sym_o_notifications" size="sm" class="q-mr-sm" aria-hidden="true" />
-          {{ t('notifications.active.heading') }}
-        </h2>
-
-        <div class="row q-gutter-lg justify-center">
-          <div class="col-12 col-md-5" v-if="priceAlerts.length > 0">
-            <q-card class="active-alerts-card glass-card">
-              <q-card-section>
-                <div class="card-title q-mb-md">
-                  <q-icon name="sym_o_notifications_active" size="sm" color="primary" aria-hidden="true" />
-                  <h3 class="text-h6">{{ t('notifications.active.priceAlertsTitle') }}</h3>
-                </div>
-                <q-list class="alerts-list">
-                  <q-item v-for="alert in priceAlerts" :key="alert.id" class="alert-item">
-                    <q-item-section>
-                      <q-item-label class="alert-location">
-                        <q-icon name="sym_o_location_on" size="16px" class="q-mr-xs" aria-hidden="true" />
-                        {{ getDisplayLocation(alert) }}
-                      </q-item-label>
-                      <q-item-label caption class="alert-details">
-                        <q-icon name="sym_o_trending_flat" size="16px" class="q-mr-xs" aria-hidden="true" />
-                        {{ t('notifications.active.priceAlertDetail', { condition: getConditionLabel(alert.condition), price: alert.targetPrice }) }}
-                      </q-item-label>
-                      <q-item-label caption class="alert-schedule">
-                        <q-icon name="sym_o_calendar_month" size="16px" class="q-mr-xs" aria-hidden="true" />
-                        {{ scheduleSummary(alert) }}
-                      </q-item-label>
-                    </q-item-section>
-                    <q-item-section side class="alert-controls">
-                      <div class="row items-center q-gutter-sm no-wrap">
-                        <q-toggle
-                          v-model="alert.enabled"
-                          @update:model-value="toggleAlert(alert)"
-                          color="primary"
-                          dense
-                        />
-                        <q-btn
-                          flat
-                          round
-                          icon="sym_o_delete"
-                          color="negative"
-                          size="md"
-                          :aria-label="t('notifications.active.deleteTooltip')"
-                          @click="deleteAlert(alert)"
-                        >
-                          <q-tooltip>{{ t('notifications.active.deleteTooltip') }}</q-tooltip>
-                        </q-btn>
-                      </div>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-card-section>
-            </q-card>
-          </div>
-
-          <div class="col-12 col-md-5" v-if="cheapestAlerts.length > 0">
-            <q-card class="active-alerts-card glass-card">
-              <q-card-section>
-                <div class="card-title q-mb-md">
-                  <q-icon name="sym_o_schedule" size="sm" color="secondary" aria-hidden="true" />
-                  <h3 class="text-h6">{{ t('notifications.active.cheapestAlertsTitle') }}</h3>
-                </div>
-                <q-list class="alerts-list">
-                  <q-item v-for="alert in cheapestAlerts" :key="alert.id" class="alert-item">
-                    <q-item-section>
-                      <q-item-label class="alert-location">
-                        <q-icon name="sym_o_location_on" size="16px" class="q-mr-xs" aria-hidden="true" />
-                        {{ getDisplayLocation(alert) }}
-                      </q-item-label>
-                      <q-item-label caption class="alert-details">
-                        <q-icon name="sym_o_schedule" size="16px" class="q-mr-xs" aria-hidden="true" />
-                        {{ t('notifications.active.cheapestAlertDetail', { time: alert.notificationTime }) }}
-                      </q-item-label>
-                      <q-item-label caption class="alert-schedule">
-                        <q-icon name="sym_o_calendar_month" size="16px" class="q-mr-xs" aria-hidden="true" />
-                        {{ scheduleSummary(alert) }}
-                      </q-item-label>
-                    </q-item-section>
-                    <q-item-section side class="alert-controls">
-                      <div class="row items-center q-gutter-sm no-wrap">
-                        <q-toggle
-                          v-model="alert.enabled"
-                          @update:model-value="toggleAlert(alert)"
-                          color="primary"
-                          dense
-                        />
-                        <q-btn
-                          flat
-                          round
-                          icon="sym_o_delete"
-                          color="negative"
-                          size="md"
-                          :aria-label="t('notifications.active.deleteTooltip')"
-                          @click="deleteAlert(alert)"
-                        >
-                          <q-tooltip>{{ t('notifications.active.deleteTooltip') }}</q-tooltip>
-                        </q-btn>
-                      </div>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-card-section>
-            </q-card>
+      <q-card class="alert-setup-card">
+        <div class="alert-card-heading">
+          <q-icon name="sym_o_schedule" class="panel-icon" aria-hidden="true" />
+          <div>
+            <h2 id="cheapest-alert-title">{{ t('notifications.cheapestAlert.title') }}</h2>
+            <p>{{ t('notifications.cheapestAlert.description') }}</p>
           </div>
         </div>
 
-        <div
-          v-if="priceAlerts.length === 0 && cheapestAlerts.length === 0"
-          class="no-alerts-message q-mx-auto q-mt-xl text-center"
+        <q-form
+          novalidate
+          class="alert-form"
+          aria-labelledby="cheapest-alert-title"
+          @submit="saveCheapestAlert"
         >
-          <q-card class="glass-card text-center">
-            <q-card-section class="q-pa-xl">
-              <div class="empty-badge q-mb-md">
-                <q-icon name="sym_o_notifications_off" size="32px" aria-hidden="true" />
+          <div class="alert-field-grid">
+            <AppSelect
+              ref="cheapestAreaRef"
+              v-model="cheapestForm.area"
+              :options="areaOptions"
+              :label="t('notifications.cheapestAlert.area')"
+              :error="cheapestAreaError ? t('notifications.validation.area') : ''"
+              icon="sym_o_location_on"
+            />
+            <AppSelect
+              v-model="cheapestForm.city"
+              :options="cheapestCityOptions"
+              :label="t('notifications.cheapestAlert.city')"
+              icon="sym_o_apartment"
+              :disable="!cheapestForm.area"
+              clearable
+            />
+            <AppSelect
+              v-model="cheapestForm.notificationTime"
+              :options="notificationTimeOptions"
+              :label="t('notifications.cheapestAlert.notificationTime')"
+              class="notification-time"
+              icon="sym_o_schedule"
+            />
+          </div>
+
+          <AlertScheduleFields
+            v-model:days="cheapestForm.days"
+            v-model:quiet-hours="cheapestForm.quietHours"
+          />
+
+          <div class="alert-form-actions">
+            <q-toggle
+              v-model="cheapestForm.enabled"
+              :label="t('notifications.cheapestAlert.enable')"
+              color="primary"
+            />
+            <q-btn
+              :label="t('notifications.cheapestAlert.save')"
+              type="submit"
+              color="primary"
+              icon="sym_o_save"
+              unelevated
+              no-caps
+            />
+          </div>
+        </q-form>
+      </q-card>
+    </div>
+
+    <section class="alerts-section" aria-labelledby="saved-alerts-title">
+      <h2 id="saved-alerts-title" class="table-heading">
+        <q-icon name="sym_o_notifications" class="panel-icon" aria-hidden="true" />
+        {{ t('notifications.active.heading') }}
+      </h2>
+
+      <div v-if="alertGroups.length" class="alert-grid">
+        <q-card v-for="group in alertGroups" :key="group.kind" class="saved-group">
+          <div class="saved-group-heading">
+            <q-icon :name="group.icon" class="field-icon" aria-hidden="true" />
+            <h3>{{ group.heading }}</h3>
+          </div>
+          <ul class="alerts-list">
+            <li v-for="alert in group.alerts" :key="alert.id" class="alert-item">
+              <div class="alert-item-copy">
+                <div class="alert-location">
+                  <strong>{{ getDisplayLocation(alert) }}</strong>
+                  <span class="alert-area">{{ alert.area }}</span>
+                </div>
+                <p>{{ alertDetail(alert) }}</p>
+                <p class="alert-schedule">
+                  <q-icon name="sym_o_calendar_month" size="15px" aria-hidden="true" />
+                  <span>{{ scheduleSummary(alert) }}</span>
+                </p>
               </div>
-              <h3 class="text-h5 text-grey-5 q-mb-sm">{{ t('notifications.active.emptyTitle') }}</h3>
-              <p class="text-body2 text-grey-6">
-                {{ t('notifications.active.emptyDescription') }}
-              </p>
-            </q-card-section>
-          </q-card>
-        </div>
-      </div>
 
-      <div class="recent-section q-mt-xl">
-        <h2 class="text-h5 q-mb-lg text-center">
-          <q-icon name="sym_o_history" size="sm" class="q-mr-sm" aria-hidden="true" />
-          {{ t('notifications.recent.heading') }}
-        </h2>
-
-        <q-card class="recent-card glass-card q-mx-auto">
-          <q-card-section v-if="recentDeliveries.length === 0" class="recent-empty">
-            <q-icon name="sym_o_notifications" size="28px" aria-hidden="true" />
-            <p>{{ t('notifications.recent.empty') }}</p>
-          </q-card-section>
-
-          <q-list v-else separator>
-            <q-item v-for="event in recentDeliveries" :key="`${event.key}-${event.at}`">
-              <q-item-section avatar>
-                <q-icon
-                  :name="outcomeIcon(event.outcome)"
-                  :color="outcomeColor(event.outcome)"
-                  size="20px"
-                  aria-hidden="true"
+              <div class="alert-controls">
+                <q-toggle
+                  v-model="alert.enabled"
+                  :aria-label="
+                    t('notifications.active.toggleLabel', { location: getDisplayLocation(alert) })
+                  "
+                  :label="
+                    t(
+                      alert.enabled
+                        ? 'notifications.active.enabled'
+                        : 'notifications.active.paused',
+                    )
+                  "
+                  color="primary"
+                  dense
+                  @update:model-value="toggleAlert(alert)"
                 />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ event.body }}</q-item-label>
-                <q-item-label caption>
-                  {{ outcomeLabel(event.outcome) }} &bull; {{ formatEventTime(event.at) }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
+                <q-btn
+                  flat
+                  round
+                  icon="sym_o_delete"
+                  :aria-label="t('notifications.active.deleteTooltip')"
+                  class="delete-alert"
+                  @click="deleteAlert(alert)"
+                >
+                  <q-tooltip>{{ t('notifications.active.deleteTooltip') }}</q-tooltip>
+                </q-btn>
+              </div>
+            </li>
+          </ul>
         </q-card>
       </div>
-    </main>
+      <div v-else class="alerts-empty">
+        <q-icon name="sym_o_notifications_off" class="panel-icon" aria-hidden="true" />
+        <p>{{ t('notifications.active.emptyDescription') }}</p>
+      </div>
+    </section>
 
-    <footer class="q-mt-xl q-pb-lg">
-      <FooterSection />
-    </footer>
+    <section class="alerts-section" aria-labelledby="recent-alerts-title">
+      <h2 id="recent-alerts-title" class="table-heading">
+        <q-icon name="sym_o_history" class="panel-icon" aria-hidden="true" />
+        {{ t('notifications.recent.heading') }}
+      </h2>
+
+      <q-list v-if="recentDeliveries.length" separator class="recent-list">
+        <q-item v-for="event in recentDeliveries" :key="`${event.key}-${event.at}`">
+          <q-item-section avatar>
+            <q-icon
+              :name="outcomeIcon(event.outcome)"
+              class="field-icon"
+              :color="outcomeColor(event.outcome)"
+              aria-hidden="true"
+            />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>{{ event.body }}</q-item-label>
+            <q-item-label caption>
+              {{ outcomeLabel(event.outcome) }} · {{ formatEventTime(event.at) }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+
+      <div v-else class="alerts-empty">
+        <q-icon name="sym_o_schedule" class="panel-icon" aria-hidden="true" />
+        <p>{{ t('notifications.recent.empty') }}</p>
+      </div>
+    </section>
   </q-page>
 </template>
 
 <style lang="scss" scoped>
-:deep(.hero-section) {
-  text-align: center;
+.notification-page {
+  color: var(--app-ink);
 }
-
-.engine-card {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.engine-row {
+.delivery-status {
   display: flex;
-  align-items: center;
-  gap: 1rem;
   flex-wrap: wrap;
-}
-
-.engine-icon {
-  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  flex-shrink: 0;
-
-  &--primary {
-    background: color-mix(in srgb, var(--q-primary) 16%, transparent);
-    color: var(--q-primary);
-  }
-
-  &--positive {
-    background: color-mix(in srgb, $positive 16%, transparent);
-    color: $positive;
-  }
-
-  &--muted {
-    background: var(--surface);
-    color: var(--text-subtle);
-  }
+  gap: 8px 12px;
+  margin-bottom: 16px;
+  padding: 12px clamp(12px, 2vw, 20px);
 }
-
-.engine-copy {
-  flex: 1;
-  min-width: 200px;
+.delivery-copy {
+  flex: 1 1 170px;
+  min-width: 0;
+  color: var(--text-subtle);
 }
-
-.engine-message {
+.delivery-copy p {
   margin: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
 }
-
-.engine-degraded {
+.delivery-copy .delivery-warning {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  margin: 0.25rem 0 0;
-  font-size: 0.8rem;
-  color: $warning;
+  gap: 5px;
+  margin-top: 4px;
+  color: var(--warning-ink);
+  font-size: 0.84rem;
 }
-
-.alert-setup-card {
-  height: 100%;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.delivery-icon[data-tone='positive'] {
+  background: color-mix(in srgb, var(--positive-ink) 12%, var(--surface-card));
+  color: var(--positive-ink);
 }
-
-.card-header {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-
-  .icon-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-    flex-shrink: 0;
-
-    &.primary-icon {
-      background: var(--q-primary);
-      color: white;
-    }
-
-    &.secondary-icon {
-      background: $secondary;
-      color: white;
-    }
-  }
-
-  h3 {
-    margin: 0;
-    font-weight: 700;
-  }
-
-  p {
-    margin: 0;
-  }
-}
-
-.active-alerts-section,
-.recent-section {
-  h2 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-  }
-}
-
-.active-alerts-card {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-  .card-title {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-
-    h3 {
-      margin: 0;
-      font-weight: 600;
-    }
-  }
-
-  .alerts-list {
-    .alert-item {
-      padding: 1rem;
-      border-radius: 12px;
-      background: rgba(0, 0, 0, 0.02);
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: color-mix(in srgb, var(--q-primary) 8%, transparent);
-      }
-
-      .alert-location {
-        display: flex;
-        align-items: center;
-        font-weight: 600;
-        font-size: 1rem;
-      }
-
-      .alert-details,
-      .alert-schedule {
-        display: flex;
-        align-items: center;
-        font-size: 0.875rem;
-        opacity: 0.8;
-      }
-
-      .alert-schedule {
-        margin-top: 0.125rem;
-      }
-
-      .alert-controls {
-        margin-left: 1rem;
-      }
-    }
-  }
-}
-
-.body--dark {
-  .alerts-list .alert-item {
-    background: rgba(255, 255, 255, 0.05);
-
-    &:hover {
-      background: color-mix(in srgb, var(--q-primary) 10%, transparent);
-    }
-  }
-}
-
-.empty-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 9999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
+.delivery-icon[data-tone='muted'] {
+  background: var(--surface-inset);
   color: var(--text-subtle);
 }
 
-.recent-card {
-  max-width: 900px;
-  margin: 0 auto;
+.alert-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
-
-.recent-empty {
+.alert-setup-card {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  padding: clamp(12px, 2vw, 20px);
+}
+.alert-card-heading {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.alert-card-heading h2 {
+  margin: 0 0 3px;
+  font-size: clamp(1.1rem, 2vw, 1.32rem);
+  font-weight: 650;
+  line-height: 1.25;
+}
+.alert-card-heading p {
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 0.86rem;
+}
+.alert-form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 14px;
+}
+.alert-field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 8px;
+}
+.notification-time {
+  grid-column: 1 / -1;
+}
+.alert-form-actions {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  padding: 2.5rem 1rem;
-  text-align: center;
-  color: var(--text-muted);
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.alert-form-actions :deep(.q-toggle),
+.alert-form-actions :deep(.q-btn),
+.delivery-status :deep(.q-btn) {
+  min-height: 44px;
+}
 
-  p {
-    margin: 0;
-    font-size: 0.875rem;
+.alerts-section {
+  margin-top: clamp(24px, 4vw, 40px);
+}
+.alerts-section h2 {
+  margin: 0 0 12px;
+}
+.saved-group {
+  min-width: 0;
+}
+.saved-group-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+}
+.saved-group-heading h3 {
+  margin: 0;
+  font-size: 0.96rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+.alerts-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.alert-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+}
+.alert-item-copy {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.alert-location,
+.alert-schedule,
+.alert-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+.alert-area {
+  padding: 2px 5px;
+  border-radius: 5px;
+  background: var(--surface-inset);
+  color: var(--text-subtle);
+  font: 500 0.68rem var(--data-font);
+}
+.alert-item-copy p {
+  margin: 3px 0 0;
+  color: var(--text-subtle);
+  font-size: 0.84rem;
+}
+.alert-item-copy .alert-schedule {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+.alert-schedule :deep(.q-icon) {
+  flex: none;
+  margin-top: 2px;
+}
+.alert-schedule span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.alert-controls {
+  justify-content: flex-end;
+}
+.alert-controls :deep(.q-toggle),
+.alert-controls .delete-alert {
+  min-height: 44px;
+}
+.alert-controls .delete-alert {
+  min-width: 44px;
+  color: var(--danger-ink);
+}
+.alerts-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px dashed var(--border-hover);
+  border-radius: var(--panel-radius);
+  color: var(--text-subtle);
+}
+.alerts-empty p {
+  margin: 0;
+}
+.recent-list {
+  border: 1px solid var(--border);
+  border-radius: var(--panel-radius);
+  background: var(--surface-card);
+}
+.recent-list :deep(.q-item__label--caption) {
+  color: var(--text-subtle);
+}
+
+@media (max-width: 760px) {
+  .alert-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
-
-@media (max-width: 768px) {
-  .alert-setup-card .card-header {
-    flex-direction: column;
-    text-align: center;
-
-    .icon-wrapper {
-      margin: 0 auto;
-    }
+@media (max-width: 420px) {
+  .alert-form-actions :deep(.q-btn),
+  .delivery-status :deep(.q-btn) {
+    width: 100%;
   }
-
-  .active-alerts-card .alerts-list .alert-item {
-    flex-direction: column;
-    gap: 1rem;
-
-    .alert-controls {
-      margin-left: 0;
-      align-self: stretch;
-      justify-content: space-between;
-    }
+  .alert-controls {
+    flex: 1 0 100%;
   }
-}
-</style>
-
-<style scoped>
-.q-card {
-  min-height: 400px;
-}
-
-.engine-card,
-.recent-card {
-  min-height: 0;
-}
-
-.q-card .text-h6 {
-  font-weight: 600;
-}
-
-.q-form .q-btn {
-  margin-top: 1rem;
-}
-
-.q-item {
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-}
-
-.q-item:hover {
-  background-color: var(--q-grey-1);
-}
-
-h5 {
-  color: var(--q-dark);
-  font-weight: 600;
 }
 </style>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useQuasar } from 'quasar';
+import { ref, computed, nextTick, watch } from 'vue';
+import { useQuasar, type QInput } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import AlertScheduleFields from 'src/components/AlertScheduleFields.vue';
 import AppSelect from 'src/components/AppSelect.vue';
-import FooterSection from 'src/components/FooterSection.vue';
 import HeroSection from 'src/components/HeroSection.vue';
-import NavSection from 'src/components/NavSection.vue';
 import { useAlertEngine, type DeliveryEvent } from 'src/composables/useAlertEngine';
-import { formatMinutesOfDay, getOsloParts, timeOfDayOptions, type WeekdayIndex } from 'src/scripts/osloTime';
-import { baseCities, cityOptions, useAreaOptions } from 'src/scripts/TableScript';
+import {
+  formatMinutesOfDay,
+  getOsloParts,
+  timeOfDayOptions,
+  type WeekdayIndex,
+} from 'src/scripts/osloTime';
+import { cityOptions, useAreaOptions } from 'src/scripts/TableScript';
 import {
   createCheapestAlert,
   createPriceAlert,
@@ -632,15 +514,13 @@ import {
   loadAlerts,
   saveAlerts,
   type Alert,
-  type CheapestAlert,
   type DeliveryOutcome,
-  type PriceAlert,
   type PriceCondition,
   type QuietHours,
 } from 'src/scripts/alertStore';
 
 const $q = useQuasar();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { permission, isDegraded, recentDeliveries, requestPermission, runOnce } = useAlertEngine();
 
 /* ------------------------------------------------------------------ *
@@ -649,9 +529,21 @@ const { permission, isDegraded, recentDeliveries, requestPermission, runOnce } =
 
 const alerts = ref<Alert[]>(loadAlerts());
 
-const priceAlerts = computed(() => alerts.value.filter((alert): alert is PriceAlert => alert.kind === 'price'));
-const cheapestAlerts = computed(() =>
-  alerts.value.filter((alert): alert is CheapestAlert => alert.kind === 'cheapest'),
+const alertGroups = computed(() =>
+  [
+    {
+      kind: 'price',
+      icon: 'sym_o_notifications_active',
+      heading: t('notifications.active.priceAlertsTitle'),
+      alerts: alerts.value.filter(({ kind }) => kind === 'price'),
+    },
+    {
+      kind: 'cheapest',
+      icon: 'sym_o_schedule',
+      heading: t('notifications.active.cheapestAlertsTitle'),
+      alerts: alerts.value.filter(({ kind }) => kind === 'cheapest'),
+    },
+  ].filter((group) => group.alerts.length > 0),
 );
 
 // Persists to storage and asks the engine to re-evaluate immediately, so
@@ -667,8 +559,12 @@ function persist() {
  * ------------------------------------------------------------------ */
 
 const areaOptions = useAreaOptions();
-const priceCityOptions = computed(() => cityOptions.filter((city) => city.area === priceForm.value.area));
-const cheapestCityOptions = computed(() => cityOptions.filter((city) => city.area === cheapestForm.value.area));
+const priceCityOptions = computed(() =>
+  cityOptions.filter((city) => city.area === priceForm.value.area),
+);
+const cheapestCityOptions = computed(() =>
+  cityOptions.filter((city) => city.area === cheapestForm.value.area),
+);
 
 const conditionOptions = computed(() => [
   { label: t('notifications.priceAlert.conditionUnder'), value: 'under' },
@@ -689,8 +585,8 @@ const notificationTimeOptions = timeOfDayOptions(30).map(({ label }) => ({ label
 
 interface PriceFormState {
   area: string;
-  city: string;
-  targetPrice: number | null;
+  city: string | null;
+  targetPrice: string | number | null;
   condition: PriceCondition;
   enabled: boolean;
   days: WeekdayIndex[];
@@ -699,7 +595,7 @@ interface PriceFormState {
 
 interface CheapestFormState {
   area: string;
-  city: string;
+  city: string | null;
   notificationTime: string;
   enabled: boolean;
   days: WeekdayIndex[];
@@ -709,7 +605,7 @@ interface CheapestFormState {
 function emptyPriceForm(): PriceFormState {
   return {
     area: '',
-    city: '',
+    city: null,
     targetPrice: null,
     condition: 'under',
     enabled: true,
@@ -721,7 +617,7 @@ function emptyPriceForm(): PriceFormState {
 function emptyCheapestForm(): CheapestFormState {
   return {
     area: '',
-    city: '',
+    city: null,
     notificationTime: '07:00',
     enabled: true,
     days: [],
@@ -732,42 +628,88 @@ function emptyCheapestForm(): CheapestFormState {
 const priceForm = ref<PriceFormState>(emptyPriceForm());
 const cheapestForm = ref<CheapestFormState>(emptyCheapestForm());
 
-function savePriceAlert() {
-  const { area, city, targetPrice, condition, enabled, days, quietHours } = priceForm.value;
-  if (!area || targetPrice === null || Number.isNaN(targetPrice)) {
-    $q.notify({ type: 'negative', message: t('notifications.notify.validationError') });
+const priceAreaRef = ref<InstanceType<typeof AppSelect> | null>(null);
+const cheapestAreaRef = ref<InstanceType<typeof AppSelect> | null>(null);
+const priceInputRef = ref<QInput | null>(null);
+const submittedPrice = ref(false);
+const submittedCheapest = ref(false);
+const priceAreaError = computed(() => submittedPrice.value && !priceForm.value.area);
+const cheapestAreaError = computed(() => submittedCheapest.value && !cheapestForm.value.area);
+
+const targetAmount = computed(() => {
+  const input = String(priceForm.value.targetPrice ?? '')
+    .trim()
+    .replace(',', '.');
+  if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(input)) return null;
+  const amount = Number(input);
+  return Number.isFinite(amount) ? amount : null;
+});
+const priceAmountError = computed(() => submittedPrice.value && targetAmount.value === null);
+
+watch(
+  () => priceForm.value.area,
+  () => {
+    priceForm.value.city = null;
+  },
+  { flush: 'sync' },
+);
+watch(
+  () => cheapestForm.value.area,
+  () => {
+    cheapestForm.value.city = null;
+  },
+  { flush: 'sync' },
+);
+
+async function savePriceAlert() {
+  submittedPrice.value = true;
+  const amount = targetAmount.value;
+  const { area, city, condition, enabled, days, quietHours } = priceForm.value;
+  if (!area || amount === null) {
+    await nextTick();
+    if (!area) priceAreaRef.value?.focus();
+    else priceInputRef.value?.focus();
     return;
   }
 
-  const alert = createPriceAlert({ area, city, targetPrice, condition, enabled, days, quietHours });
+  const alert = createPriceAlert({
+    area,
+    city: city ?? '',
+    targetPrice: amount,
+    condition,
+    enabled,
+    days,
+    quietHours,
+  });
   alerts.value = [...alerts.value, alert];
   persist();
   priceForm.value = emptyPriceForm();
-
-  $q.notify({
-    type: 'positive',
-    message: t('notifications.notify.priceAlertSaved'),
-    caption: t('notifications.notify.priceAlertSavedCaption'),
-  });
+  submittedPrice.value = false;
+  $q.notify({ type: 'positive', message: t('notifications.notify.priceAlertSaved') });
 }
 
-function saveCheapestAlert() {
+async function saveCheapestAlert() {
+  submittedCheapest.value = true;
   const { area, city, notificationTime, enabled, days, quietHours } = cheapestForm.value;
   if (!area || !notificationTime) {
-    $q.notify({ type: 'negative', message: t('notifications.notify.validationError') });
+    await nextTick();
+    cheapestAreaRef.value?.focus();
     return;
   }
 
-  const alert = createCheapestAlert({ area, city, notificationTime, enabled, days, quietHours });
+  const alert = createCheapestAlert({
+    area,
+    city: city ?? '',
+    notificationTime,
+    enabled,
+    days,
+    quietHours,
+  });
   alerts.value = [...alerts.value, alert];
   persist();
   cheapestForm.value = emptyCheapestForm();
-
-  $q.notify({
-    type: 'positive',
-    message: t('notifications.notify.cheapestAlertSaved'),
-    caption: t('notifications.notify.cheapestAlertSavedCaption'),
-  });
+  submittedCheapest.value = false;
+  $q.notify({ type: 'positive', message: t('notifications.notify.cheapestAlertSaved') });
 }
 
 function toggleAlert(alert: Alert) {
@@ -788,16 +730,22 @@ function deleteAlert(alert: Alert) {
     alert.kind === 'price'
       ? 'notifications.notify.confirmDeletePriceAlert'
       : 'notifications.notify.confirmDeleteCheapestAlert';
-  if (!confirm(t(confirmKey))) return;
+  $q.dialog({
+    title: t('notifications.active.deleteTooltip'),
+    message: t(confirmKey),
+    cancel: { label: t('common.cancel'), flat: true, noCaps: true },
+    ok: { label: t('notifications.active.deleteTooltip'), color: 'negative', noCaps: true },
+    focus: 'cancel',
+  }).onOk(() => {
+    alerts.value = alerts.value.filter((existing) => existing.id !== alert.id);
+    persist();
 
-  // Filtered by stable id, not array index - an earlier deletion can no
-  // longer re-point a later alert's toggle/delete at the wrong entry.
-  alerts.value = alerts.value.filter((existing) => existing.id !== alert.id);
-  persist();
-
-  const doneKey =
-    alert.kind === 'price' ? 'notifications.notify.priceAlertDeleted' : 'notifications.notify.cheapestAlertDeleted';
-  $q.notify({ type: 'positive', message: t(doneKey) });
+    const doneKey =
+      alert.kind === 'price'
+        ? 'notifications.notify.priceAlertDeleted'
+        : 'notifications.notify.cheapestAlertDeleted';
+    $q.notify({ type: 'positive', message: t(doneKey) });
+  });
 }
 
 /* ------------------------------------------------------------------ *
@@ -806,10 +754,25 @@ function deleteAlert(alert: Alert) {
 
 function getDisplayLocation(alert: Pick<Alert, 'area' | 'city'>): string {
   if (alert.city) {
-    const match = cityOptions.find((option) => option.area === alert.area && option.value === alert.city);
+    const match = cityOptions.find(
+      (option) => option.area === alert.area && option.value === alert.city,
+    );
     return match ? match.label : alert.city;
   }
-  return baseCities[alert.area as keyof typeof baseCities] ?? alert.area;
+  return areaOptions.value.find(({ value }) => value === alert.area)?.label ?? alert.area;
+}
+
+const amountFormatter = computed(
+  () => new Intl.NumberFormat(locale.value, { maximumSignificantDigits: 15 }),
+);
+function alertDetail(alert: Alert) {
+  if (alert.kind === 'cheapest') {
+    return t('notifications.active.cheapestAlertDetail', { time: alert.notificationTime });
+  }
+  return t('notifications.active.priceAlertDetail', {
+    condition: getConditionLabel(alert.condition),
+    price: amountFormatter.value.format(alert.targetPrice),
+  });
 }
 
 const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
@@ -854,7 +817,13 @@ const permissionIcon = computed(() =>
       : 'sym_o_notifications',
 );
 
-const permissionTone = computed(() => (permission.value === 'granted' ? 'positive' : permission.value === 'default' ? 'primary' : 'muted'));
+const permissionTone = computed(() =>
+  permission.value === 'granted'
+    ? 'positive'
+    : permission.value === 'default'
+      ? 'primary'
+      : 'muted',
+);
 
 async function enableNotifications() {
   const result = await requestPermission();

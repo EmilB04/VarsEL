@@ -1,147 +1,89 @@
-# ⚡ VarsEL
+<h1 align="center">VarsEL</h1>
 
-> Fetch and display electricity prices, fast and simple.
+<p align="center"><strong>Electricity prices, clear at a glance.</strong><br />
+Fetch and browse electricity prices by region, date and hour range.</p>
 
-**[Live Demo →](https://varsel.pages.dev/)**
+<p align="center">
+  <a href="https://varsel.pages.dev/">Live demo</a> ·
+  <a href="docs/notifications.md">Notifications</a>
+</p>
 
-VarsEL is a private project that fetches and displays electricity prices from an external API. It's built as a two-part app: a **Spring Boot** backend and a **Quasar (Vue.js)** frontend.
+<p align="center">
+  <img src="https://img.shields.io/badge/Spring%20Boot-Java-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot" />
+  <img src="https://img.shields.io/badge/Quasar-Vue-1976D2?logo=quasar&logoColor=white" alt="Quasar and Vue" />
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose" />
+</p>
 
-![Java](https://img.shields.io/badge/Java-Backend-orange?logo=openjdk)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-Backend-6DB33F?logo=springboot&logoColor=white)
-![Vue.js](https://img.shields.io/badge/Vue.js-Frontend-4FC08D?logo=vuedotjs&logoColor=white)
-![Quasar](https://img.shields.io/badge/Quasar-Framework-1976D2?logo=quasar&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Supported-2496ED?logo=docker&logoColor=white)
-![License](https://img.shields.io/badge/license-private-lightgrey)
+The Render backend can spin down when idle. The GitHub Actions workflow pings `/api/health` every five minutes. Scheduled runs can be delayed. Set the repository variable `KEEP_WARM_URL` to the health endpoint if the backend address changes.
 
----
+## What it does
 
-## Table of Contents
+- Fetches electricity prices for different regions and cities.
+- Shows prices in a clean, readable table.
+- Filters by date and by start and end hour.
+- Finds today’s price area from the device location when requested.
 
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-  - [Option 1: Quick Start](#option-1-quick-start-recommended)
-  - [Option 2: Manual Setup](#option-2-manual-setup)
-  - [Option 3: Docker](#option-3-using-docker)
-- [API Reference](#api-reference)
-- [Project Structure](#project-structure)
-- [Tech Stack](#tech-stack)
-- [License](#license)
+## Run it
 
----
+Needs Node.js and npm for the frontend, Java and Maven for the backend, and Docker if you prefer containers.
 
-## Features
-
-- 📍 Fetch electricity prices for different regions and cities
-- 📊 Display prices in a clean, user-friendly table
-- 🕒 Filter prices by date and time range
-
-## Prerequisites
-
-| Requirement | Needed for |
-|---|---|
-| Node.js & npm | Frontend |
-| Java & Maven | Backend |
-| Docker & Docker Compose | Docker option (optional) |
-
-## Getting Started
-
-### Option 1: Quick Start (Recommended)
-
-Run both services from the project root with a single command:
+**Quick start** (both services from the project root):
 
 ```bash
 npm install
+npm run install:frontend
 npm run dev
 ```
 
-| Service | URL |
-|---|---|
-| Backend | `http://localhost:8080` |
-| Frontend | `http://localhost:9000` |
+The backend runs on [localhost:8080](http://localhost:8080) and the frontend runs on [localhost:9000](http://localhost:9000). The development frontend proxies `/api` to the local backend.
 
-**Available scripts:**
+The install button and device-location lookup are available on supported browsers over HTTPS or localhost.
 
-| Command | Description |
-|---|---|
-| `npm run dev` / `npm start` | Start both frontend and backend |
-| `npm run frontend` | Start only the frontend |
-| `npm run backend` | Start only the backend |
-| `npm run build` | Build both frontend and backend |
+| Script | What it does |
+| --- | --- |
+| `npm run dev` / `npm start` | Start frontend and backend |
+| `npm run frontend` / `npm run backend` | Start just one of them |
+| `npm run build` | Build both |
 | `npm run install:all` | Install dependencies for both projects |
-| `npm run test` | Run tests for both projects |
-| `npm run clean` | Clean build artifacts for both projects |
+| `npm run test` | Run tests for both |
+| `npm run clean` | Clean build artifacts |
 
-### Option 2: Manual Setup
-
-**Frontend** — from `varsel-frontend`:
-
-```bash
-npm install
-quasar dev
-```
-
-Runs at `http://localhost:9000`.
-
-**Backend** — from `varsel`:
-
-```bash
-mvn clean install
-mvn spring-boot:run
-```
-
-Runs at `http://localhost:8080`.
-
-### Option 3: Using Docker
-
-From the project root:
+**Docker:**
 
 ```bash
 docker-compose up --build
 ```
 
-| Service | URL |
-|---|---|
-| Backend | `http://localhost:8080` |
-| Frontend | `http://localhost:80` |
+The backend is at `http://localhost:8080` and the frontend at `http://localhost:80`.
 
-## API Reference
+**Manually:** run `npm install` then `quasar dev` in `varsel-frontend/`, and `mvn clean install` then `mvn spring-boot:run` in `varsel/`.
 
-```
-GET /prices/{region}/{date}
-```
+## API
 
-Fetch electricity prices for a specific region and date.
-
-**Optional query parameters:**
-
-| Parameter | Description |
-|---|---|
-| `startHour` | Filter prices starting from this hour |
-| `endHour` | Filter prices up to this hour |
-
-**Example:**
+`GET /api/prices/{region}/{date}` returns prices for a region and date. Use `startHour` and `endHour` to limit the result to a time range.
 
 ```bash
-curl "http://localhost:8080/prices/oslo/2026-07-25?startHour=6&endHour=18"
+curl "http://localhost:8080/api/prices/NO1/2026-11-26?startHour=6&endHour=18"
 ```
 
-## Project Structure
+## Price-area boundaries
 
+The location lookup uses [NVE’s Elspot N2000 map layer](https://gis3.nve.no/map/rest/services/Mapservices/Omradekonsesjoner/MapServer/8) under [NLOD](https://kartkatalog.nve.no/om). The bundled `varsel-frontend/src/assets/price-areas.geojson` is a snapshot downloaded on 2026-11-26. It keeps the area code and simplified geometry. To refresh it, query the layer with `f=geojson`, `where=1=1`, `outFields=ElSpotOmr`, `outSR=4326`, `geometryPrecision=5`, and `maxAllowableOffset=0.0002`. The browser uses this map locally.
+
+## Built with
+
+Java · Spring Boot · Vue.js · Quasar · Axios · Maven · Docker
+
+```text
+varsel/            Spring Boot backend
+varsel-frontend/   Quasar frontend
+docs/              Project documentation
 ```
-VarsEL/
-├── varsel/            # Backend (Spring Boot)
-└── varsel-frontend/   # Frontend (Quasar / Vue.js)
-```
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Backend | Java, Spring Boot |
-| Frontend | Vue.js, Quasar Framework |
-| Infra / Tooling | Docker, Maven, Axios |
 
 ## License
 
 This is a private project and not licensed for public use.
+
+---
+
+Created by [Emil Berglund](https://github.com/EmilB04)

@@ -1,34 +1,51 @@
 <template>
-  <div class="q-mt-lg" aria-hidden="true">
-    <q-skeleton type="text" width="260px" height="28px" class="q-mb-lg" />
-
-    <div class="skeleton-chart q-mb-xl">
-      <q-skeleton height="100%" style="border-radius: 20px" />
+  <div class="price-loading" role="status" :aria-label="t('common.loadingPrices')">
+    <div class="chart-placeholder">
+      <q-skeleton type="text" width="172px" height="32px" aria-hidden="true" />
+      <q-skeleton class="plot-placeholder" aria-hidden="true" />
     </div>
-
-    <div class="row q-gutter-md">
-      <div v-for="n in 5" :key="n" class="col-12 col-sm-6 col-md">
-        <q-skeleton height="180px" style="border-radius: 20px" />
-      </div>
+    <div class="summary-placeholder" aria-hidden="true">
+      <q-skeleton v-for="tile in 5" :key="tile" height="105px" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// Shape-matched placeholder shown while backend requests are in flight, so
-// the page doesn't jump/reflow once real data (chart + summary cards) arrives.
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 </script>
 
-<style lang="scss" scoped>
-.skeleton-chart {
-  height: 450px;
-  border-radius: 20px;
-  overflow: hidden;
+<style scoped>
+.price-loading {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
 }
-
-@media (max-width: 768px) {
-  .skeleton-chart {
-    height: 300px;
+.chart-placeholder {
+  display: grid;
+  gap: 12px;
+  padding: clamp(12px, 2.2vw, 24px);
+  border: 1px solid var(--border);
+  border-radius: var(--panel-radius);
+  background: var(--surface-card);
+  box-shadow: var(--panel-shadow);
+}
+.price-loading :deep(.q-skeleton) {
+  background: var(--surface-inset);
+}
+.plot-placeholder {
+  height: clamp(245px, 30vw, 350px);
+  border-radius: var(--control-radius);
+}
+.summary-placeholder {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+}
+@media (max-width: 600px) {
+  .summary-placeholder {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 </style>

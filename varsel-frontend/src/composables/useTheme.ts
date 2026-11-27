@@ -36,9 +36,12 @@ const currentTheme = computed<ResolvedTheme>(() =>
 // The initial value is applied explicitly via initTheme() from App.vue's onMounted,
 // once Quasar is guaranteed to be fully installed. This watch only needs to handle
 // changes made *after* that point (user toggling the setting, system theme changes).
-watch(currentTheme, (value) => {
+function applyTheme(value: ResolvedTheme) {
   Dark.set(value === 'dark');
-});
+  document.documentElement.dataset.theme = value;
+}
+
+watch(currentTheme, applyTheme);
 
 function setTheme(value: Theme) {
   theme.value = value;
@@ -48,7 +51,7 @@ function setTheme(value: Theme) {
 // Call once after the app has mounted to apply the stored/system theme -
 // see the comment above the watch() call for why this can't just be `immediate: true`.
 export function initTheme() {
-  Dark.set(currentTheme.value === 'dark');
+  applyTheme(currentTheme.value);
 }
 
 export function useTheme() {

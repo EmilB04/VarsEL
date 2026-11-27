@@ -1,36 +1,50 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="lHh Lpr lFf" class="app-shell">
+    <NavSection />
+
     <q-page-container class="main-page-container">
       <router-view />
+      <FooterSection />
     </q-page-container>
 
-    <!-- Rendered once for the whole app so the cold-start notice is visible
-         without scrolling on every page. -->
     <BackendStatusBar />
   </q-layout>
 </template>
 
 <script setup lang="ts">
+import { watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 import BackendStatusBar from 'src/components/BackendStatusBar.vue';
+import FooterSection from 'src/components/FooterSection.vue';
+import NavSection from 'src/components/NavSection.vue';
+
+const route = useRoute();
+const { t } = useI18n();
+watchEffect(() => {
+  const title = route.meta.title;
+  document.title = typeof title === 'string' ? `${t(title)} · VarsEL` : 'VarsEL';
+});
 </script>
 
 <style scoped>
-/* Reserves space below every page's content (including its footer) so the
-   fixed BackendStatusBar pill - which can appear/disappear at any scroll
-   position - never lands on top of real footer content when the user is
-   scrolled to the bottom of the page. The pill's own footprint is roughly
-   4rem including its margins, so this comfortably clears it on desktop. */
-.main-page-container {
-  padding-bottom: 4.5rem;
+.app-shell {
+  display: flex;
+  flex-direction: column;
 }
-
-/* On mobile the status pill shifts up to clear the bottom tab bar (see
-   NavSection.vue / BackendStatusBar.vue), so both are stacked above the
-   viewport's bottom edge at once - the reserved space has to clear that
-   whole stack, not just the tab bar. */
+.main-page-container {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.main-page-container :deep(.app-page) {
+  width: 100%;
+  flex: 1;
+}
 @media (max-width: 868px) {
   .main-page-container {
-    padding-bottom: calc(56px + 4.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(var(--dock-height) + var(--dock-gap) + env(safe-area-inset-bottom, 0px));
   }
 }
 </style>

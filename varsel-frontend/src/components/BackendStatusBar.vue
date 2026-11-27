@@ -75,8 +75,7 @@ const message = computed(() => {
   border-radius: 9999px;
   border: 1px solid var(--border);
   background: var(--surface-card);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  box-shadow: var(--popup-shadow);
   font-size: 0.85rem;
   font-weight: 500;
 }
@@ -126,7 +125,7 @@ const message = computed(() => {
 // Clears the fixed bottom tab bar on mobile (see NavSection.vue).
 @media (max-width: 868px) {
   .backend-status {
-    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--dock-height) + var(--dock-gap) + env(safe-area-inset-bottom, 0px));
     padding-bottom: 0.5rem;
   }
 }

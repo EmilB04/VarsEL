@@ -1,12 +1,14 @@
 export default {
   common: {
+    cancel: 'Cancel',
     retry: 'Try again',
     close: 'Close',
     clear: 'Clear selection',
     noOptions: 'No options available',
     loadingPrices: 'Loading prices...',
     errorTitle: 'Could not load prices',
-    errorDescription: "If the backend service isn't running, you can start it manually:",
+    errorDescription: 'Check your connection and try again.',
+    noPrices: 'No prices available for this selection.',
     priceUnit: 'kr/kWh',
     areas: {
       NO1: 'Eastern Norway',
@@ -26,6 +28,13 @@ export default {
     },
   },
 
+  install: {
+    action: 'Install app',
+    title: 'Add VarsEL to your home screen',
+    ios: 'In Safari, tap Share, then Add to Home Screen. Turn on Open as Web App if available, then tap Add.',
+    android: 'Open your browser menu and choose Install app or Add to Home screen.',
+  },
+
   backendStatus: {
     waking: 'Starting the backend service, about {countdown} left',
     ready: 'Connected to the backend',
@@ -33,6 +42,7 @@ export default {
   },
 
   nav: {
+    main: 'Main navigation',
     logo: 'VarsEL',
     today: 'Today',
     history: 'History',
@@ -43,7 +53,6 @@ export default {
 
   footer: {
     tagline: 'Real-time electricity prices',
-    linksLabel: 'Footer',
     github: 'View source on GitHub',
     madeBy: 'Designed and built by {author}',
     dataSourceAlt: 'Electricity prices provided by Hva koster strømmen.no',
@@ -95,15 +104,31 @@ export default {
   },
 
   index: {
+    location: {
+      action: 'Use my location',
+      locating: 'Finding your price area…',
+      matched: 'Price area from your location: {area} ({code}).',
+      unsupported: 'Location requires a secure connection (HTTPS) and a browser with location support. Choose an area manually.',
+      denied: 'Location access is blocked. Allow it in your browser or choose an area manually.',
+      timedOut: 'Finding your location timed out. Try again or choose an area manually.',
+      unavailable: 'Could not get your location. Try again or choose an area manually.',
+      outside: 'No price area matches your location. Choose an area manually.',
+      uncertain: 'Your position is too close to an area boundary. Choose your price area manually.',
+      mapError: 'Could not load the price-area map. Try again or choose an area manually.',
+    },
     heroTitle: "Today's electricity prices",
     heroDescription: 'See real-time electricity prices and plan your usage smartly',
     selectArea: 'Select your area',
     selectCity: 'City (optional)',
     chartHeading: 'Price trend today - {city}',
     tableHeading: "Today's hourly prices",
+    hourlyPeriod: 'Time window',
+    hourlyLowest: 'Cheapest',
   },
 
   history: {
+    empty: 'Choose an area and date to view electricity prices.',
+    invalidHours: 'Choose an end time after the start time.',
     heroTitle: 'Price history',
     heroDescription: 'Explore and analyze past electricity prices',
     selectAreaSection: 'Select area',
@@ -114,7 +139,6 @@ export default {
     previousDay: 'Previous day',
     today: 'Today',
     nextDay: 'Next day',
-    nextDayDisabled: 'You can only look one day ahead',
     timeFilterSection: 'Time filter (optional)',
     startHour: 'From',
     endHour: 'To',
@@ -127,12 +151,16 @@ export default {
   notifications: {
     heroTitle: 'Smart price alerts',
     heroDescription: 'Get notified when electricity is cheap or when the price changes',
+    validation: {
+      area: 'Choose a price area.',
+      price: 'Enter a valid price, such as 1.50.',
+    },
     priceAlert: {
       title: 'Price alert',
       description: 'Get notified when the electricity price reaches a certain value',
       area: 'Area',
       city: 'City (optional)',
-      targetPrice: 'Target price (kr/kWh)',
+      targetPrice: 'Price threshold',
       condition: 'Alert when the price is',
       conditionUnder: 'under',
       conditionOver: 'over',
@@ -150,23 +178,22 @@ export default {
       save: 'Save cheapest hour alert',
     },
     active: {
-      heading: 'Active alerts',
+      heading: 'Saved alerts',
+      enabled: 'On',
+      paused: 'Paused',
+      toggleLabel: 'Alert for {location}',
       priceAlertsTitle: 'Price alerts',
       cheapestAlertsTitle: 'Cheapest hour alerts',
       priceAlertDetail: 'Alert when the price is {condition} {price} kr/kWh',
-      cheapestAlertDetail: 'Daily alert at {time}',
+      cheapestAlertDetail: 'Alert at {time}',
       deleteTooltip: 'Delete alert',
-      emptyTitle: 'No active alerts',
       emptyDescription: 'Create your first alert above to get started',
       scheduleEveryDay: 'Every day',
       quietSummary: 'Quiet {from}–{to}',
     },
     notify: {
-      validationError: 'Please fill in all required fields',
       priceAlertSaved: 'Price alert saved!',
-      priceAlertSavedCaption: "You'll be notified when the conditions are met",
       cheapestAlertSaved: 'Cheapest hour alert saved!',
-      cheapestAlertSavedCaption: "You'll get a daily alert about the cheapest hour",
       priceAlertEnabled: 'Price alert enabled',
       priceAlertDisabled: 'Price alert disabled',
       cheapestAlertEnabled: 'Cheapest hour alert enabled',
@@ -179,11 +206,12 @@ export default {
     schedule: {
       daysLabel: 'Active days',
       everyDay: 'Every day',
-      selectedDays: '{count} days selected',
+      selectedDays: 'One day selected | {count} days selected',
       quietTitle: 'Quiet hours',
       quietEnable: 'Enable quiet hours',
       quietFrom: 'From',
       quietTo: 'To',
+      quietSameTime: 'Choose different start and end times to mute alerts.',
       quietDescription: 'No notifications are sent during this window - they are still recorded as suppressed.',
     },
     weekdays: {
@@ -223,52 +251,44 @@ export default {
 
   about: {
     heroTitle: 'About VarsEL',
-    heroDescription: 'Your smart partner for electricity usage',
-    whatIsTitle: 'What is VarsEL?',
-    whatIsBody: 'VarsEL is a modern web application that gives you full control over your electricity usage. With real-time data from all of Norway, you can monitor electricity prices, analyze price trends, and receive smart alerts when prices reach your desired levels. The app combines powerful data visualization with practical tools to help you save money on your electricity bill.',
-    featuresTitle: 'Key features',
-    monitoring: {
-      title: 'Price monitoring and visualization',
-      items: [
-        'Real-time data from all Norwegian price areas (NO1-NO5)',
-        'Interactive charts with min/max/average prices',
-        'Detailed tables with hourly prices',
-        'Current price indicator for an instant overview',
-      ],
+    heroDescription: 'Track electricity spot prices in Norway and find the cheapest hours in your price area.',
+    featuresTitle: 'What you can do',
+    priceAreas: 'Price areas',
+    features: {
+      today: {
+        title: 'See today’s electricity prices',
+        description: 'See the current price and prices for the rest of the day. Choose an area or use your device location.',
+      },
+      history: {
+        title: 'Explore price history',
+        description: 'Choose a price area, date, and time range to see past prices.',
+      },
+      notifications: {
+        title: 'Set up price alerts',
+        description: 'Set a price threshold or get an alert for the cheapest hour while VarsEL is open.',
+      },
     },
-    alerts: {
-      title: 'Smart alert systems',
-      items: [
-        'Price alerts when electricity reaches certain levels',
-        'Cheapest hour alerts for optimal planning',
-        'Customizable alert times',
-        'Locally saved settings',
-      ],
+    dataSourcesTitle: 'Data sources',
+    sources: {
+      prices: {
+        name: 'Hva koster strømmen?',
+        description: 'Spot prices from a service run by Beneficial Apps AS.',
+      },
+      location: {
+        name: 'NVE price area map',
+        description: 'VarsEL uses the map in your browser to find your price area.',
+      },
     },
-    tools: {
-      title: 'Advanced tools',
-      items: [
-        'Time-range filtering for specific hours',
-        'VAT calculator (included/excluded)',
-        'Dark/light mode for a better experience',
-        'Responsive design for every device',
-      ],
-    },
-    architectureTitle: 'Technical architecture',
+    projectTitle: 'About the project',
+    developerBody: 'VarsEL is a personal project built by {author}.',
     frontend: 'Frontend',
     backend: 'Backend',
-    developerTitle: 'About the developer',
-    developerBody1: 'VarsEL was built by {author} as a personal project to put his skills to the test and learn more about full-stack development.',
-    developerBody2: 'The project combines modern web development with practical use, demonstrating full-stack development with Java and Vue.js.',
-    openSourceTitle: 'Open source',
-    openSourceBody: 'VarsEL is open source and available on GitHub. Contributions and suggestions are welcome!',
-    viewOnGithub: 'View on GitHub',
-    dataSourcesTitle: 'Data sources',
-    dataSourcesBody: 'Electricity prices are fetched from:',
-    dataSourcesCaption: 'A service by Beneficial Apps AS',
+    viewOnGithub: 'View the project on GitHub',
+    opensInNewTab: '(opens in a new tab)',
   },
 
   priceSummary: {
+    chartNow: 'Now',
     heading: 'Price summary',
     lowest: 'Lowest price',
     highest: 'Highest price',

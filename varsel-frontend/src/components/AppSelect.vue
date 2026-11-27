@@ -9,17 +9,18 @@
       type="button"
       role="combobox"
       class="select-trigger"
-      :class="{ 'select-trigger--open': open, 'select-trigger--filled': hasValue }"
+      :class="{ 'select-trigger--open': open, 'select-trigger--filled': hasValue, 'select-trigger--clearable': canClear }"
       :disabled="disable === true"
       :aria-expanded="open"
+      :aria-invalid="!!error"
       :aria-controls="listboxId"
-      v-bind="activeDescendant"
+      v-bind="{ ...activeDescendant, ...(error ? { 'aria-describedby': errorId } : {}) }"
       aria-haspopup="listbox"
       :aria-labelledby="`${labelId} ${triggerId}`"
       @click="toggle"
       @keydown="onTriggerKeydown"
     >
-      <q-icon v-if="icon" :name="icon" class="select-icon" aria-hidden="true" />
+      <q-icon v-if="icon" :name="icon" class="field-icon" aria-hidden="true" />
 
       <span class="select-body">
         <span :id="labelId" class="select-label" :class="{ 'select-label--floated': floated }">
@@ -28,20 +29,19 @@
         <span v-if="hasValue" class="select-value">{{ selectedLabel }}</span>
       </span>
 
-      <span
-        v-if="clearable && hasValue && !disable"
-        class="select-clear"
-        role="button"
-        tabindex="-1"
-        :aria-label="t('common.clear')"
-        @click.stop="clear"
-        @keydown.enter.stop.prevent="clear"
-      >
-        <q-icon name="sym_o_close" size="16px" aria-hidden="true" />
-      </span>
-
       <q-icon name="sym_o_keyboard_arrow_down" class="select-arrow" aria-hidden="true" />
     </button>
+    <button
+      v-if="canClear"
+      type="button"
+      class="select-clear"
+      :aria-label="`${t('common.clear')} · ${label}`"
+      @click="clear"
+    >
+      <q-icon name="sym_o_close" size="16px" aria-hidden="true" />
+    </button>
+
+    <p v-if="error" :id="errorId" class="select-error" role="status">{{ error }}</p>
 
     <!-- Teleported to <body> so no ancestor's overflow, stacking context or
          max-width can clip the options, and positioned with explicit viewport
@@ -98,6 +98,7 @@ const props = withDefaults(
     icon?: string;
     disable?: boolean;
     clearable?: boolean;
+    error?: string;
   }>(),
   { icon: '', disable: false, clearable: false },
 );
@@ -112,9 +113,11 @@ const uid = useId();
 const triggerId = `select-trigger-${uid}`;
 const listboxId = `select-listbox-${uid}`;
 const labelId = `select-label-${uid}`;
+const errorId = `select-error-${uid}`;
 const optionId = (index: number) => `select-option-${uid}-${index}`;
 
 const triggerRef = ref<HTMLButtonElement | null>(null);
+defineExpose({ focus: () => triggerRef.value?.focus() });
 const menuRef = ref<HTMLElement | null>(null);
 const optionRefs = ref<HTMLElement[]>([]);
 
@@ -135,6 +138,7 @@ const selectedIndex = computed(() =>
 );
 const selectedLabel = computed(() => props.options[selectedIndex.value]?.label ?? '');
 const hasValue = computed(() => selectedIndex.value !== -1);
+const canClear = computed(() => props.clearable && hasValue.value && !props.disable);
 const floated = computed(() => hasValue.value || open.value);
 
 function isSelected(option: AppSelectOption): boolean {
@@ -155,9 +159,7 @@ const MIN_MENU_HEIGHT = 140;
  * it can never run off either edge, and caps its height to the space actually
  * available (the menu scrolls internally past that).
  *
- * This is what makes long option labels safe: the menu is free to be wider than
- * its trigger, but is always bounded by the viewport rather than by an
- * ancestor's width or overflow.
+ * The menu matches the trigger width, with long labels wrapping inside it.
  */
 function updatePosition() {
   const trigger = triggerRef.value;
@@ -173,7 +175,7 @@ function updatePosition() {
   const placeBelow = spaceBelow >= MIN_MENU_HEIGHT || spaceBelow >= spaceAbove;
 
   const available = viewportWidth - VIEWPORT_MARGIN * 2;
-  const width = Math.min(Math.max(rect.width, 200), available);
+  const width = Math.min(rect.width, available);
 
   let left = rect.left;
   if (left + width > viewportWidth - VIEWPORT_MARGIN) {
@@ -183,11 +185,8 @@ function updatePosition() {
 
   menuStyle.value = {
     left: `${Math.round(left)}px`,
-    minWidth: `${Math.round(width)}px`,
-    // Bounded by the distance to the right edge, so the menu cannot overflow
-    // however long an option label is - it wraps or scrolls instead.
-    maxWidth: `${Math.round(viewportWidth - VIEWPORT_MARGIN - left)}px`,
-    maxHeight: `${Math.round(Math.max(MIN_MENU_HEIGHT, placeBelow ? spaceBelow : spaceAbove))}px`,
+    width: `${width}px`,
+    maxHeight: `${Math.max(0, placeBelow ? spaceBelow : spaceAbove)}px`,
     ...(placeBelow
       ? { top: `${Math.round(rect.bottom + TRIGGER_GAP)}px` }
       : { bottom: `${Math.round(viewportHeight - rect.top + TRIGGER_GAP)}px` }),
@@ -234,7 +233,7 @@ function toggle() {
 
 function onPointerDown(event: PointerEvent) {
   const target = event.target as Node;
-  if (triggerRef.value?.contains(target) || menuRef.value?.contains(target)) return;
+  if (triggerRef.value?.parentElement?.contains(target) || menuRef.value?.contains(target)) return;
   closeMenu(false); // clicking elsewhere should not yank focus back
 }
 
@@ -246,6 +245,7 @@ function choose(option: AppSelectOption) {
 function clear() {
   emit('update:modelValue', null);
   if (open.value) closeMenu();
+  else triggerRef.value?.focus();
 }
 
 function scrollActiveIntoView() {
@@ -370,7 +370,7 @@ onBeforeUnmount(() => {
   width: 100%;
   min-height: 56px;
   padding: 0.5rem 0.875rem;
-  border-radius: 14px;
+  border-radius: var(--control-radius);
   border: 1px solid var(--border);
   background: var(--surface);
   color: inherit;
@@ -384,13 +384,14 @@ onBeforeUnmount(() => {
 
   &:hover:not(:disabled) {
     border-color: var(--border-hover);
+    background: var(--surface-card);
   }
 
   &:focus-visible,
   &.select-trigger--open {
     outline: none;
     border-color: var(--q-primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--q-primary) 16%, transparent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
   }
 
   &:disabled {
@@ -399,10 +400,17 @@ onBeforeUnmount(() => {
   }
 }
 
-.select-icon {
-  flex-shrink: 0;
-  font-size: 1.25rem;
-  color: var(--text-subtle);
+.select-trigger[aria-invalid='true'] {
+  border-color: var(--danger-ink);
+}
+.select-error {
+  margin: 5px 0 0;
+  color: var(--danger-ink);
+  font-size: 0.78rem;
+}
+
+.select-trigger--clearable .select-body {
+  margin-inline-end: 42px;
 }
 
 .select-body {
@@ -414,7 +422,7 @@ onBeforeUnmount(() => {
 }
 
 .select-label {
-  font-size: 1rem;
+  font-size: 0.94rem;
   color: var(--text-subtle);
   transition:
     font-size 0.2s cubic-bezier(0.4, 0, 0.2, 1),
@@ -424,10 +432,8 @@ onBeforeUnmount(() => {
   text-overflow: ellipsis;
 
   &--floated {
-    font-size: 0.7rem;
+    font-size: 0.74rem;
     font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
   }
 }
 
@@ -450,11 +456,17 @@ onBeforeUnmount(() => {
 }
 
 .select-clear {
+  position: absolute;
+  inset-inline-end: 36px;
+  top: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   border-radius: 9999px;
   cursor: pointer;
   transition:
@@ -487,11 +499,10 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 0.375rem;
-  border-radius: 16px;
+  border-radius: var(--control-radius);
   border: 1px solid var(--border);
   background: var(--surface-card);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+  box-shadow: var(--popup-shadow);
   animation: select-menu-in 0.14s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -529,7 +540,7 @@ onBeforeUnmount(() => {
 }
 
 .select-option--active {
-  background: color-mix(in srgb, var(--q-primary) 12%, transparent);
+  background: var(--accent-soft);
 }
 
 .select-option--selected {

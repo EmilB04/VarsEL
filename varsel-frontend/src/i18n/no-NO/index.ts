@@ -1,12 +1,14 @@
 export default {
   common: {
+    cancel: 'Avbryt',
     retry: 'Prøv igjen',
     close: 'Lukk',
     clear: 'Fjern valg',
     noOptions: 'Ingen alternativer tilgjengelig',
     loadingPrices: 'Laster priser...',
     errorTitle: 'Kunne ikke laste priser',
-    errorDescription: 'Hvis backend-tjenesten ikke kjører, kan du starte den manuelt:',
+    errorDescription: 'Sjekk tilkoblingen og prøv igjen.',
+    noPrices: 'Ingen priser tilgjengelig for dette valget.',
     priceUnit: 'kr/kWh',
     areas: {
       NO1: 'Øst-Norge',
@@ -26,6 +28,13 @@ export default {
     },
   },
 
+  install: {
+    action: 'Installer app',
+    title: 'Legg VarsEL på Hjem-skjermen',
+    ios: 'I Safari trykker du på Del og deretter Legg til på Hjem-skjerm. Slå på Åpne som nettapp hvis valget vises, og trykk på Legg til.',
+    android: 'Åpne nettlesermenyen og velg Installer app eller Legg til på startskjermen.',
+  },
+
   backendStatus: {
     waking: 'Starter backend-tjenesten, omtrent {countdown} igjen',
     ready: 'Koblet til backend',
@@ -33,6 +42,7 @@ export default {
   },
 
   nav: {
+    main: 'Hovedmeny',
     logo: 'VarsEL',
     today: 'I dag',
     history: 'Historikk',
@@ -43,7 +53,6 @@ export default {
 
   footer: {
     tagline: 'Strømpriser i sanntid',
-    linksLabel: 'Bunntekst',
     github: 'Se kildekoden på GitHub',
     madeBy: 'Designet og utviklet av {author}',
     dataSourceAlt: 'Strømpriser levert av Hva koster strømmen.no',
@@ -95,15 +104,31 @@ export default {
   },
 
   index: {
+    location: {
+      action: 'Bruk min posisjon',
+      locating: 'Finner prisområdet ditt …',
+      matched: 'Prisområde fra posisjonen din: {area} ({code}).',
+      unsupported: 'Posisjon krever en sikker tilkobling (HTTPS) og en nettleser med posisjonsstøtte. Velg område manuelt.',
+      denied: 'Posisjonstilgang er avslått. Tillat tilgang i nettleseren eller velg område manuelt.',
+      timedOut: 'Det tok for lang tid å finne posisjonen. Prøv igjen eller velg område manuelt.',
+      unavailable: 'Kunne ikke finne posisjonen. Prøv igjen eller velg område manuelt.',
+      outside: 'Fant ikke et prisområde ved posisjonen din. Velg område manuelt.',
+      uncertain: 'Posisjonen er for nær en områdegrense. Velg prisområdet ditt manuelt.',
+      mapError: 'Kunne ikke laste kartet over prisområder. Prøv igjen eller velg område manuelt.',
+    },
     heroTitle: 'Dagens strømpriser',
     heroDescription: 'Se strømpriser i sanntid og planlegg strømbruket ditt smart',
     selectArea: 'Velg ditt område',
     selectCity: 'By (valgfritt)',
     chartHeading: 'Prisutvikling i dag - {city}',
     tableHeading: 'Dagens timespriser',
+    hourlyPeriod: 'Tidsrom',
+    hourlyLowest: 'Billigst',
   },
 
   history: {
+    empty: 'Velg område og dato for å se strømprisene.',
+    invalidHours: 'Velg en sluttid etter starttiden.',
     heroTitle: 'Prishistorikk',
     heroDescription: 'Utforsk og analyser tidligere strømpriser',
     selectAreaSection: 'Velg område',
@@ -114,7 +139,6 @@ export default {
     previousDay: 'Forrige dag',
     today: 'I dag',
     nextDay: 'Neste dag',
-    nextDayDisabled: 'Kan bare se en dag frem',
     timeFilterSection: 'Tidsfilter (valgfritt)',
     startHour: 'Fra klokkeslett',
     endHour: 'Til klokkeslett',
@@ -127,12 +151,16 @@ export default {
   notifications: {
     heroTitle: 'Smarte prisvarsler',
     heroDescription: 'Få beskjed når strømmen er billig eller når prisen endrer seg',
+    validation: {
+      area: 'Velg et prisområde.',
+      price: 'Skriv inn en gyldig pris, for eksempel 1,50.',
+    },
     priceAlert: {
       title: 'Prisvarsel',
       description: 'Få varsel når strømprisen når en bestemt verdi',
       area: 'Område',
       city: 'By (valgfritt)',
-      targetPrice: 'Ønsket pris (kr/kWh)',
+      targetPrice: 'Prisgrense',
       condition: 'Varsel når prisen er',
       conditionUnder: 'under',
       conditionOver: 'over',
@@ -150,23 +178,22 @@ export default {
       save: 'Lagre billigste time-varsel',
     },
     active: {
-      heading: 'Aktive varsler',
+      heading: 'Lagrede varsler',
+      enabled: 'På',
+      paused: 'Pauset',
+      toggleLabel: 'Varsel for {location}',
       priceAlertsTitle: 'Prisvarsler',
       cheapestAlertsTitle: 'Billigste time-varsler',
       priceAlertDetail: 'Varsel når prisen er {condition} {price} kr/kWh',
-      cheapestAlertDetail: 'Daglig varsel kl. {time}',
+      cheapestAlertDetail: 'Varsel kl. {time}',
       deleteTooltip: 'Slett varsel',
-      emptyTitle: 'Ingen aktive varsler',
       emptyDescription: 'Opprett ditt første varsel ovenfor for å komme i gang',
       scheduleEveryDay: 'Hver dag',
       quietSummary: 'Stille {from}–{to}',
     },
     notify: {
-      validationError: 'Vennligst fyll ut alle påkrevde felt',
       priceAlertSaved: 'Prisvarsel lagret!',
-      priceAlertSavedCaption: 'Du vil få varsel når betingelsene oppfylles',
       cheapestAlertSaved: 'Billigste time-varsel lagret!',
-      cheapestAlertSavedCaption: 'Du vil få daglig varsel om billigste time',
       priceAlertEnabled: 'Prisvarsel aktivert',
       priceAlertDisabled: 'Prisvarsel deaktivert',
       cheapestAlertEnabled: 'Billigste time-varsel aktivert',
@@ -179,11 +206,12 @@ export default {
     schedule: {
       daysLabel: 'Aktive dager',
       everyDay: 'Hver dag',
-      selectedDays: '{count} dager valgt',
+      selectedDays: 'Én dag valgt | {count} dager valgt',
       quietTitle: 'Stille timer',
       quietEnable: 'Aktiver stille timer',
       quietFrom: 'Fra',
       quietTo: 'Til',
+      quietSameTime: 'Velg ulik start- og sluttid for å dempe varsler.',
       quietDescription: 'Det sendes ingen varsler i dette tidsrommet - de registreres likevel som undertrykt.',
     },
     weekdays: {
@@ -223,52 +251,44 @@ export default {
 
   about: {
     heroTitle: 'Om VarsEL',
-    heroDescription: 'Din smarte partner for strømforbruk',
-    whatIsTitle: 'Hva er VarsEL?',
-    whatIsBody: 'VarsEL er en moderne webapplikasjon som gir deg full kontroll over strømforbruket ditt. Med sanntidsdata fra hele Norge kan du overvåke strømpriser, analysere pristrender og motta smarte varsler når prisene når ønskede nivåer. Applikasjonen kombinerer kraftig datavisualisering med praktiske verktøy for å hjelpe deg med å spare penger på strømregningen.',
-    featuresTitle: 'Hovedfunksjoner',
-    monitoring: {
-      title: 'Prisovervåking og visualisering',
-      items: [
-        'Sanntidsdata fra alle norske prisområder (NO1-NO5)',
-        'Interaktive diagrammer med min/maks/gjennomsnittspriser',
-        'Detaljerte tabeller med timespriser',
-        'Nåværende pris-indikator for umiddelbar oversikt',
-      ],
+    heroDescription: 'Følg spotprisen på strøm i Norge og finn de billigste timene i ditt prisområde.',
+    featuresTitle: 'Dette kan du gjøre',
+    priceAreas: 'Prisområder',
+    features: {
+      today: {
+        title: 'Se dagens strømpriser',
+        description: 'Se prisen akkurat nå og resten av dagen. Velg prisområde selv, eller bruk enhetens posisjon.',
+      },
+      history: {
+        title: 'Utforsk prishistorikken',
+        description: 'Velg prisområde, dato og tidsrom for å se tidligere priser.',
+      },
+      notifications: {
+        title: 'Sett opp prisvarsler',
+        description: 'Velg en prisgrense eller få beskjed om dagens billigste time mens VarsEL er åpen.',
+      },
     },
-    alerts: {
-      title: 'Smarte varselsystemer',
-      items: [
-        'Prisvarsler når strømmen når bestemte nivåer',
-        'Billigste time-varsler for optimal planlegging',
-        'Tilpassbare varslingstidspunkter',
-        'Lokale lagrede innstillinger',
-      ],
+    dataSourcesTitle: 'Datakilder',
+    sources: {
+      prices: {
+        name: 'Hva koster strømmen?',
+        description: 'Spotpriser fra en tjeneste levert av Beneficial Apps AS.',
+      },
+      location: {
+        name: 'Prisområdekart fra NVE',
+        description: 'VarsEL bruker kartet i nettleseren for å finne prisområdet ditt.',
+      },
     },
-    tools: {
-      title: 'Avanserte verktøy',
-      items: [
-        'Tidsintervall-filtrering for spesifikke timer',
-        'MVA-kalkulator (inkludert/ekskludert)',
-        'Mørk/lys modus for bedre brukeropplevelse',
-        'Responsivt design for alle enheter',
-      ],
-    },
-    architectureTitle: 'Teknisk arkitektur',
+    projectTitle: 'Om prosjektet',
+    developerBody: 'VarsEL er et personlig prosjekt utviklet av {author}.',
     frontend: 'Frontend',
     backend: 'Backend',
-    developerTitle: 'Om utvikleren',
-    developerBody1: 'VarsEL er utviklet av {author} som et personlig prosjekt for å sette sin kunnskap på prøve, og lær mer om fullstack-utvikling.',
-    developerBody2: 'Prosjektet kombinerer moderne webutvikling med praktisk nytte, og demonstrerer fullstack-utvikling med Java og Vue.js.',
-    openSourceTitle: 'Åpen kildekode',
-    openSourceBody: 'VarsEL er åpen kildekode og tilgjengelig på GitHub. Bidrag og forslag er velkommen!',
-    viewOnGithub: 'Se på GitHub',
-    dataSourcesTitle: 'Datakilder',
-    dataSourcesBody: 'Strømpriser hentes fra:',
-    dataSourcesCaption: 'En tjeneste fra Beneficial Apps AS',
+    viewOnGithub: 'Se prosjektet på GitHub',
+    opensInNewTab: '(åpnes i en ny fane)',
   },
 
   priceSummary: {
+    chartNow: 'Nå',
     heading: 'Prissammendrag',
     lowest: 'Laveste pris',
     highest: 'Høyeste pris',

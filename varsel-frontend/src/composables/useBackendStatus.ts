@@ -87,9 +87,20 @@ export function markReady() {
   }, READY_DISMISS_MS);
 }
 
+/** Settle a request that did not establish backend connectivity. */
+export function finishRequest() {
+  pendingRequests = Math.max(0, pendingRequests - 1);
+  if (pendingRequests === 0 && state.value === 'waking') {
+    clearTimers();
+    visible.value = false;
+    state.value = lastSuccessAt.value === null ? 'unknown' : 'ready';
+  }
+}
+
 /** Call when a backend request fails. */
 export function markError() {
   pendingRequests = Math.max(0, pendingRequests - 1);
+  if (pendingRequests > 0) return;
   clearTimers();
   state.value = 'error';
   visible.value = true;
