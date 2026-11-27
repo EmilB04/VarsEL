@@ -60,7 +60,11 @@ The backend is at `http://localhost:8080` and the frontend at `http://localhost:
 
 ## API
 
-`GET /api/prices/{region}/{date}` returns prices for a region and date. Optional query parameters: `startHour` and `endHour`.
+`GET /api/prices/{region}/{date}` returns prices for a region and date. Use `startHour` and `endHour` to limit the result to a time range.
+
+```bash
+curl "http://localhost:8080/api/prices/NO1/2026-11-26?startHour=6&endHour=18"
+```
 
 ## Price-area boundaries
 
