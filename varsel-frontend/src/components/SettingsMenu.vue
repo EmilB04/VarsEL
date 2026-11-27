@@ -1,27 +1,30 @@
 <template>
   <div ref="rootRef" class="settings-menu">
     <button
+      ref="triggerRef"
       type="button"
       class="gear-trigger"
-      :class="[`gear-trigger--${variant}`, { 'gear-trigger--open': open }]"
+      :class="{ 'gear-trigger--open': open }"
       aria-haspopup="dialog"
       :aria-expanded="open"
       :aria-label="t('nav.settings')"
       @click="open = !open"
     >
       <q-icon name="sym_o_settings" class="gear-icon" />
-      <span v-if="variant === 'bottom'" class="gear-label">{{ t('nav.settings') }}</span>
+      <q-tooltip>{{ t('nav.settings') }}</q-tooltip>
     </button>
 
     <div
+      :inert="!open"
+      :aria-hidden="!open"
       role="dialog"
       :aria-label="t('nav.settings')"
       class="settings-panel"
-      :class="[`settings-panel--${variant}`, { 'settings-panel--open': open }]"
+      :class="{ 'settings-panel--open': open }"
     >
       <div class="panel-header">
         <span class="panel-title">{{ t('nav.settings') }}</span>
-        <button type="button" class="panel-close" :aria-label="t('common.close')" @click="open = false">
+        <button type="button" class="panel-close" :aria-label="t('common.close')" @click="closeAndFocus">
           <q-icon name="sym_o_close" size="16px" />
         </button>
       </div>
@@ -133,14 +136,13 @@ import { useTheme, type Theme } from 'src/composables/useTheme';
 import { useAccent, ACCENT_PRESETS, type AccentColor } from 'src/composables/useAccent';
 import { useTaxMode } from 'src/composables/useTaxMode';
 
-withDefaults(defineProps<{ variant?: 'nav' | 'bottom' }>(), { variant: 'nav' });
-
 const { t, locale } = useI18n();
 const { theme, currentTheme, setTheme } = useTheme();
 const { accent, setAccent } = useAccent();
 const { isTaxIncluded, setTaxIncluded } = useTaxMode();
 
 const open = ref(false);
+const triggerRef = ref<HTMLButtonElement | null>(null);
 const rootRef = ref<HTMLElement | null>(null);
 
 const languages = computed(() => [
@@ -166,10 +168,13 @@ function handleClickOutside(event: MouseEvent) {
   }
 }
 
+function closeAndFocus() {
+  open.value = false;
+  triggerRef.value?.focus();
+}
+
 function handleKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    open.value = false;
-  }
+  if (open.value && event.key === 'Escape') closeAndFocus();
 }
 
 onMounted(() => {
@@ -189,13 +194,12 @@ onUnmounted(() => {
   display: inline-flex;
 }
 
-// Trigger button - nav variant matches the pill nav-links, bottom variant matches the tab bar
-.gear-trigger--nav {
+.gear-trigger {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 9999px;
   border: none;
   background: transparent;
@@ -215,47 +219,14 @@ onUnmounted(() => {
   }
 
   &.gear-trigger--open {
-    background: var(--q-primary);
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--q-primary) 30%, transparent);
+    background: var(--accent-soft);
+    box-shadow: inset 0 0 0 1px var(--accent-edge);
 
     .gear-icon {
       opacity: 1;
-      color: white;
+      color: var(--q-primary);
       transform: rotate(45deg);
     }
-  }
-}
-
-.gear-trigger--bottom {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.125rem;
-  min-height: 56px;
-  padding: 0.375rem 0.25rem;
-  border: none;
-  background: transparent;
-  color: inherit;
-  opacity: 0.7;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-  .gear-icon {
-    font-size: 1.35rem;
-    transition: transform 0.3s ease;
-  }
-
-  .gear-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-  }
-
-  &.gear-trigger--open {
-    opacity: 1;
-    color: var(--q-primary);
-    .gear-icon { transform: rotate(45deg); }
   }
 }
 
@@ -263,15 +234,17 @@ onUnmounted(() => {
 .settings-panel {
   position: absolute;
   z-index: 3000;
+  right: 0;
+  top: calc(100% + 0.6rem);
   width: 18rem;
   max-width: calc(100vw - 2rem);
   max-height: 70vh;
+  max-height: min(70dvh, calc(100dvh - var(--dock-height) - 68px - env(safe-area-inset-bottom)));
   overflow-y: auto;
-  border-radius: 20px;
+  border-radius: var(--panel-radius);
   border: 1px solid var(--border);
   background: var(--surface-card);
-  backdrop-filter: blur(24px);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+  box-shadow: var(--popup-shadow);
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -288,17 +261,6 @@ onUnmounted(() => {
     transform: translateY(0) scale(1);
     pointer-events: auto;
   }
-}
-
-.settings-panel--nav {
-  right: 0;
-  top: calc(100% + 0.6rem);
-}
-
-.settings-panel--bottom {
-  right: 0;
-  bottom: calc(100% + 0.6rem);
-  transform-origin: bottom right;
 }
 
 .menu-section--bordered {
@@ -421,7 +383,7 @@ onUnmounted(() => {
 
   &.segmented-btn--selected {
     background: var(--q-primary);
-    color: white;
+    color: var(--on-primary, #fff);
   }
 }
 

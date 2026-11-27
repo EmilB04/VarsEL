@@ -26,6 +26,13 @@ export default {
     },
   },
 
+  install: {
+    action: 'Installer app',
+    title: 'Legg VarsEL på Hjem-skjermen',
+    ios: 'I Safari trykker du på Del og deretter Legg til på Hjem-skjerm. Slå på Åpne som nettapp hvis valget vises, og trykk på Legg til.',
+    android: 'Åpne nettlesermenyen og velg Installer app eller Legg til på startskjermen.',
+  },
+
   backendStatus: {
     waking: 'Starter backend-tjenesten, omtrent {countdown} igjen',
     ready: 'Koblet til backend',
@@ -33,6 +40,7 @@ export default {
   },
 
   nav: {
+    main: 'Hovedmeny',
     logo: 'VarsEL',
     today: 'I dag',
     history: 'Historikk',
@@ -43,7 +51,6 @@ export default {
 
   footer: {
     tagline: 'Strømpriser i sanntid',
-    linksLabel: 'Bunntekst',
     github: 'Se kildekoden på GitHub',
     madeBy: 'Designet og utviklet av {author}',
     dataSourceAlt: 'Strømpriser levert av Hva koster strømmen.no',

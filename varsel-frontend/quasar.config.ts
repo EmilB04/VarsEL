@@ -15,24 +15,7 @@ export default defineConfig((ctx) => {
     boot: ['i18n', 'axios'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
-    css: ['app.scss'],
-
-    // https://github.com/quasarframework/quasar/tree/dev/extras
-    extras: [
-      // 'ionicons-v4',
-      // 'mdi-v7',
-      // 'fontawesome-v6',
-      // 'eva-icons',
-      // 'themify',
-      // 'line-awesome',
-      // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
-
-      'roboto-font',
-      // Material Symbols is the current generation of the Material icon set:
-      // a single variable font with a consistent optical size and stroke
-      // weight, replacing the older (and visually heavier) material-icons.
-      'material-symbols-outlined',
-    ],
+    css: ['app.scss', 'material-symbols.scss'],
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {

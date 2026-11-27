@@ -26,6 +26,13 @@ export default {
     },
   },
 
+  install: {
+    action: 'Install app',
+    title: 'Add VarsEL to your home screen',
+    ios: 'In Safari, tap Share, then Add to Home Screen. Turn on Open as Web App if available, then tap Add.',
+    android: 'Open your browser menu and choose Install app or Add to Home screen.',
+  },
+
   backendStatus: {
     waking: 'Starting the backend service, about {countdown} left',
     ready: 'Connected to the backend',
@@ -33,6 +40,7 @@ export default {
   },
 
   nav: {
+    main: 'Main navigation',
     logo: 'VarsEL',
     today: 'Today',
     history: 'History',
@@ -43,7 +51,6 @@ export default {
 
   footer: {
     tagline: 'Real-time electricity prices',
-    linksLabel: 'Footer',
     github: 'View source on GitHub',
     madeBy: 'Designed and built by {author}',
     dataSourceAlt: 'Electricity prices provided by Hva koster strømmen.no',
