@@ -1,5 +1,6 @@
 export default {
   common: {
+    cancel: 'Avbryt',
     retry: 'Prøv igjen',
     close: 'Lukk',
     clear: 'Fjern valg',
@@ -150,12 +151,16 @@ export default {
   notifications: {
     heroTitle: 'Smarte prisvarsler',
     heroDescription: 'Få beskjed når strømmen er billig eller når prisen endrer seg',
+    validation: {
+      area: 'Velg et prisområde.',
+      price: 'Skriv inn en gyldig pris, for eksempel 1,50.',
+    },
     priceAlert: {
       title: 'Prisvarsel',
       description: 'Få varsel når strømprisen når en bestemt verdi',
       area: 'Område',
       city: 'By (valgfritt)',
-      targetPrice: 'Ønsket pris (kr/kWh)',
+      targetPrice: 'Prisgrense',
       condition: 'Varsel når prisen er',
       conditionUnder: 'under',
       conditionOver: 'over',
@@ -173,23 +178,22 @@ export default {
       save: 'Lagre billigste time-varsel',
     },
     active: {
-      heading: 'Aktive varsler',
+      heading: 'Lagrede varsler',
+      enabled: 'På',
+      paused: 'Pauset',
+      toggleLabel: 'Varsel for {location}',
       priceAlertsTitle: 'Prisvarsler',
       cheapestAlertsTitle: 'Billigste time-varsler',
       priceAlertDetail: 'Varsel når prisen er {condition} {price} kr/kWh',
-      cheapestAlertDetail: 'Daglig varsel kl. {time}',
+      cheapestAlertDetail: 'Varsel kl. {time}',
       deleteTooltip: 'Slett varsel',
-      emptyTitle: 'Ingen aktive varsler',
       emptyDescription: 'Opprett ditt første varsel ovenfor for å komme i gang',
       scheduleEveryDay: 'Hver dag',
       quietSummary: 'Stille {from}–{to}',
     },
     notify: {
-      validationError: 'Vennligst fyll ut alle påkrevde felt',
       priceAlertSaved: 'Prisvarsel lagret!',
-      priceAlertSavedCaption: 'Du vil få varsel når betingelsene oppfylles',
       cheapestAlertSaved: 'Billigste time-varsel lagret!',
-      cheapestAlertSavedCaption: 'Du vil få daglig varsel om billigste time',
       priceAlertEnabled: 'Prisvarsel aktivert',
       priceAlertDisabled: 'Prisvarsel deaktivert',
       cheapestAlertEnabled: 'Billigste time-varsel aktivert',
@@ -202,11 +206,12 @@ export default {
     schedule: {
       daysLabel: 'Aktive dager',
       everyDay: 'Hver dag',
-      selectedDays: '{count} dager valgt',
+      selectedDays: 'Én dag valgt | {count} dager valgt',
       quietTitle: 'Stille timer',
       quietEnable: 'Aktiver stille timer',
       quietFrom: 'Fra',
       quietTo: 'Til',
+      quietSameTime: 'Velg ulik start- og sluttid for å dempe varsler.',
       quietDescription: 'Det sendes ingen varsler i dette tidsrommet - de registreres likevel som undertrykt.',
     },
     weekdays: {

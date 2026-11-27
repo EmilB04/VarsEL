@@ -1,5 +1,6 @@
 export default {
   common: {
+    cancel: 'Cancel',
     retry: 'Try again',
     close: 'Close',
     clear: 'Clear selection',
@@ -150,12 +151,16 @@ export default {
   notifications: {
     heroTitle: 'Smart price alerts',
     heroDescription: 'Get notified when electricity is cheap or when the price changes',
+    validation: {
+      area: 'Choose a price area.',
+      price: 'Enter a valid price, such as 1.50.',
+    },
     priceAlert: {
       title: 'Price alert',
       description: 'Get notified when the electricity price reaches a certain value',
       area: 'Area',
       city: 'City (optional)',
-      targetPrice: 'Target price (kr/kWh)',
+      targetPrice: 'Price threshold',
       condition: 'Alert when the price is',
       conditionUnder: 'under',
       conditionOver: 'over',
@@ -173,23 +178,22 @@ export default {
       save: 'Save cheapest hour alert',
     },
     active: {
-      heading: 'Active alerts',
+      heading: 'Saved alerts',
+      enabled: 'On',
+      paused: 'Paused',
+      toggleLabel: 'Alert for {location}',
       priceAlertsTitle: 'Price alerts',
       cheapestAlertsTitle: 'Cheapest hour alerts',
       priceAlertDetail: 'Alert when the price is {condition} {price} kr/kWh',
-      cheapestAlertDetail: 'Daily alert at {time}',
+      cheapestAlertDetail: 'Alert at {time}',
       deleteTooltip: 'Delete alert',
-      emptyTitle: 'No active alerts',
       emptyDescription: 'Create your first alert above to get started',
       scheduleEveryDay: 'Every day',
       quietSummary: 'Quiet {from}–{to}',
     },
     notify: {
-      validationError: 'Please fill in all required fields',
       priceAlertSaved: 'Price alert saved!',
-      priceAlertSavedCaption: "You'll be notified when the conditions are met",
       cheapestAlertSaved: 'Cheapest hour alert saved!',
-      cheapestAlertSavedCaption: "You'll get a daily alert about the cheapest hour",
       priceAlertEnabled: 'Price alert enabled',
       priceAlertDisabled: 'Price alert disabled',
       cheapestAlertEnabled: 'Cheapest hour alert enabled',
@@ -202,11 +206,12 @@ export default {
     schedule: {
       daysLabel: 'Active days',
       everyDay: 'Every day',
-      selectedDays: '{count} days selected',
+      selectedDays: 'One day selected | {count} days selected',
       quietTitle: 'Quiet hours',
       quietEnable: 'Enable quiet hours',
       quietFrom: 'From',
       quietTo: 'To',
+      quietSameTime: 'Choose different start and end times to mute alerts.',
       quietDescription: 'No notifications are sent during this window - they are still recorded as suppressed.',
     },
     weekdays: {

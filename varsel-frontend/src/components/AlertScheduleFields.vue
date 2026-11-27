@@ -14,6 +14,7 @@
           class="day-chip"
           :class="{ 'day-chip--on': isDayActive(day.value) }"
           :aria-pressed="isDayActive(day.value)"
+          :disabled="days.length === 1 && isDayActive(day.value)"
           :aria-label="day.full"
           @click="toggleDay(day.value)"
         >
@@ -21,7 +22,11 @@
         </button>
       </div>
       <p class="field-hint">
-        {{ days.length === 0 ? t('notifications.schedule.everyDay') : t('notifications.schedule.selectedDays', { count: days.length }) }}
+        {{
+          days.length === 0
+            ? t('notifications.schedule.everyDay')
+            : t('notifications.schedule.selectedDays', days.length)
+        }}
       </p>
     </fieldset>
 
@@ -56,7 +61,15 @@
         />
       </div>
 
-      <p class="field-hint">{{ t('notifications.schedule.quietDescription') }}</p>
+      <p class="field-hint">
+        {{
+          t(
+            quietHours.enabled && quietHours.startMinute === quietHours.endMinute
+              ? 'notifications.schedule.quietSameTime'
+              : 'notifications.schedule.quietDescription',
+          )
+        }}
+      </p>
     </fieldset>
   </div>
 </template>
@@ -127,10 +140,15 @@ function setQuietBound(key: 'startMinute' | 'endMinute', value: string | number 
 .schedule-fields {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background: var(--surface);
 }
 
 .field-group {
+  min-width: 0;
   margin: 0;
   padding: 0;
   border: none;
@@ -142,23 +160,23 @@ function setQuietBound(key: 'startMinute' | 'endMinute', value: string | number 
   gap: 0.375rem;
   margin-bottom: 0.625rem;
   padding: 0;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: 0.82rem;
+  font-weight: 650;
   color: var(--text-subtle);
 }
 
 .day-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  max-width: 22rem;
+  gap: 4px;
 }
 
 .day-chip {
-  min-width: 2.5rem;
-  padding: 0.4rem 0.5rem;
-  border-radius: 9999px;
+  min-width: 0;
+  min-height: 36px;
+  padding: 3px 1px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-subtle);
@@ -166,23 +184,34 @@ function setQuietBound(key: 'startMinute' | 'endMinute', value: string | number 
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     border-color: var(--border-hover);
     color: inherit;
   }
 
   &--on {
-    background: var(--q-primary);
-    border-color: var(--q-primary);
-    color: white;
+    background: var(--accent-soft);
+    border-color: var(--accent-edge);
+    color: var(--q-primary);
+  }
+  &:disabled {
+    opacity: 0.68;
+    cursor: default;
   }
 }
 
+@media (pointer: coarse) {
+  .day-chip {
+    min-height: 44px;
+  }
+}
 .quiet-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
   gap: 0.75rem;
   margin-top: 0.75rem;
 }
