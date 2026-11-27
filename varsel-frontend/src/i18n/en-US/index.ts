@@ -251,49 +251,40 @@ export default {
 
   about: {
     heroTitle: 'About VarsEL',
-    heroDescription: 'Your smart partner for electricity usage',
-    whatIsTitle: 'What is VarsEL?',
-    whatIsBody: 'VarsEL is a modern web application that gives you full control over your electricity usage. With real-time data from all of Norway, you can monitor electricity prices, analyze price trends, and receive smart alerts when prices reach your desired levels. The app combines powerful data visualization with practical tools to help you save money on your electricity bill.',
-    featuresTitle: 'Key features',
-    monitoring: {
-      title: 'Price monitoring and visualization',
-      items: [
-        'Real-time data from all Norwegian price areas (NO1-NO5)',
-        'Interactive charts with min/max/average prices',
-        'Detailed tables with hourly prices',
-        'Current price indicator for an instant overview',
-      ],
+    heroDescription: 'Track electricity spot prices in Norway and find the cheapest hours in your price area.',
+    featuresTitle: 'What you can do',
+    priceAreas: 'Price areas',
+    features: {
+      today: {
+        title: 'See today’s electricity prices',
+        description: 'See the current price and prices for the rest of the day. Choose an area or use your device location.',
+      },
+      history: {
+        title: 'Explore price history',
+        description: 'Choose a price area, date, and time range to see past prices.',
+      },
+      notifications: {
+        title: 'Set up price alerts',
+        description: 'Set a price threshold or get an alert for the cheapest hour while VarsEL is open.',
+      },
     },
-    alerts: {
-      title: 'Smart alert systems',
-      items: [
-        'Price alerts when electricity reaches certain levels',
-        'Cheapest hour alerts for optimal planning',
-        'Customizable alert times',
-        'Locally saved settings',
-      ],
+    dataSourcesTitle: 'Data sources',
+    sources: {
+      prices: {
+        name: 'Hva koster strømmen?',
+        description: 'Spot prices from a service run by Beneficial Apps AS.',
+      },
+      location: {
+        name: 'NVE price area map',
+        description: 'VarsEL uses the map in your browser to find your price area.',
+      },
     },
-    tools: {
-      title: 'Advanced tools',
-      items: [
-        'Time-range filtering for specific hours',
-        'VAT calculator (included/excluded)',
-        'Dark/light mode for a better experience',
-        'Responsive design for every device',
-      ],
-    },
-    architectureTitle: 'Technical architecture',
+    projectTitle: 'About the project',
+    developerBody: 'VarsEL is a personal project built by {author}.',
     frontend: 'Frontend',
     backend: 'Backend',
-    developerTitle: 'About the developer',
-    developerBody1: 'VarsEL was built by {author} as a personal project to put his skills to the test and learn more about full-stack development.',
-    developerBody2: 'The project combines modern web development with practical use, demonstrating full-stack development with Java and Vue.js.',
-    openSourceTitle: 'Open source',
-    openSourceBody: 'VarsEL is open source and available on GitHub. Contributions and suggestions are welcome!',
-    viewOnGithub: 'View on GitHub',
-    dataSourcesTitle: 'Data sources',
-    dataSourcesBody: 'Electricity prices are fetched from:',
-    dataSourcesCaption: 'A service by Beneficial Apps AS',
+    viewOnGithub: 'View the project on GitHub',
+    opensInNewTab: '(opens in a new tab)',
   },
 
   priceSummary: {

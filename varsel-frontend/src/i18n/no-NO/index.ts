@@ -251,49 +251,40 @@ export default {
 
   about: {
     heroTitle: 'Om VarsEL',
-    heroDescription: 'Din smarte partner for strømforbruk',
-    whatIsTitle: 'Hva er VarsEL?',
-    whatIsBody: 'VarsEL er en moderne webapplikasjon som gir deg full kontroll over strømforbruket ditt. Med sanntidsdata fra hele Norge kan du overvåke strømpriser, analysere pristrender og motta smarte varsler når prisene når ønskede nivåer. Applikasjonen kombinerer kraftig datavisualisering med praktiske verktøy for å hjelpe deg med å spare penger på strømregningen.',
-    featuresTitle: 'Hovedfunksjoner',
-    monitoring: {
-      title: 'Prisovervåking og visualisering',
-      items: [
-        'Sanntidsdata fra alle norske prisområder (NO1-NO5)',
-        'Interaktive diagrammer med min/maks/gjennomsnittspriser',
-        'Detaljerte tabeller med timespriser',
-        'Nåværende pris-indikator for umiddelbar oversikt',
-      ],
+    heroDescription: 'Følg spotprisen på strøm i Norge og finn de billigste timene i ditt prisområde.',
+    featuresTitle: 'Dette kan du gjøre',
+    priceAreas: 'Prisområder',
+    features: {
+      today: {
+        title: 'Se dagens strømpriser',
+        description: 'Se prisen akkurat nå og resten av dagen. Velg prisområde selv, eller bruk enhetens posisjon.',
+      },
+      history: {
+        title: 'Utforsk prishistorikken',
+        description: 'Velg prisområde, dato og tidsrom for å se tidligere priser.',
+      },
+      notifications: {
+        title: 'Sett opp prisvarsler',
+        description: 'Velg en prisgrense eller få beskjed om dagens billigste time mens VarsEL er åpen.',
+      },
     },
-    alerts: {
-      title: 'Smarte varselsystemer',
-      items: [
-        'Prisvarsler når strømmen når bestemte nivåer',
-        'Billigste time-varsler for optimal planlegging',
-        'Tilpassbare varslingstidspunkter',
-        'Lokale lagrede innstillinger',
-      ],
+    dataSourcesTitle: 'Datakilder',
+    sources: {
+      prices: {
+        name: 'Hva koster strømmen?',
+        description: 'Spotpriser fra en tjeneste levert av Beneficial Apps AS.',
+      },
+      location: {
+        name: 'Prisområdekart fra NVE',
+        description: 'VarsEL bruker kartet i nettleseren for å finne prisområdet ditt.',
+      },
     },
-    tools: {
-      title: 'Avanserte verktøy',
-      items: [
-        'Tidsintervall-filtrering for spesifikke timer',
-        'MVA-kalkulator (inkludert/ekskludert)',
-        'Mørk/lys modus for bedre brukeropplevelse',
-        'Responsivt design for alle enheter',
-      ],
-    },
-    architectureTitle: 'Teknisk arkitektur',
+    projectTitle: 'Om prosjektet',
+    developerBody: 'VarsEL er et personlig prosjekt utviklet av {author}.',
     frontend: 'Frontend',
     backend: 'Backend',
-    developerTitle: 'Om utvikleren',
-    developerBody1: 'VarsEL er utviklet av {author} som et personlig prosjekt for å sette sin kunnskap på prøve, og lær mer om fullstack-utvikling.',
-    developerBody2: 'Prosjektet kombinerer moderne webutvikling med praktisk nytte, og demonstrerer fullstack-utvikling med Java og Vue.js.',
-    openSourceTitle: 'Åpen kildekode',
-    openSourceBody: 'VarsEL er åpen kildekode og tilgjengelig på GitHub. Bidrag og forslag er velkommen!',
-    viewOnGithub: 'Se på GitHub',
-    dataSourcesTitle: 'Datakilder',
-    dataSourcesBody: 'Strømpriser hentes fra:',
-    dataSourcesCaption: 'En tjeneste fra Beneficial Apps AS',
+    viewOnGithub: 'Se prosjektet på GitHub',
+    opensInNewTab: '(åpnes i en ny fane)',
   },
 
   priceSummary: {
