@@ -1,71 +1,49 @@
-import { ref, watch, onUnmounted } from 'vue';
-import { markWaking, markReady, markError } from 'src/composables/useBackendStatus';
+import { onUnmounted, ref } from 'vue';
+import { isAxiosError } from 'axios';
+import { markWaking, markReady, markError, finishRequest } from 'src/composables/useBackendStatus';
 
-// Render's free tier spins the backend down when idle, so a first request
-// after idle can take 30-60s+. This composable drives the per-page
-// loading/error state around any async fetch, shared between pages that hit
-// the backend (IndexPage, HistoryPage).
-//
-// The cold-start notice itself is no longer rendered per page - it is reported
-// to the app-wide useBackendStatus singleton and shown by BackendStatusBar, so
-// it is visible without scrolling regardless of where the user is on the page.
 export function useBackendRequest() {
   const isLoading = ref(false);
   const hasError = ref(false);
-  const errorCountdownSeconds = ref(180); // suggested wait time shown on error
+  let requestId = 0;
 
-  let errorCountdownInterval: ReturnType<typeof setInterval> | null = null;
+  function reset() {
+    requestId++;
+    isLoading.value = false;
+    hasError.value = false;
+  }
 
-  watch(hasError, (newValue) => {
-    if (newValue) {
-      errorCountdownSeconds.value = 180; // reset to 3 minutes
-      if (errorCountdownInterval) clearInterval(errorCountdownInterval);
-      errorCountdownInterval = setInterval(() => {
-        errorCountdownSeconds.value--;
-        if (errorCountdownSeconds.value <= 0 && errorCountdownInterval) {
-          clearInterval(errorCountdownInterval);
-          errorCountdownInterval = null;
-        }
-      }, 1000);
-    } else {
-      if (errorCountdownInterval) clearInterval(errorCountdownInterval);
-      errorCountdownInterval = null;
-    }
-  });
+  onUnmounted(reset);
 
-  onUnmounted(() => {
-    if (errorCountdownInterval) clearInterval(errorCountdownInterval);
-  });
+  async function run<T>(load: () => Promise<T>, apply: (result: T) => void | Promise<void>) {
+    const id = ++requestId;
+    isLoading.value = true;
+    hasError.value = false;
+    markWaking();
 
-  // Wraps an async fetch with the loading/error lifecycle above, reporting
-  // connectivity to the app-wide status bar as it goes.
-  async function run(fn: () => Promise<void>) {
+    let connected = false;
     try {
-      isLoading.value = true;
-      hasError.value = false;
-      markWaking();
-      await fn();
-      // `fn` may set hasError itself for a well-formed but unusable response
-      // (e.g. an empty price array), which is not a connectivity problem.
+      const result = await load();
+      connected = true;
       markReady();
+      if (id === requestId) await apply(result);
     } catch (err) {
-      console.error('Backend request failed', err);
-      hasError.value = true;
-      markError();
+      if (id === requestId) {
+        hasError.value = true;
+      }
+      if (!connected) {
+        if (id === requestId && isAxiosError(err) && !err.response) markError();
+        else if (isAxiosError(err) && err.response) markReady();
+        else finishRequest();
+      }
     } finally {
-      isLoading.value = false;
+      if (id === requestId) isLoading.value = false;
     }
   }
 
-  return {
-    isLoading,
-    hasError,
-    errorCountdownSeconds,
-    run,
-  };
+  return { isLoading, hasError, reset, run };
 }
 
-// Format a countdown in seconds as MM:SS.
 export function formatCountdown(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;

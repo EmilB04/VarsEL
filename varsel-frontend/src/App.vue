@@ -5,39 +5,33 @@
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { api } from 'boot/axios'
+import { useQuasar } from 'quasar'
+import norwegian from 'quasar/lang/nb-NO'
+import english from 'quasar/lang/en-US'
 import { useTheme, initTheme } from 'src/composables/useTheme'
 import { useAccent } from 'src/composables/useAccent'
-import { markWaking, markReady } from 'src/composables/useBackendStatus'
 import { startAlertEngine } from 'src/composables/useAlertEngine'
 import { LANGUAGE_KEY } from 'boot/i18n'
+import { startOsloClock } from 'src/scripts/useOsloClock'
 
 // Both composables are module-level singletons - importing/calling them here
 // registers their reactive state/watchers as early as possible on load.
 useTheme()
 useAccent()
+startOsloClock()
 
 const { locale } = useI18n()
+const quasar = useQuasar()
 watch(locale, (value) => {
+  quasar.lang.set(value === 'no-NO' ? norwegian : english)
   localStorage.setItem(LANGUAGE_KEY, value)
-})
+}, { immediate: true })
 
 onMounted(() => {
   // Apply the stored/system theme now that Quasar is guaranteed to be fully
   // installed - doing this at module-eval time (before app.use(Quasar, ...))
   // gets silently overwritten once Quasar's own install touches body classes.
   initTheme()
-
-  // Fire-and-forget: wake up the backend as early as possible so a Render
-  // cold start happens while the user is still looking at the page, not
-  // after they've picked a region and are waiting on real data. Reported to
-  // the status bar so a slow wake-up is visible without scrolling.
-  markWaking();
-  api.get('/health').then(markReady, () => {
-    // Not treated as a hard error - the real price request will surface any
-    // lasting problem with a retry affordance.
-    markReady();
-  });
 
   // Evaluate saved price alerts for as long as the app is open.
   startAlertEngine();

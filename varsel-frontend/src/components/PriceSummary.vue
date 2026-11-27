@@ -1,323 +1,196 @@
 <template>
-  <div class="q-mt-xl">
-    <h3 class="text-h6 q-mb-lg">{{ t('priceSummary.heading') }}</h3>
-    <div class="row q-gutter-md">
-      <!-- Lowest Price Card -->
-      <div class="col-12 col-sm-6 col-md">
-        <q-card
-          class="price-card glass-card lowest-price"
-          :class="{ 'price-card--selected': selectedKey === 'lowest' }"
-          clickable
-          tabindex="0"
-          role="button"
-          :aria-pressed="selectedKey === 'lowest'"
-          @click="toggle('lowest')"
-          @keydown.enter="toggle('lowest')"
-          @keydown.space.prevent="toggle('lowest')"
-        >
-          <q-card-section>
-            <div class="card-icon q-mb-lg">
-              <q-icon name="sym_o_arrow_downward" size="lg" />
-            </div>
-            <div class="price-value q-mb-xs">{{ getMinPrice(prices).toFixed(2) }}</div>
-            <div class="price-unit q-mb-sm">{{ t('common.priceUnit') }}</div>
-            <div class="price-label q-mb-sm">{{ t('priceSummary.lowest') }}</div>
-            <div class="price-time q-gutter-xs">
-              <q-icon name="sym_o_schedule" size="xs" />
-              {{ getMinPriceTime(prices) }}
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <!-- Highest Price Card -->
-      <div class="col-12 col-sm-6 col-md">
-        <q-card
-          class="price-card glass-card highest-price"
-          :class="{ 'price-card--selected': selectedKey === 'highest' }"
-          clickable
-          tabindex="0"
-          role="button"
-          :aria-pressed="selectedKey === 'highest'"
-          @click="toggle('highest')"
-          @keydown.enter="toggle('highest')"
-          @keydown.space.prevent="toggle('highest')"
-        >
-          <q-card-section>
-            <div class="card-icon q-mb-lg">
-              <q-icon name="sym_o_arrow_upward" size="lg" />
-            </div>
-            <div class="price-value q-mb-xs">{{ getMaxPrice(prices).toFixed(2) }}</div>
-            <div class="price-unit q-mb-sm">{{ t('common.priceUnit') }}</div>
-            <div class="price-label q-mb-sm">{{ t('priceSummary.highest') }}</div>
-            <div class="price-time q-gutter-xs">
-              <q-icon name="sym_o_schedule" size="xs" />
-              {{ getMaxPriceTime(prices) }}
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <!-- Current Price Card -->
-      <div class="col-12 col-sm-6 col-md">
-        <q-card
-          class="price-card glass-card current-price"
-          :class="{ 'price-card--selected': selectedKey === 'current' }"
-          clickable
-          tabindex="0"
-          role="button"
-          :aria-pressed="selectedKey === 'current'"
-          @click="toggle('current')"
-          @keydown.enter="toggle('current')"
-          @keydown.space.prevent="toggle('current')"
-        >
-          <q-card-section>
-            <div class="card-icon q-mb-lg">
-              <q-icon name="sym_o_schedule" size="lg" />
-            </div>
-            <div class="price-value q-mb-xs">{{ getCurrentPrice(prices).toFixed(2) }}</div>
-            <div class="price-unit q-mb-sm">{{ t('common.priceUnit') }}</div>
-            <div class="price-label q-mb-sm">{{ t('priceSummary.current') }}</div>
-            <div class="price-time q-gutter-xs">
-              <q-icon name="sym_o_schedule" size="xs" />
-              {{ t('priceSummary.now', { hour: new Date().getHours() }) }}
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <!-- Average Price Card -->
-      <div class="col-12 col-sm-6 col-md">
-        <q-card
-          class="price-card glass-card average-price"
-          :class="{ 'price-card--selected': selectedKey === 'average' }"
-          clickable
-          tabindex="0"
-          role="button"
-          :aria-pressed="selectedKey === 'average'"
-          @click="toggle('average')"
-          @keydown.enter="toggle('average')"
-          @keydown.space.prevent="toggle('average')"
-        >
-          <q-card-section>
-            <div class="card-icon q-mb-lg">
-              <q-icon name="sym_o_monitoring" size="lg" />
-            </div>
-            <div class="price-value q-mb-xs">{{ getAvgPrice(prices).toFixed(2) }}</div>
-            <div class="price-unit q-mb-sm">{{ t('common.priceUnit') }}</div>
-            <div class="price-label q-mb-sm">{{ t('priceSummary.average') }}</div>
-            <div class="price-time q-gutter-xs">
-              <q-icon name="sym_o_hourglass_empty" size="xs" />
-              {{ t('priceSummary.hours', { count: prices.length }) }}
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <!-- Difference Price Card -->
-      <div class="col-12 col-sm-6 col-md">
-        <q-card
-          class="price-card glass-card difference-price"
-          :class="{ 'price-card--selected': selectedKey === 'difference' }"
-          clickable
-          tabindex="0"
-          role="button"
-          :aria-pressed="selectedKey === 'difference'"
-          @click="toggle('difference')"
-          @keydown.enter="toggle('difference')"
-          @keydown.space.prevent="toggle('difference')"
-        >
-          <q-card-section>
-            <div class="card-icon q-mb-lg">
-              <q-icon name="sym_o_trending_flat" size="lg" />
-            </div>
-            <div class="price-value q-mb-xs">{{ getPriceDifference(prices).toFixed(2) }}</div>
-            <div class="price-unit q-mb-sm">{{ t('common.priceUnit') }}</div>
-            <div class="price-label q-mb-sm">{{ t('priceSummary.difference') }}</div>
-            <div class="price-time q-gutter-xs">
-              <q-icon name="sym_o_compare_arrows" size="xs" />
-              {{ t('priceSummary.highLow') }}
-            </div>
-          </q-card-section>
-        </q-card>
-      </div>
-    </div>
-  </div>
+  <section class="price-summary" :aria-label="t('priceSummary.heading')">
+    <button
+      v-for="stat in stats"
+      :key="stat.key"
+      type="button"
+      class="price-stat"
+      :data-stat="stat.key"
+      :aria-pressed="selectedKey === stat.key"
+      @click="toggle(stat.key)"
+    >
+      <span class="stat-label">
+        <q-icon :name="stat.icon" class="stat-icon" size="16px" aria-hidden="true" />
+        {{ stat.label }}
+      </span>
+      <span class="stat-reading">
+        <strong>{{ number.format(stat.value) }}</strong>
+        <span class="stat-unit">{{ t('common.priceUnit') }}</span>
+      </span>
+      <span v-if="stat.detail" class="stat-detail">{{ stat.detail }}</span>
+    </button>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useTableServices, type Price } from 'src/scripts/TableScript'
-import type { HighlightKey } from 'src/scripts/ChartScript'
+import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import {
+  getAvgPrice,
+  getCurrentPriceIndex,
+  getMaxPrice,
+  getMaxPriceTime,
+  getMinPrice,
+  getMinPriceTime,
+  getPriceDifference,
+  type Price,
+} from 'src/scripts/TableScript';
+import type { HighlightKey } from 'src/scripts/ChartScript';
+import { useOsloClock } from 'src/scripts/useOsloClock';
 
-interface Props {
-  prices: Price[]
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<{ highlight: [key: HighlightKey | null] }>()
-const { t } = useI18n()
-
-const selectedKey = ref<HighlightKey | null>(null)
+const props = defineProps<{ prices: Price[] }>();
+const emit = defineEmits<{ highlight: [key: HighlightKey | null] }>();
+const { t, locale } = useI18n();
+const number = computed(
+  () =>
+    new Intl.NumberFormat(locale.value, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }),
+);
+const selectedKey = ref<HighlightKey | null>(null);
+const now = useOsloClock();
+const currentPrice = computed(() => props.prices[getCurrentPriceIndex(props.prices, now.value)]);
+const stats = computed(() => {
+  const prices = props.prices;
+  const items: {
+    key: HighlightKey;
+    icon: string;
+    label: string;
+    value: number;
+    detail?: string;
+  }[] = [
+    {
+      key: 'lowest',
+      icon: 'sym_o_arrow_downward',
+      label: t('priceSummary.lowest'),
+      value: getMinPrice(prices),
+      detail: getMinPriceTime(prices),
+    },
+    {
+      key: 'highest',
+      icon: 'sym_o_arrow_upward',
+      label: t('priceSummary.highest'),
+      value: getMaxPrice(prices),
+      detail: getMaxPriceTime(prices),
+    },
+    {
+      key: 'average',
+      icon: 'sym_o_monitoring',
+      label: t('priceSummary.average'),
+      value: getAvgPrice(prices),
+    },
+    {
+      key: 'difference',
+      icon: 'sym_o_compare_arrows',
+      label: t('priceSummary.difference'),
+      value: getPriceDifference(prices),
+    },
+  ];
+  if (currentPrice.value) {
+    items.unshift({
+      key: 'current',
+      icon: 'sym_o_schedule',
+      label: t('priceSummary.current'),
+      value: currentPrice.value.NOK_per_kWh,
+      detail: currentPrice.value.time_start.slice(11, 16),
+    });
+  }
+  return items;
+});
 
 function toggle(key: HighlightKey) {
-  selectedKey.value = selectedKey.value === key ? null : key
-  emit('highlight', selectedKey.value)
+  selectedKey.value = selectedKey.value === key ? null : key;
+  emit('highlight', selectedKey.value);
 }
-
-// Determine selected area from prices or default
-const selectedArea = computed(() => {
-  return props.prices[0]?.area || 'NO1'
-})
-
-const {
-  getMinPrice,
-  getMaxPrice,
-  getAvgPrice,
-  getPriceDifference,
-  getMinPriceTime,
-  getMaxPriceTime,
-} = useTableServices(selectedArea)
-
-function getCurrentPrice(prices: Price[]): number {
-  if (!prices.length) return 0
-
-  const now = new Date()
-  const currentHour = now.getHours()
-  const currentTime = `${currentHour.toString().padStart(2, '0')}:00`
-
-  const currentPriceEntry = prices.find((price) => {
-    if (!price.time_start) return false
-    const priceHour = price.time_start.slice(11, 16)
-    return priceHour === currentTime
-  })
-
-  return currentPriceEntry ? currentPriceEntry.NOK_per_kWh : 0
-}
+watch(
+  () => [props.prices[0]?.area, props.prices[0]?.date],
+  (next, previous) => {
+    if (next[0] === previous[0] && next[1] === previous[1]) return;
+    selectedKey.value = null;
+    emit('highlight', null);
+  },
+);
 </script>
 
-<style lang="scss" scoped>
-.price-card {
-  text-align: center;
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease, box-shadow 0.25s ease;
-
-  &:focus-visible {
-    outline: 2px solid var(--q-primary);
-    outline-offset: 2px;
-  }
-
-  .card-icon {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 56px;
-    height: 56px;
-    margin-inline: auto;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .price-value {
-    font-size: 2.2rem;
-    font-weight: 800;
-    line-height: 1;
-  }
-
-  .price-unit {
-    font-size: 0.875rem;
-    opacity: 0.8;
-  }
-
-  .price-label {
-    font-size: 1rem;
-    font-weight: 600;
-  }
-
-  .price-time {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    opacity: 0.7;
-  }
-
-  &.price-card--selected {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
-  }
+<style scoped>
+.price-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  gap: 10px;
 }
-
-.lowest-price {
-  .card-icon {
-    background: $positive;
-    color: white;
-  }
-  .price-value {
-    color: $positive;
-  }
-  &.price-card--selected {
-    border-color: $positive;
-  }
+.price-stat {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px clamp(10px, 1.5vw, 16px);
+  text-align: left;
+  color: inherit;
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  box-shadow: var(--panel-shadow);
+  font: inherit;
+  --stat-ink: var(--q-primary);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
 }
-
-.highest-price {
-  .card-icon {
-    background: $negative;
-    color: white;
-  }
-  .price-value {
-    color: $negative;
-  }
-  &.price-card--selected {
-    border-color: $negative;
-  }
+.price-stat[data-stat='lowest'] {
+  --stat-ink: var(--positive-ink);
 }
-
-.current-price {
-  .card-icon {
-    background: $info;
-    color: white;
-  }
-  .price-value {
-    color: $info;
-  }
-  &.price-card--selected {
-    border-color: $info;
-  }
+.price-stat[data-stat='highest'] {
+  --stat-ink: var(--danger-ink);
 }
-
-.average-price {
-  .card-icon {
-    background: $warning;
-    color: white;
-  }
-  .price-value {
-    color: $warning;
-  }
-  &.price-card--selected {
-    border-color: $warning;
-  }
+.price-stat[data-stat='average'] {
+  --stat-ink: var(--warning-ink);
 }
-
-.difference-price {
-  .card-icon {
-    background: $accent;
-    color: white;
-  }
-  .price-value {
-    color: $accent;
-  }
-  &.price-card--selected {
-    border-color: $accent;
-  }
+.price-stat:hover,
+.price-stat[aria-pressed='true'] {
+  border-color: var(--q-primary);
+  background: var(--accent-soft);
 }
-
-.body--dark {
-  .price-value {
-    filter: brightness(1.3);
+.stat-label {
+  display: flex;
+  min-height: 27px;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-subtle);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+.stat-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--stat-ink) 10%, var(--surface-card));
+  color: var(--stat-ink);
+}
+.stat-reading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+}
+.price-stat strong {
+  font: 500 clamp(1.25rem, 2.5vw, 1.85rem) / 1.05 var(--data-font);
+  letter-spacing: -0.065em;
+}
+.stat-unit,
+.stat-detail {
+  color: var(--text-subtle);
+  font-size: 0.72rem;
+}
+.stat-detail {
+  font-family: var(--data-font);
+  font-weight: 500;
+}
+@media (max-width: 600px) {
+  .price-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 </style>

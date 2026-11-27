@@ -6,7 +6,8 @@ export default {
     noOptions: 'Ingen alternativer tilgjengelig',
     loadingPrices: 'Laster priser...',
     errorTitle: 'Kunne ikke laste priser',
-    errorDescription: 'Hvis backend-tjenesten ikke kjører, kan du starte den manuelt:',
+    errorDescription: 'Sjekk tilkoblingen og prøv igjen.',
+    noPrices: 'Ingen priser tilgjengelig for dette valget.',
     priceUnit: 'kr/kWh',
     areas: {
       NO1: 'Øst-Norge',
@@ -102,15 +103,31 @@ export default {
   },
 
   index: {
+    location: {
+      action: 'Bruk min posisjon',
+      locating: 'Finner prisområdet ditt …',
+      matched: 'Prisområde fra posisjonen din: {area} ({code}).',
+      unsupported: 'Posisjon krever en sikker tilkobling (HTTPS) og en nettleser med posisjonsstøtte. Velg område manuelt.',
+      denied: 'Posisjonstilgang er avslått. Tillat tilgang i nettleseren eller velg område manuelt.',
+      timedOut: 'Det tok for lang tid å finne posisjonen. Prøv igjen eller velg område manuelt.',
+      unavailable: 'Kunne ikke finne posisjonen. Prøv igjen eller velg område manuelt.',
+      outside: 'Fant ikke et prisområde ved posisjonen din. Velg område manuelt.',
+      uncertain: 'Posisjonen er for nær en områdegrense. Velg prisområdet ditt manuelt.',
+      mapError: 'Kunne ikke laste kartet over prisområder. Prøv igjen eller velg område manuelt.',
+    },
     heroTitle: 'Dagens strømpriser',
     heroDescription: 'Se strømpriser i sanntid og planlegg strømbruket ditt smart',
     selectArea: 'Velg ditt område',
     selectCity: 'By (valgfritt)',
     chartHeading: 'Prisutvikling i dag - {city}',
     tableHeading: 'Dagens timespriser',
+    hourlyPeriod: 'Tidsrom',
+    hourlyLowest: 'Billigst',
   },
 
   history: {
+    empty: 'Velg område og dato for å se strømprisene.',
+    invalidHours: 'Velg en sluttid etter starttiden.',
     heroTitle: 'Prishistorikk',
     heroDescription: 'Utforsk og analyser tidligere strømpriser',
     selectAreaSection: 'Velg område',
@@ -121,7 +138,6 @@ export default {
     previousDay: 'Forrige dag',
     today: 'I dag',
     nextDay: 'Neste dag',
-    nextDayDisabled: 'Kan bare se en dag frem',
     timeFilterSection: 'Tidsfilter (valgfritt)',
     startHour: 'Fra klokkeslett',
     endHour: 'Til klokkeslett',
@@ -276,6 +292,7 @@ export default {
   },
 
   priceSummary: {
+    chartNow: 'Nå',
     heading: 'Prissammendrag',
     lowest: 'Laveste pris',
     highest: 'Høyeste pris',

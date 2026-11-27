@@ -18,7 +18,7 @@
  */
 
 import { ref, computed, readonly } from 'vue';
-import { api } from 'boot/axios';
+import { getPriceDay, type DayPrice } from 'src/scripts/priceData';
 import {
   getOsloIsoDate,
   getOsloParts,
@@ -61,12 +61,6 @@ export interface DeliveryEvent {
   body: string;
   at: number;
   outcome: DeliveryOutcome;
-}
-
-interface BackendPrice {
-  time_start: string;
-  time_end: string;
-  NOK_per_kWh: number;
 }
 
 /* ------------------------------------------------------------------ *
@@ -140,26 +134,9 @@ export function priceMeetsCondition(alert: PriceAlert, price: number): boolean {
  * time, so the hour is a fixed slice. Returns -1 for an unparseable value
  * rather than silently treating it as midnight.
  */
-function hourOf(price: BackendPrice): number {
+function hourOf(price: DayPrice): number {
   const hour = Number(price.time_start?.slice(11, 13));
   return Number.isInteger(hour) && hour >= 0 && hour <= 23 ? hour : -1;
-}
-
-async function fetchPrices(regionParam: string, isoDate: string): Promise<BackendPrice[]> {
-  const response = await api.get(`/prices/${regionParam}/${isoDate}`, {
-    params: { startHour: 0, endHour: 24 },
-  });
-  const json = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
-
-  if (!json || !Array.isArray(json.prices)) {
-    throw new Error('Backend returned no usable price data');
-  }
-  return json.prices as BackendPrice[];
-}
-
-/** City takes precedence over area, matching the price pages. */
-function regionParamFor(alert: Alert): string {
-  return alert.city || alert.area;
 }
 
 /* ------------------------------------------------------------------ *
@@ -230,7 +207,7 @@ function skip(key: string, alert: Alert, outcome: DeliveryOutcome, summary: stri
 
 function evaluatePriceAlert(
   alert: PriceAlert,
-  prices: BackendPrice[],
+  prices: DayPrice[],
   osloDate: string,
   hour: number,
   minuteOfDay: number,
@@ -255,7 +232,7 @@ function evaluatePriceAlert(
 
 function evaluateCheapestAlert(
   alert: CheapestAlert,
-  prices: BackendPrice[],
+  prices: DayPrice[],
   osloDate: string,
   minuteOfDay: number,
 ): void {
@@ -320,16 +297,16 @@ export async function runOnce(options: { force?: boolean } = {}): Promise<void> 
     }
 
     // One request per distinct region for this pass.
-    const regions = [...new Set(dueToday.map(regionParamFor))];
-    const priceCache = new Map<string, BackendPrice[]>();
+    const regions = [...new Set(dueToday.map((alert) => alert.area))];
+    const priceCache = new Map<string, DayPrice[]>();
     await Promise.all(
       regions.map(async (region) => {
-        priceCache.set(region, await fetchPrices(region, osloDate));
+        priceCache.set(region, await getPriceDay(region, osloDate));
       }),
     );
 
     for (const alert of dueToday) {
-      const prices = priceCache.get(regionParamFor(alert));
+      const prices = priceCache.get(alert.area);
       if (!prices) continue;
 
       if (alert.kind === 'price') {

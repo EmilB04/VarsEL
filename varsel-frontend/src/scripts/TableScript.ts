@@ -1,6 +1,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { QTableColumn } from 'quasar'
+import { getOsloIsoDate, getOsloParts } from './osloTime'
 
 // Region codes - labels are translated inside useTableServices() via common.areas.*
 export const AREA_CODES = ['NO1', 'NO2', 'NO3', 'NO4', 'NO5'] as const
@@ -50,6 +51,27 @@ export interface Price {
   // on the October DST transition Norway has 25 hours and the 02:00 slot
   // occurs twice, so two rows would collide on the same key.
   rowKey: string;
+}
+
+export function getCurrentPriceIndex(prices: Price[], instant = new Date()): number {
+  if (prices[0]?.date !== getOsloIsoDate(instant)) return -1;
+  const { hour, minute } = getOsloParts(instant);
+  const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+  const isCurrentPeriod = (price: Price) => {
+    const start = price.time_start.slice(11, 16);
+    const end = price.time_end.slice(11, 16);
+    return start <= time && (time < end || (end <= start && hour === Number(start.slice(0, 2))));
+  };
+  // On the autumn clock change the same local start time can occur twice.
+  const oneHourAgo = new Date(instant.getTime() - 60 * 60_000);
+  if (getOsloParts(oneHourAgo).hour === hour) {
+    for (let index = prices.length - 1; index >= 0; index--) {
+      const price = prices[index];
+      if (price && isCurrentPeriod(price)) return index;
+    }
+    return -1;
+  }
+  return prices.findIndex(isCurrentPeriod);
 }
 
 // Helper functions for price statistics

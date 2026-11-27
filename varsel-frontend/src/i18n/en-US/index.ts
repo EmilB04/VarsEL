@@ -6,7 +6,8 @@ export default {
     noOptions: 'No options available',
     loadingPrices: 'Loading prices...',
     errorTitle: 'Could not load prices',
-    errorDescription: "If the backend service isn't running, you can start it manually:",
+    errorDescription: 'Check your connection and try again.',
+    noPrices: 'No prices available for this selection.',
     priceUnit: 'kr/kWh',
     areas: {
       NO1: 'Eastern Norway',
@@ -102,15 +103,31 @@ export default {
   },
 
   index: {
+    location: {
+      action: 'Use my location',
+      locating: 'Finding your price area…',
+      matched: 'Price area from your location: {area} ({code}).',
+      unsupported: 'Location requires a secure connection (HTTPS) and a browser with location support. Choose an area manually.',
+      denied: 'Location access is blocked. Allow it in your browser or choose an area manually.',
+      timedOut: 'Finding your location timed out. Try again or choose an area manually.',
+      unavailable: 'Could not get your location. Try again or choose an area manually.',
+      outside: 'No price area matches your location. Choose an area manually.',
+      uncertain: 'Your position is too close to an area boundary. Choose your price area manually.',
+      mapError: 'Could not load the price-area map. Try again or choose an area manually.',
+    },
     heroTitle: "Today's electricity prices",
     heroDescription: 'See real-time electricity prices and plan your usage smartly',
     selectArea: 'Select your area',
     selectCity: 'City (optional)',
     chartHeading: 'Price trend today - {city}',
     tableHeading: "Today's hourly prices",
+    hourlyPeriod: 'Time window',
+    hourlyLowest: 'Cheapest',
   },
 
   history: {
+    empty: 'Choose an area and date to view electricity prices.',
+    invalidHours: 'Choose an end time after the start time.',
     heroTitle: 'Price history',
     heroDescription: 'Explore and analyze past electricity prices',
     selectAreaSection: 'Select area',
@@ -121,7 +138,6 @@ export default {
     previousDay: 'Previous day',
     today: 'Today',
     nextDay: 'Next day',
-    nextDayDisabled: 'You can only look one day ahead',
     timeFilterSection: 'Time filter (optional)',
     startHour: 'From',
     endHour: 'To',
@@ -276,6 +292,7 @@ export default {
   },
 
   priceSummary: {
+    chartNow: 'Now',
     heading: 'Price summary',
     lowest: 'Lowest price',
     highest: 'Highest price',
